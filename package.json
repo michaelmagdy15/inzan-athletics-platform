@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "deploy": "npm run build && Copy-Item dist\\index.html dist\\200.html && npx surge dist inzan-athletics.surge.sh"
+    "deploy": "npm run build && node -e \"const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/200.html');\" && npx surge dist inzan-athletics.surge.sh"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
