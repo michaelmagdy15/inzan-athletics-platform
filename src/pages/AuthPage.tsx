@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Hammer, Crown, Zap, Mail, Lock, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
@@ -196,6 +197,13 @@ export default function AuthPage() {
                                             required
                                         />
                                     </div>
+                                    {isLogin && (
+                                        <div className="flex justify-end pt-2">
+                                            <Link to="/reset-password" className="text-[10px] text-white/40 hover:text-gold uppercase tracking-[0.15em] font-bold transition-colors">
+                                                Forgot Password?
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <AnimatePresence mode="wait">

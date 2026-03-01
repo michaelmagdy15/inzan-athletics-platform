@@ -51,8 +51,8 @@ export default function CoachesView() {
                     </div>
                 </div>
 
-                <div className="h-96 w-full relative z-10 font-bold">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="h-96 w-full relative z-10 font-bold" style={{ minHeight: '384px' }}>
+                    <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={300}>
                         <ScatterChart margin={{ top: 20, right: 40, bottom: 20, left: 0 }}>
                             <CartesianGrid strokeDasharray="10 10" stroke="rgba(255,255,255,0.03)" vertical={false} />
                             <XAxis
