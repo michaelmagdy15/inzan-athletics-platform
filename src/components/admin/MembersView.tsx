@@ -37,26 +37,26 @@ export default function MembersView({ members, selectedMember, setSelectedMember
     }, [members]);
 
     return (
-        <div className="flex flex-col gap-10">
-            <div className="flex justify-between items-end">
+        <div className="flex flex-col gap-6 lg:gap-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
                 <div>
-                    <h1 className="text-3xl font-heading tracking-tight text-white mb-1 uppercase">Member Management</h1>
+                    <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">Member Management</h1>
                     <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Full Member List & Profiles</p>
                 </div>
-                <div className="flex items-center gap-4 font-bold">
+                <div className="flex items-center gap-3 lg:gap-4 font-bold w-full lg:w-auto">
                     <button
                         onClick={() => setIsAttendanceTerminalOpen(true)}
-                        className="bg-white/5 border border-white/5 px-6 py-4 rounded-2xl flex items-center gap-3 transition-all hover:bg-white/10 group shadow-xl"
+                        className="flex-1 lg:flex-none bg-white/5 border border-white/5 px-4 lg:px-6 py-3 lg:py-4 rounded-xl lg:rounded-2xl flex items-center justify-center gap-3 transition-all hover:bg-white/10 group shadow-xl"
                     >
                         <QrCode size={16} className="text-white/40 group-hover:text-gold transition-colors" />
-                        <span className="text-[10px] font-black tracking-widest uppercase text-white/60 group-hover:text-white transition-colors">Entry Terminal</span>
+                        <span className="text-[9px] lg:text-[10px] font-black tracking-widest uppercase text-white/60 group-hover:text-white transition-colors">Entry Terminal</span>
                     </button>
                     <button
                         onClick={onNewMember}
-                        className="premium-button px-8 py-4 rounded-2xl flex items-center gap-3 shadow-2xl transition-all hover:scale-[1.02]"
+                        className="flex-1 lg:flex-none premium-button px-6 lg:px-8 py-3 lg:py-4 rounded-xl lg:rounded-2xl flex items-center justify-center gap-3 shadow-2xl transition-all hover:scale-[1.02]"
                     >
                         <Plus size={16} className="text-black" />
-                        <span className="text-[10px] font-black tracking-widest uppercase text-black">New Member</span>
+                        <span className="text-[9px] lg:text-[10px] font-black tracking-widest uppercase text-black">New Member</span>
                     </button>
                 </div>
             </div>

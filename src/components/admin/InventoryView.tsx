@@ -25,20 +25,20 @@ export default function InventoryView() {
     };
 
     return (
-        <div className="flex flex-col gap-10">
-            <div className="flex justify-between items-end">
+        <div className="flex flex-col gap-6 lg:gap-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
                 <div>
-                    <h1 className="text-3xl font-heading tracking-tight text-white mb-1 uppercase">Gym Facility</h1>
+                    <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">Gym Facility</h1>
                     <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Gym Equipment & Facility Logs</p>
                 </div>
-                <div className="flex items-center gap-4 font-bold">
-                    <button onClick={() => broadcastAlert('Facility status refreshed.', 'info')} className="px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">Refresh Status</button>
-                    <button onClick={() => setIsLogModalOpen(true)} className="premium-button px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Log Maintenance</button>
+                <div className="flex items-center gap-3 lg:gap-4 font-bold w-full lg:w-auto">
+                    <button onClick={() => broadcastAlert('Facility status refreshed.', 'info')} className="flex-1 lg:flex-none px-4 lg:px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">Refresh Status</button>
+                    <button onClick={() => setIsLogModalOpen(true)} className="flex-1 lg:flex-none premium-button px-4 lg:px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Log Maintenance</button>
                 </div>
             </div>
 
             {/* Facility Overview Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                 <Scorecard title="Equipment Condition" value="98%" trend="GOOD" icon={<ShieldCheck size={18} />} highlight />
                 <Scorecard title="Total Machines" value="142" trend="+3" icon={<Package size={18} />} />
                 <Scorecard title="Service Rate" value="92%" trend="-1.2%" icon={<Wrench size={18} />} />
@@ -166,13 +166,13 @@ export default function InventoryView() {
 
 function Scorecard({ title, value, trend, icon, highlight }: any) {
     return (
-        <div className={`p-10 rounded-[3rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${highlight ? 'bg-gold/10 border-gold/20 shadow-[0_0_60px_rgba(202,138,4,0.15)]' : 'bg-[#121212]/30 border-white/5 hover:border-gold/20'}`}>
-            <div className="flex justify-between items-start mb-8">
+        <div className={`p-6 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${highlight ? 'bg-gold/10 border-gold/20 shadow-[0_0_60px_rgba(202,138,4,0.15)]' : 'bg-[#121212]/30 border-white/5 hover:border-gold/20'}`}>
+            <div className="flex justify-between items-start mb-6 lg:mb-8">
                 <div className="text-white/20 group-hover:text-gold transition-colors duration-500">{icon}</div>
                 <span className={`text-[8px] font-black tracking-widest uppercase px-2 py-1 rounded-lg ${highlight ? 'bg-gold text-black' : 'bg-white/5 text-white/40 group-hover:text-white transition-colors'}`}>{trend}</span>
             </div>
-            <h3 className="text-[10px] font-black tracking-[0.3em] text-white/20 uppercase mb-4 group-hover:text-gold transition-colors font-bold">{title}</h3>
-            <span className={`text-5xl font-heading tracking-tight ${highlight ? 'text-gold' : 'text-white'}`}>{value}</span>
+            <h3 className="text-[9px] lg:text-[10px] font-black tracking-[0.3em] text-white/20 uppercase mb-3 lg:mb-4 group-hover:text-gold transition-colors font-bold">{title}</h3>
+            <span className={`text-4xl lg:text-5xl font-heading tracking-tight ${highlight ? 'text-gold' : 'text-white'}`}>{value}</span>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
     );
@@ -181,20 +181,20 @@ function Scorecard({ title, value, trend, icon, highlight }: any) {
 function LogItem({ title, desc, time, initial, highlight }: any) {
     const statusColor = time === 'COMPLETED' ? 'text-emerald-400' : time === 'IN_PROGRESS' ? 'text-gold' : 'text-white/20';
     return (
-        <div className="flex justify-between items-center bg-white/[0.02] border border-white/5 rounded-[2rem] p-8 hover:bg-white/[0.04] hover:border-gold/20 transition-all duration-500 group cursor-pointer relative overflow-hidden font-bold">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/[0.02] border border-white/5 rounded-[1.5rem] lg:rounded-[2rem] p-5 lg:p-8 hover:bg-white/[0.04] hover:border-gold/20 transition-all duration-500 group cursor-pointer relative overflow-hidden font-bold gap-6">
             <div className={`absolute top-0 left-0 w-1 h-full transition-all duration-500 ${highlight ? 'bg-gold/40' : 'bg-gold/0 group-hover:bg-gold/20'}`} />
-            <div className="flex items-center gap-8 relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-white/[0.05] border border-white/5 flex items-center justify-center text-xl font-heading text-white/20 group-hover:text-gold transition-colors shadow-inner">{initial}</div>
+            <div className="flex items-center gap-4 lg:gap-8 relative z-10">
+                <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl bg-white/[0.05] border border-white/5 flex items-center justify-center text-lg font-heading text-white/20 group-hover:text-gold transition-colors shadow-inner">{initial}</div>
                 <div>
-                    <h4 className="text-xl font-heading text-white group-hover:text-gold transition-colors">{title}</h4>
-                    <p className="text-[11px] text-white/40 font-light max-w-md tracking-wide uppercase">{desc}</p>
+                    <h4 className="text-lg lg:text-xl font-heading text-white group-hover:text-gold transition-colors">{title}</h4>
+                    <p className="text-[10px] lg:text-[11px] text-white/40 font-light max-w-md tracking-wide uppercase">{desc}</p>
                 </div>
             </div>
-            <div className="text-right flex items-center gap-10 relative z-10 transition-all">
+            <div className="w-full sm:w-auto text-right flex items-center justify-between sm:justify-end gap-6 lg:gap-10 relative z-10 transition-all">
                 <div>
                     <p className={`text-[9px] font-black uppercase tracking-[0.2em] ${statusColor} transition-colors`}>{time}</p>
                 </div>
-                <div className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all shadow-inner">
+                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all shadow-inner">
                     <ChevronRight size={14} className="text-white/10 group-hover:text-gold transition-all" />
                 </div>
             </div>

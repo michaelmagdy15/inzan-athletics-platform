@@ -1,10 +1,13 @@
 import React from 'react';
-import { Bell, Shield, Flame, Droplets, Award, Clock, Users, Package, Apple, Calendar, FileText, LogOut } from 'lucide-react';
+import { Bell, Shield, Flame, Droplets, Award, Clock, Users, Package, Apple, Calendar, FileText, LogOut, ScanLine } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProfileTab() {
     const { currentUser } = useData();
+    const navigate = useNavigate();
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -21,7 +24,7 @@ export default function ProfileTab() {
                 <header className="flex justify-between items-center mb-4">
                     <h2 className="text-3xl font-light tracking-tight">My Profile</h2>
                     <div className="flex gap-2">
-                        <button className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <button onClick={() => navigate('/p/notifications')} className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
                             <Bell size={18} />
                         </button>
                         <button
@@ -47,11 +50,19 @@ export default function ProfileTab() {
                             <div className="flex flex-col justify-center">
                                 <h2 className="font-medium text-xl tracking-tight mb-1">{currentUser?.name}</h2>
                                 <p className="text-[10px] text-[#FFB800] tracking-widest uppercase mb-2">Role: {currentUser?.role}</p>
-                                <p className="text-xs text-gray-400 truncate max-w-[150px]">{currentUser?.email}</p>
+                                <button onClick={() => navigate('/p/qr-scanner')} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFB800] text-black rounded-lg text-xs font-bold uppercase tracking-widest transition-transform hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(255,184,0,0.3)] w-max">
+                                    <ScanLine size={14} /> Scan In
+                                </button>
                             </div>
                         </div>
-                        <div className="w-16 h-16 bg-white p-1.5 rounded-xl shrink-0 shadow-lg rotate-3">
-                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${currentUser?.id}`} className="w-full h-full" alt="QR Code" />
+                        <div className="w-16 h-16 bg-white p-2 rounded-xl shrink-0 shadow-lg rotate-3 flex items-center justify-center">
+                            <QRCodeSVG
+                                value={currentUser?.code || 'INZAN'}
+                                size={64}
+                                level="H"
+                                includeMargin={false}
+                                className="w-full h-full"
+                            />
                         </div>
                     </div>
                 </div>
@@ -98,19 +109,19 @@ export default function ProfileTab() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                    <OptionItem icon={<Package size={20} />} label="Packages" />
-                    <OptionItem icon={<Apple size={20} />} label="Nutrition" />
-                    <OptionItem icon={<Calendar size={20} />} label="Attendance" />
-                    <OptionItem icon={<FileText size={20} />} label="Billing" />
+                    <OptionItem icon={<Package size={20} />} label="Packages" onClick={() => navigate('/p/packages')} />
+                    <OptionItem icon={<Apple size={20} />} label="Nutrition" onClick={() => navigate('/p/nutrition')} />
+                    <OptionItem icon={<Calendar size={20} />} label="Attendance" onClick={() => navigate('/p/attendance')} />
+                    <OptionItem icon={<FileText size={20} />} label="Billing" onClick={() => navigate('/p/billing')} />
                 </div>
             </div>
         </div>
     );
 }
 
-function OptionItem({ icon, label }: { icon: React.ReactNode, label: string }) {
+function OptionItem({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick?: () => void }) {
     return (
-        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/5 flex flex-col gap-3 cursor-pointer hover:bg-white/10 transition-all group">
+        <div onClick={onClick} className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/5 flex flex-col gap-3 cursor-pointer hover:bg-white/10 transition-all group">
             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-[#FFB800] group-hover:scale-110 transition-all">
                 {icon}
             </div>

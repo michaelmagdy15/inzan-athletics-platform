@@ -3,6 +3,7 @@ import UserApp from './pages/UserApp';
 import AdminHub from './pages/AdminHub';
 import AuthPage from './pages/AuthPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import UserSubPage from './pages/UserSubPage';
 import { useData } from './context/DataContext';
 import { Loader2 } from 'lucide-react';
 
@@ -33,6 +34,11 @@ export default function App() {
         <Route
           path="/"
           element={currentUser ? <UserApp /> : <Navigate to="/auth" />}
+        />
+
+        <Route
+          path="/p/:pageId"
+          element={currentUser ? <UserSubPage /> : <Navigate to="/auth" />}
         />
 
         <Route

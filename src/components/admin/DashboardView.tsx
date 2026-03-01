@@ -35,13 +35,13 @@ export default function DashboardView() {
     };
 
     return (
-        <div className="flex flex-col gap-10">
-            <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-6 lg:gap-10">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-heading tracking-tight text-white mb-1 uppercase">Admin Dashboard</h1>
+                    <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">Admin Dashboard</h1>
                     <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Real-time Performance & Operations Oversight</p>
                 </div>
-                <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-5 py-2.5 rounded-2xl backdrop-blur-xl transition-all hover:border-gold/30 group cursor-pointer shadow-xl">
+                <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-4 lg:px-5 py-2 lg:py-2.5 rounded-xl lg:rounded-2xl backdrop-blur-xl transition-all hover:border-gold/30 group cursor-pointer shadow-xl">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                     <span className="text-[10px] font-bold text-white/60 tracking-widest uppercase group-hover:text-white transition-colors">Systems Online</span>
                 </div>
@@ -144,21 +144,21 @@ function StatCard({ title, value, currency, trend, highlight, icon }: any) {
     return (
         <motion.div
             whileHover={{ y: -8, scale: 1.02 }}
-            className={`p-10 rounded-[3rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer shadow-2xl font-bold ${highlight ? 'bg-gold/10 border-gold/20 shadow-[0_0_60px_rgba(202,138,4,0.15)]' : 'bg-white/[0.02] border-white/5 hover:border-gold/30'}`}
+            className={`p-6 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer shadow-2xl font-bold ${highlight ? 'bg-gold/10 border-gold/20 shadow-[0_0_60px_rgba(202,138,4,0.15)]' : 'bg-white/[0.02] border-white/5 hover:border-gold/30'}`}
         >
-            <div className="flex justify-between items-start mb-10">
+            <div className="flex justify-between items-start mb-6 lg:mb-10">
                 <div className="text-white/20 group-hover:text-gold/50 transition-colors duration-500">
                     {icon}
                 </div>
                 {trend && (
-                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/5 px-3 py-1.5 rounded-xl italic">{trend}</span>
+                    <span className="text-[9px] lg:text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/5 px-3 py-1.5 rounded-xl italic">{trend}</span>
                 )}
             </div>
 
-            <h3 className="text-[10px] font-black tracking-[0.3em] text-white/30 uppercase mb-4 selection:bg-gold group-hover:text-gold transition-colors">{title}</h3>
+            <h3 className="text-[9px] lg:text-[10px] font-black tracking-[0.3em] text-white/30 uppercase mb-3 lg:mb-4 selection:bg-gold group-hover:text-gold transition-colors">{title}</h3>
             <div className="flex items-baseline gap-2">
-                <span className={`text-6xl font-heading tracking-tighter ${highlight ? 'text-gold' : 'text-white'}`}>{value}</span>
-                {currency && <span className="text-xs text-white/20 uppercase font-black tracking-widest italic ml-1">{currency}</span>}
+                <span className={`text-4xl lg:text-6xl font-heading tracking-tighter ${highlight ? 'text-gold' : 'text-white'}`}>{value}</span>
+                {currency && <span className="text-[10px] lg:text-xs text-white/20 uppercase font-black tracking-widest italic ml-1">{currency}</span>}
             </div>
 
             {/* Visual Flare */}
@@ -171,13 +171,13 @@ function ActionButton({ label, variant, onClick }: { label: string, variant?: st
     return (
         <button
             onClick={onClick}
-            className="w-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-gold/30 rounded-[1.5rem] p-7 flex justify-between items-center group transition-all duration-500 shadow-xl cursor-pointer overflow-hidden relative"
+            className="w-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-gold/30 rounded-2xl lg:rounded-[1.5rem] p-5 lg:p-7 flex justify-between items-center group transition-all duration-500 shadow-xl cursor-pointer overflow-hidden relative"
         >
             <div className="absolute top-0 left-0 w-1 h-full bg-gold/0 group-hover:bg-gold/40 transition-all duration-500" />
-            <span className={`text-[10px] font-black tracking-[0.2em] uppercase transition-colors relative z-10 ${variant === 'danger' ? 'text-red-400/60 group-hover:text-red-400' : 'text-white/40 group-hover:text-white'}`}>{label}</span>
-            <div className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all relative z-10 shadow-inner">
+            <span className={`text-[9px] lg:text-[10px] font-black tracking-[0.2em] uppercase transition-colors relative z-10 ${variant === 'danger' ? 'text-red-400/60 group-hover:text-red-400' : 'text-white/40 group-hover:text-white'}`}>{label}</span>
+            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all relative z-10 shadow-inner">
                 <motion.div whileHover={{ x: 2 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
-                    <Activity size={16} className="text-white/10 group-hover:text-gold" />
+                    <Activity size={14} className="text-white/10 group-hover:text-gold" />
                 </motion.div>
             </div>
         </button>

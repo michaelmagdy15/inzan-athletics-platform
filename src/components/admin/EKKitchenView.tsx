@@ -32,34 +32,34 @@ export default function EKKitchenView() {
     ];
 
     return (
-        <div className="flex flex-col gap-10">
-            <div className="flex justify-between items-end">
+        <div className="flex flex-col gap-6 lg:gap-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
                 <div>
-                    <h1 className="text-3xl font-heading tracking-tight text-white mb-1 uppercase">EK Kitchen</h1>
+                    <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">EK Kitchen</h1>
                     <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Kitchen Inventory</p>
                 </div>
-                <div className="flex items-center gap-4 font-bold">
-                    <button onClick={() => broadcastAlert('Kitchen inventory status checked.', 'info')} className="px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">Inventory Check</button>
-                    <button onClick={() => broadcastAlert('Restock order placed.', 'success')} className="premium-button px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Bulk Restock</button>
+                <div className="flex items-center gap-3 lg:gap-4 font-bold w-full lg:w-auto">
+                    <button onClick={() => broadcastAlert('Kitchen inventory status checked.', 'info')} className="flex-1 lg:flex-none px-4 lg:px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">Inventory Check</button>
+                    <button onClick={() => broadcastAlert('Restock order placed.', 'success')} className="flex-1 lg:flex-none premium-button px-4 lg:px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Bulk Restock</button>
                 </div>
             </div>
 
             {/* Performance Goals Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                 {goals.map((goal, idx) => (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
                         key={goal.label}
-                        className="glass-card rounded-[2.5rem] p-8 border border-white/5 relative overflow-hidden group font-bold"
+                        className="glass-card rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-8 border border-white/5 relative overflow-hidden group font-bold"
                     >
-                        <div className="flex justify-between items-center mb-6">
+                        <div className="flex justify-between items-center mb-5 lg:mb-6">
                             <h4 className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] group-hover:text-gold transition-colors">{goal.label}</h4>
                             <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/5 px-2.5 py-1 rounded-lg italic">{goal.trend}</span>
                         </div>
                         <div className="flex items-baseline gap-2 mb-4">
-                            <span className="text-3xl font-heading text-white">{goal.current.toLocaleString()}</span>
+                            <span className="text-2xl lg:text-3xl font-heading text-white">{goal.current.toLocaleString()}</span>
                             <span className="text-[10px] text-white/20 font-black uppercase italic tracking-widest">EGP</span>
                         </div>
                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
@@ -77,17 +77,17 @@ export default function EKKitchenView() {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                <div className="xl:col-span-2 flex flex-col gap-10">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-10">
+                <div className="xl:col-span-2 flex flex-col gap-6 lg:gap-10">
                     {/* Inventory Registry Oversight */}
-                    <div className="glass-card rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl">
-                        <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-black/20 font-bold">
-                            <div className="flex items-center gap-6">
+                    <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl">
+                        <div className="px-6 lg:px-10 py-6 lg:py-8 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-black/20 font-bold gap-4">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:gap-6">
                                 <div className="flex items-center gap-3">
                                     <Package size={16} className="text-white/20" />
                                     <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase">Inventory Overview</h3>
                                 </div>
-                                <div className="flex gap-4">
+                                <div className="flex flex-wrap gap-2 lg:gap-4">
                                     {['ALL', 'PROTEIN', 'GREENS', 'SYNC'].map(cat => (
                                         <button
                                             key={cat}
@@ -99,7 +99,7 @@ export default function EKKitchenView() {
                                     ))}
                                 </div>
                             </div>
-                            <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/5 hover:border-gold/30 transition-all text-white/40 hover:text-gold">
+                            <button className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/5 hover:border-gold/30 transition-all text-white/40 hover:text-gold shrink-0">
                                 <Plus size={18} />
                             </button>
                         </div>

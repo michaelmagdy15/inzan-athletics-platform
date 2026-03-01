@@ -6,6 +6,8 @@ export default function ClassesTab() {
     const { classes, currentUser, bookClass, cancelClass, loading } = useData();
     const [subTab, setSubTab] = useState('date');
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [filterValue, setFilterValue] = useState('');
 
     const handleAction = async (classId: string, isBooked: boolean) => {
         setProcessingId(classId);
@@ -32,18 +34,40 @@ export default function ClassesTab() {
             </header>
 
             <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 backdrop-blur-md">
-                <button onClick={() => setSubTab('date')} className={`flex-1 py-2.5 text-[11px] uppercase tracking-widest font-bold rounded-xl transition-all ${subTab === 'date' ? 'bg-white text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}>Date</button>
-                <button onClick={() => setSubTab('instructor')} className={`flex-1 py-2.5 text-[11px] uppercase tracking-widest font-bold rounded-xl transition-all ${subTab === 'instructor' ? 'bg-white text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}>Instructor</button>
-                <button onClick={() => setSubTab('class')} className={`flex-1 py-2.5 text-[11px] uppercase tracking-widest font-bold rounded-xl transition-all ${subTab === 'class' ? 'bg-white text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}>Class</button>
+                <button onClick={() => { setSubTab('date'); setFilterValue(''); }} className={`flex-1 py-2.5 text-[11px] uppercase tracking-widest font-bold rounded-xl transition-all ${subTab === 'date' ? 'bg-white text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}>Date</button>
+                <button onClick={() => { setSubTab('instructor'); setFilterValue(''); }} className={`flex-1 py-2.5 text-[11px] uppercase tracking-widest font-bold rounded-xl transition-all ${subTab === 'instructor' ? 'bg-white text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}>Instructor</button>
+                <button onClick={() => { setSubTab('class'); setFilterValue(''); }} className={`flex-1 py-2.5 text-[11px] uppercase tracking-widest font-bold rounded-xl transition-all ${subTab === 'class' ? 'bg-white text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}>Class</button>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 flex justify-between items-center cursor-pointer border border-white/10 hover:bg-white/10 transition-colors">
-                <span className="text-sm font-medium tracking-widest uppercase mx-auto text-[#FFB800]">-- 01 Mar 2026 --</span>
-                <ChevronDown size={18} />
+            <div className="relative">
+                <div onClick={() => setShowDropdown(!showDropdown)} className="bg-white/5 backdrop-blur-md rounded-2xl p-4 flex justify-between items-center cursor-pointer border border-white/10 hover:bg-white/10 transition-colors">
+                    <span className="text-sm font-medium tracking-widest uppercase mx-auto text-[#FFB800]">
+                        {filterValue || (subTab === 'date' ? 'All Dates' : subTab === 'instructor' ? 'All Instructors' : 'All Classes')}
+                    </span>
+                    <ChevronDown size={18} />
+                </div>
+                {showDropdown && (
+                    <div className="absolute top-full left-0 w-full mt-2 bg-[#141414] border border-white/10 rounded-2xl overflow-hidden z-20 shadow-2xl">
+                        <div onClick={() => { setFilterValue(''); setShowDropdown(false); }} className="p-4 border-b border-white/5 text-sm uppercase tracking-widest cursor-pointer hover:bg-white/5">
+                            Clear Filter
+                        </div>
+                        {Array.from(new Set(classes.map(c => subTab === 'date' ? c.date : subTab === 'instructor' ? c.trainer : c.title))).map((option, idx) => (
+                            <div key={idx} onClick={() => { setFilterValue(option); setShowDropdown(false); }} className="p-4 border-b border-white/5 text-sm cursor-pointer hover:bg-white/5">
+                                {option}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <div className="flex flex-col gap-4 mt-2">
-                {classes.map(c => {
+                {classes.filter(c => {
+                    if (!filterValue) return true;
+                    if (subTab === 'date') return c.date === filterValue;
+                    if (subTab === 'instructor') return c.trainer === filterValue;
+                    if (subTab === 'class') return c.title === filterValue;
+                    return true;
+                }).map(c => {
                     const isBooked = currentUser?.bookedClasses?.includes(c.id) || false;
                     return (
                         <ClassCard
