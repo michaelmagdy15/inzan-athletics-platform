@@ -61,10 +61,10 @@ export default function UserApp() {
       <nav className="fixed bottom-0 w-full max-w-md bg-[#0a0a0a]/80 backdrop-blur-2xl border-t border-white/5 px-6 py-5 z-50 rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <ul className="flex justify-between items-center">
           <NavItem icon={<Home size={22} />} label="Home" isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
-          <NavItem icon={<Users size={22} />} label="Classes" isActive={activeTab === 'classes'} onClick={() => setActiveTab('classes')} />
+          <NavItem icon={<Users size={22} />} label="Sessions" isActive={activeTab === 'classes'} onClick={() => setActiveTab('classes')} />
           <NavItem icon={<Coffee size={22} />} label="Kitchen" isActive={activeTab === 'kitchen'} onClick={() => setActiveTab('kitchen')} />
           <NavItem icon={<User size={22} />} label="Profile" isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} />
-          <NavItem icon={<MoreHorizontal size={22} />} label="More" isActive={activeTab === 'more'} onClick={() => setActiveTab('more')} />
+          <NavItem icon={<MoreHorizontal size={22} />} label="Settings" isActive={activeTab === 'more'} onClick={() => setActiveTab('more')} />
         </ul>
       </nav>
     </div>

@@ -138,7 +138,7 @@ export default function ResetPasswordPage() {
         newPassword: {
             icon: <KeyRound className="w-6 h-6 text-blue-400" />,
             iconBg: 'bg-blue-400/10 border-blue-400/20',
-            title: 'New Passphrase',
+            title: 'New Password',
             subtitle: 'Set a new passphrase for your identity.'
         },
         success: {
@@ -180,11 +180,11 @@ export default function ResetPasswordPage() {
                         {(['request', 'verify', 'newPassword', 'success'] as ResetStep[]).map((s, i) => (
                             <React.Fragment key={s}>
                                 <div className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${step === s ? 'bg-[#FFB800] scale-125 shadow-[0_0_8px_rgba(255,184,0,0.4)]' :
-                                        (['request', 'verify', 'newPassword', 'success'].indexOf(step) > i ? 'bg-[#FFB800]/50' : 'bg-white/10')
+                                    (['request', 'verify', 'newPassword', 'success'].indexOf(step) > i ? 'bg-[#FFB800]/50' : 'bg-white/10')
                                     }`} />
                                 {i < 3 && (
                                     <div className={`w-8 h-0.5 transition-all duration-300 ${(['request', 'verify', 'newPassword', 'success'].indexOf(step) > i ? 'bg-[#FFB800]/30' : 'bg-white/5'
-                                        )}`} />
+                                    )}`} />
                                 )}
                             </React.Fragment>
                         ))}
@@ -204,10 +204,8 @@ export default function ResetPasswordPage() {
                                 <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full border mb-4 ${current.iconBg}`}>
                                     {current.icon}
                                 </div>
-                                <h3 className="text-xl font-light text-white uppercase tracking-tight">{current.title}</h3>
-                                <p className="text-[10px] text-white/40 uppercase tracking-widest mt-2 px-4">
-                                    {current.subtitle}
-                                </p>
+                                <h1 className="text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">Password Recovery</h1>
+                                <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-medium">Initiate Password Reset</p>
                             </div>
 
                             {/* Step 1: Request Reset */}
@@ -334,13 +332,13 @@ export default function ResetPasswordPage() {
                                             }`}>
                                             6+ Characters
                                         </div>
-                                        <div className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${/[A-Z]/.test(newPassword) ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : 'text-white/20 border-white/5 bg-white/[0.02]'
-                                            }`}>
-                                            Uppercase
-                                        </div>
                                         <div className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${/\d/.test(newPassword) ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : 'text-white/20 border-white/5 bg-white/[0.02]'
                                             }`}>
                                             Number
+                                        </div>
+                                        <div className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${/[A-Z]/.test(newPassword) ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : 'text-white/20 border-white/5 bg-white/[0.02]'
+                                            }`}>
+                                            Uppercase
                                         </div>
                                         <div className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${newPassword === confirmPassword && confirmPassword.length > 0 ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : 'text-white/20 border-white/5 bg-white/[0.02]'
                                             }`}>
@@ -364,7 +362,7 @@ export default function ResetPasswordPage() {
                                         className="w-full bg-[#FFB800] hover:bg-[#FFB800]/90 disabled:opacity-50 text-black py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,184,0,0.2)] transition-all active:scale-[0.98]"
                                     >
                                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                                            <>Update Passphrase <ArrowRight className="w-4 h-4" /></>
+                                            <>Update Password <ArrowRight className="w-4 h-4" /></>
                                         )}
                                     </button>
                                 </form>
@@ -392,12 +390,7 @@ export default function ResetPasswordPage() {
                 </div>
 
                 <div className="text-center mt-8">
-                    <button
-                        onClick={() => navigate('/auth')}
-                        className="text-[10px] uppercase tracking-widest text-white/20 hover:text-white/40 transition-colors"
-                    >
-                        ← Back to Access Terminal
-                    </button>
+                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/5 whitespace-nowrap">Inzan Athletics | Premium Excellence</p>
                 </div>
             </motion.div>
         </div>

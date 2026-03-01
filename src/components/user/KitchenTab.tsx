@@ -38,7 +38,7 @@ export default function KitchenTab() {
             <div className="bg-[#FFB800]/10 border border-[#FFB800]/20 rounded-3xl p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFB800]/20 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <h3 className="text-lg font-medium tracking-tight mb-2 relative z-10 text-[#FFB800]">Skip the Line</h3>
-                <p className="text-sm text-gray-300 mb-5 relative z-10">Pre-order your post-workout recovery shake. Real-time sync active.</p>
+                <p className="text-sm text-gray-300 mb-5 relative z-10">Pre-order your post-workout recovery shake. Sync active.</p>
                 <div className="flex items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5 relative z-10">
                     <Clock size={16} className="text-[#FFB800]" />
                     <span className="text-xs font-medium">Auto-ordering available</span>
@@ -97,7 +97,7 @@ function KitchenCard({ item, onOrder }: any) {
                 <h4 className="font-medium text-sm mb-1 truncate">{item.name}</h4>
                 <p className="text-[10px] text-gray-400 mb-3 line-clamp-2">{item.description}</p>
                 <div className="flex justify-between items-center">
-                    <span className="text-sm font-mono text-[#FFB800]">${(item.price || 0).toFixed(2)}</span>
+                    <span className="text-sm font-mono text-[#FFB800]">{(item.price || 0).toFixed(2)} <span className="text-[10px] italic">EGP</span></span>
                     <button onClick={onOrder} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#FFB800] hover:text-black transition-colors">
                         <Zap size={14} />
                     </button>
@@ -114,7 +114,7 @@ function KitchenListItem({ item, onOrder }: any) {
             <div className="flex-1">
                 <h4 className="font-medium text-sm mb-1">{item.name}</h4>
                 <p className="text-[10px] text-gray-400 mb-2 line-clamp-1">{item.description}</p>
-                <span className="text-sm font-mono text-[#FFB800]">${(item.price || 0).toFixed(2)}</span>
+                <span className="text-sm font-mono text-[#FFB800]">{(item.price || 0).toFixed(2)} <span className="text-[10px] italic">EGP</span></span>
             </div>
             <button onClick={onOrder} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#FFB800] hover:text-black transition-colors shrink-0">
                 <Zap size={16} />
@@ -122,3 +122,4 @@ function KitchenListItem({ item, onOrder }: any) {
         </div>
     );
 }
+

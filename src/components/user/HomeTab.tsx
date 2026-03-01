@@ -1,13 +1,10 @@
 import React from 'react';
-import { Bell, Activity, ArrowRight } from 'lucide-react';
+import { Bell, Activity, ArrowRight, Calendar } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 
 export default function HomeTab() {
-    const { currentUser, classes, iotZones } = useData();
+    const { currentUser, classes } = useData();
     const nextClass = classes.length > 0 ? classes[0] : null;
-
-    const mainZone = iotZones[0];
-    const capacityPercent = mainZone ? Math.round((mainZone.occupancy / mainZone.max_capacity) * 100) : 6;
 
     const getRecoveryAdvice = () => {
         if (!currentUser) return 'Ready to start?';
@@ -44,7 +41,7 @@ export default function HomeTab() {
                     <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center border border-red-500/30">
                         <Activity size={14} className="text-red-500" />
                     </div>
-                    <h3 className="text-[10px] text-red-500 tracking-widest uppercase font-bold">AI Recovery Coach</h3>
+                    <h3 className="text-[10px] text-red-500 tracking-widest uppercase font-bold">Recovery Coach</h3>
                 </div>
                 <p className="text-sm text-gray-300 leading-relaxed relative z-10 mb-5">
                     {getRecoveryAdvice()} Your recovery is at <span className={`${currentUser?.recovery && currentUser.recovery < 50 ? 'text-red-400' : 'text-emerald-400'} font-bold`}>{currentUser?.recovery || 0}%</span>.
@@ -74,20 +71,21 @@ export default function HomeTab() {
                 </div>
             </div>
 
-            {/* Current Capacity */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 flex items-center gap-6 border border-white/10 relative overflow-hidden">
+            {/* Upcoming Class Quick Link */}
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 flex items-center justify-between border border-white/10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFB800]/10 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/2" />
-                <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-                    <svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="6" />
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="#FFB800" strokeWidth="6" strokeDasharray="282.7" strokeDashoffset={282.7 - (282.7 * capacityPercent) / 100} strokeLinecap="round" />
-                    </svg>
-                    <span className="text-sm font-bold text-white">{capacityPercent}%</span>
+                <div className="flex items-center gap-4 z-10">
+                    <div className="w-12 h-12 rounded-2xl bg-[#FFB800]/20 flex items-center justify-center border border-[#FFB800]/30 shadow-inner">
+                        <Calendar size={24} className="text-[#FFB800]" />
+                    </div>
+                    <div>
+                        <h4 className="font-medium text-lg mb-0.5 tracking-tight text-white">Daily Schedule</h4>
+                        <p className="text-[10px] text-[#FFB800]/60 tracking-widest uppercase font-bold">View Active Sessions</p>
+                    </div>
                 </div>
-                <div className="z-10">
-                    <h4 className="font-medium text-lg mb-1 tracking-tight">Current Capacity</h4>
-                    <p className="text-xs text-[#FFB800] tracking-widest uppercase">{mainZone?.name || 'Inzan Athletics'}</p>
-                </div>
+                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#FFB800] group transition-all duration-500 border border-white/10 z-10">
+                    <ArrowRight size={16} className="text-white group-hover:text-black" />
+                </button>
             </div>
         </div>
     );

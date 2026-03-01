@@ -12,10 +12,10 @@ export default function ClassesView() {
         <div className="flex flex-col gap-10">
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-heading tracking-tight text-white mb-1 uppercase">Class Command</h1>
-                    <p className="text-[10px] tracking-[0.4em] text-white/30 uppercase font-medium">Session Logistics & Traffic</p>
+                    <h1 className="text-3xl font-heading tracking-tight text-white mb-1 uppercase">Class Schedule</h1>
+                    <p className="text-[10px] tracking-[0.4em] text-white/30 uppercase font-medium">Class Attendance & Capacity</p>
                 </div>
-                <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/5">
+                <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/5 font-bold">
                     {['Grid', 'List'].map((mode) => (
                         <button key={mode} className={`px-5 py-2 rounded-xl text-[9px] font-black tracking-widest uppercase transition-all ${mode === 'List' ? 'bg-gold text-black shadow-lg' : 'text-white/30 hover:text-white'}`}>
                             {mode}
@@ -24,11 +24,11 @@ export default function ClassesView() {
                 </div>
             </div>
 
-            {/* Yield Optimization Insight */}
+            {/* Attendance Insight */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="glass-card rounded-[2.5rem] p-10 flex items-center justify-between shadow-2xl relative overflow-hidden group"
+                className="glass-card rounded-[2.5rem] p-10 flex items-center justify-between shadow-2xl relative overflow-hidden group font-bold"
             >
                 <div className="absolute top-0 left-0 w-1 h-full bg-gold opacity-50 shadow-[0_0_15px_rgba(202,138,4,0.3)]" />
                 <div className="flex items-start gap-8 relative z-10">
@@ -36,19 +36,19 @@ export default function ClassesView() {
                         <Zap className="text-gold" size={28} />
                     </div>
                     <div className="max-w-xl">
-                        <h3 className="text-[10px] font-black text-gold tracking-[0.4em] uppercase mb-4">Yield Optimization Vector</h3>
+                        <h3 className="text-[10px] font-black text-gold tracking-[0.4em] uppercase mb-4">Attendance Insight</h3>
                         <p className="text-sm text-white/70 leading-relaxed font-light">
-                            Thursday 14:00 <span className="text-white font-medium">"Holistic Flow"</span> cycles are averaging <span className="text-gold font-bold">12% capacity</span>. Demand telemetry suggests a shift to <span className="text-white font-bold">Private Training Clusters</span> for maximum ROI.
+                            Thursday 14:00 <span className="text-white font-medium">"Flow"</span> classes are showing low attendance. <span className="text-white font-medium">Adjust scheduling accordingly</span> during this slot.
                         </p>
                     </div>
                 </div>
                 <button className="premium-button px-10 py-5 rounded-2xl transition-all hover:scale-[1.05] relative z-10 shadow-2xl shadow-gold/20">
-                    <span className="text-[10px] font-black tracking-[0.3em] uppercase text-black">Apply Shift</span>
+                    <span className="text-[10px] font-black tracking-[0.3em] uppercase text-black">Update Schedule</span>
                 </button>
             </motion.div>
 
             {/* Day Selector */}
-            <div className="flex gap-4 p-2 bg-black/40 rounded-3xl border border-white/5">
+            <div className="flex gap-4 p-2 bg-black/40 rounded-3xl border border-white/5 font-bold">
                 {days.map(day => (
                     <button
                         key={day}
@@ -68,11 +68,11 @@ export default function ClassesView() {
 
             {/* Classes List */}
             <div className="glass-card rounded-[3rem] border border-white/5 p-10 shadow-2xl flex flex-col gap-8 relative overflow-hidden">
-                <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase">Deployment Registry</h3>
-                    <span className="text-[9px] text-gold/60 font-bold tracking-widest uppercase">3 Sessions Scheduled</span>
+                <div className="flex items-center justify-between mb-2 font-bold">
+                    <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase">Upcoming Classes</h3>
+                    <span className="text-[9px] text-gold/60 font-bold tracking-widest uppercase">3 Classes Scheduled</span>
                 </div>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 font-bold">
                     {classes.map((c, idx) => (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
@@ -115,7 +115,7 @@ export default function ClassesView() {
                                     </div>
                                     <div className="flex items-center justify-end gap-2">
                                         <span className={`text-[8px] font-black uppercase tracking-widest ${c.spots_left === 0 ? 'text-red-500' : 'text-white/20'}`}>
-                                            {c.spots_left === 0 ? 'Terminal' : 'Operational'}
+                                            {c.spots_left === 0 ? 'Full' : 'Open'}
                                         </span>
                                         {c.spots_left > 0 && <CheckCircle2 size={10} className="text-emerald-500/50" />}
                                     </div>

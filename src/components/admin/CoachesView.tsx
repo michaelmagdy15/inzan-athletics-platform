@@ -16,42 +16,42 @@ export default function CoachesView() {
         <div className="flex flex-col gap-10">
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-heading tracking-tight text-white mb-1 uppercase">Coaching Directorate</h1>
-                    <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Performance Metrics & ROI</p>
+                    <h1 className="text-3xl font-heading tracking-tight text-white mb-1 uppercase">Coaches & Trainers</h1>
+                    <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Coach Performance & Analytics</p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <button className="px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">Export Matrix</button>
-                    <button className="premium-button px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">New Instructor</button>
+                <div className="flex items-center gap-4 font-bold">
+                    <button className="px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">Download Report</button>
+                    <button className="premium-button px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Add New Coach</button>
                 </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Scorecard title="Aggregate Score" value="4.92" trend="+0.05" highlight icon={<Award size={16} />} />
-                <Scorecard title="Client Velocity" value="18.5" trend="-1.2" subtitle="Avg per Node" icon={<Activity size={16} />} />
-                <Scorecard title="Cycle Volume" value="420" trend="+15%" subtitle="Current Week" icon={<Zap size={16} />} />
-                <Scorecard title="Retention Flux" value="94%" trend="+2%" subtitle="Team Baseline" icon={<UserCheck size={16} />} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 font-bold">
+                <Scorecard title="Avg. Coach Rating" value="4.92" trend="+0.05" highlight icon={<Award size={16} />} />
+                <Scorecard title="Client Load" value="18.5" trend="-1.2" subtitle="Avg. per Coach" icon={<Activity size={16} />} />
+                <Scorecard title="Sessions Taught" value="420" trend="+15%" subtitle="This Week" icon={<Zap size={16} />} />
+                <Scorecard title="Retention Rate" value="94%" trend="+2%" subtitle="Team Average" icon={<UserCheck size={16} />} />
             </div>
 
-            {/* Performance Matrix */}
+            {/* Performance Chart */}
             <div className="glass-card rounded-[3rem] border border-white/5 p-10 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-                <div className="flex justify-between items-center mb-10 relative z-10">
+                <div className="flex justify-between items-center mb-10 relative z-10 font-bold">
                     <div className="flex items-center gap-3">
                         <div className="w-1 h-4 bg-gold rounded-full shadow-[0_0_10px_rgba(202,138,4,0.5)]" />
-                        <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">Multi-Dimensional Performance Matrix</h3>
+                        <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">Coach Performance Chart</h3>
                     </div>
                     <div className="flex items-center gap-6">
-                        <span className="text-[8px] text-white/20 uppercase tracking-widest font-black">Bubble Magnitude: Total Encounters</span>
+                        <span className="text-[8px] text-white/20 uppercase tracking-widest font-black">Bubble Size: Total Sessions</span>
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-gold/50 border border-gold" />
-                            <span className="text-[8px] text-gold font-black tracking-widest uppercase">Active Assets</span>
+                            <span className="text-[8px] text-gold font-black tracking-widest uppercase">Active Coaches</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="h-96 w-full relative z-10">
+                <div className="h-96 w-full relative z-10 font-bold">
                     <ResponsiveContainer width="100%" height="100%">
                         <ScatterChart margin={{ top: 20, right: 40, bottom: 20, left: 0 }}>
                             <CartesianGrid strokeDasharray="10 10" stroke="rgba(255,255,255,0.03)" vertical={false} />
@@ -63,17 +63,17 @@ export default function CoachesView() {
                                 domain={[80, 100]}
                                 stroke="rgba(255,255,255,0.1)"
                                 tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700 }}
-                                label={{ value: 'RETENTION SCORE (%)', position: 'bottom', fill: 'rgba(255,255,255,0.2)', fontSize: 9, fontWeight: 900, offset: 0, letterSpacing: '0.2em' }}
+                                label={{ value: 'RETENTION RATE (%)', position: 'bottom', fill: 'rgba(255,255,255,0.2)', fontSize: 9, fontWeight: 900, offset: 0, letterSpacing: '0.2em' }}
                             />
                             <YAxis
                                 type="number"
                                 dataKey="spend"
                                 name="Avg Spend"
-                                unit="$"
+                                unit="EGP"
                                 domain={[50, 200]}
                                 stroke="rgba(255,255,255,0.1)"
                                 tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700 }}
-                                label={{ value: 'ECOSYSTEM SPEND ($)', angle: -90, position: 'insideLeft', fill: 'rgba(255,255,255,0.2)', fontSize: 9, fontWeight: 900, letterSpacing: '0.2em' }}
+                                label={{ value: 'CLIENT SPEND (EGP)', angle: -90, position: 'insideLeft', fill: 'rgba(255,255,255,0.2)', fontSize: 9, fontWeight: 900, letterSpacing: '0.2em' }}
                             />
                             <ZAxis type="number" dataKey="clients" range={[400, 2000]} />
                             <Tooltip
@@ -90,7 +90,7 @@ export default function CoachesView() {
             {/* Coach Profiles */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <CoachCard name="Adam Althenbarden" tier="High Performance" clients={42} rating={4.9} avatar="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop" />
-                <CoachCard name="Elena Volkov" tier="Holistic Flow" clients={35} rating={5.0} avatar="https://i.pravatar.cc/150?u=4" />
+                <CoachCard name="Elena Volkov" tier="Handstands & Flow" clients={35} rating={5.0} avatar="https://i.pravatar.cc/150?u=4" />
                 <CoachCard name="Marcus Reed" tier="Power & Strength" clients={38} rating={4.8} avatar="https://i.pravatar.cc/150?u=5" />
             </div>
         </div>
@@ -99,7 +99,7 @@ export default function CoachesView() {
 
 function Scorecard({ title, value, trend, subtitle, highlight, icon }: any) {
     return (
-        <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer ${highlight ? 'bg-gold/10 border-gold/20 shadow-[0_0_50px_rgba(202,138,4,0.1)]' : 'bg-[#121212]/30 border-white/5 hover:border-gold/20'
+        <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${highlight ? 'bg-gold/10 border-gold/20 shadow-[0_0_50px_rgba(202,138,4,0.15)]' : 'bg-[#121212]/30 border-white/5 hover:border-gold/20'
             }`}>
             <div className="flex justify-between items-start mb-6">
                 <div className="text-white/20 group-hover:text-gold/50 transition-colors duration-500">
@@ -112,7 +112,7 @@ function Scorecard({ title, value, trend, subtitle, highlight, icon }: any) {
 
             <h3 className="text-[10px] font-black tracking-[0.3em] text-white/20 uppercase mb-4 group-hover:text-gold transition-colors">{title}</h3>
             <div className="flex items-baseline gap-2">
-                <span className={`text-5xl font-heading tracking-tight ${highlight ? 'text-gradient-gold' : 'text-white'}`}>{value}</span>
+                <span className={`text-5xl font-heading tracking-tight ${highlight ? 'text-gold' : 'text-white'}`}>{value}</span>
             </div>
             {subtitle && (
                 <p className="text-[8px] text-white/20 uppercase tracking-[0.3em] mt-3 font-bold">{subtitle}</p>
@@ -125,7 +125,7 @@ function CoachCard({ name, tier, clients, rating, avatar }: any) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
-            className="glass-card rounded-[3rem] border border-white/5 p-10 flex flex-col items-center text-center shadow-2xl group hover:border-gold/30 transition-all duration-500 relative overflow-hidden"
+            className="glass-card rounded-[3rem] border border-white/5 p-10 flex flex-col items-center text-center shadow-2xl group hover:border-gold/30 transition-all duration-500 relative overflow-hidden font-bold"
         >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
@@ -145,7 +145,7 @@ function CoachCard({ name, tier, clients, rating, avatar }: any) {
             <div className="grid grid-cols-2 w-full">
                 <div className="border-r border-white/5">
                     <p className="text-3xl font-heading text-white">{clients}</p>
-                    <p className="text-[8px] text-white/20 uppercase tracking-[0.4em] mt-2 font-bold select-none">ASSETS</p>
+                    <p className="text-[8px] text-white/20 uppercase tracking-[0.4em] mt-2 font-bold select-none">CLIENTS</p>
                 </div>
                 <div>
                     <p className="text-3xl font-heading text-gold group-hover:text-white transition-colors">{rating}</p>
@@ -154,7 +154,7 @@ function CoachCard({ name, tier, clients, rating, avatar }: any) {
             </div>
 
             <button className="w-full mt-10 py-5 bg-white/5 hover:bg-gold/10 border border-white/5 hover:border-gold/30 rounded-2xl flex justify-between items-center px-8 group/btn transition-all duration-500">
-                <span className="text-[9px] font-black tracking-[0.3em] uppercase text-white/30 group-hover/btn:text-gold transition-colors">Asset Profile</span>
+                <span className="text-[9px] font-black tracking-[0.3em] uppercase text-white/30 group-hover/btn:text-gold transition-colors">Coach Profile</span>
                 <ChevronRight size={14} className="text-white/10 group-hover/btn:text-gold transition-all" />
             </button>
         </motion.div>

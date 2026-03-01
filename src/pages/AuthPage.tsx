@@ -220,7 +220,7 @@ export default function AuthPage() {
                                     ) : (
                                         <>
                                             <span className="text-black font-bold uppercase tracking-[0.2em] text-xs">
-                                                {isLogin ? 'Establish Connection' : 'Register Signal'}
+                                                {isLogin ? 'Sign In' : 'Sign Up'}
                                             </span>
                                             <ArrowRight className="w-4 h-4 text-black group-hover:translate-x-1 transition-transform" />
                                         </>
@@ -238,9 +238,9 @@ export default function AuthPage() {
                                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
                                     <ShieldCheck className="w-8 h-8 text-emerald-500" />
                                 </div>
-                                <h3 className="text-2xl font-heading text-white mb-3">Verify Identity</h3>
+                                <h3 className="text-2xl font-heading text-white mb-3">Verify Email</h3>
                                 <p className="text-[11px] text-white/40 uppercase tracking-widest leading-loose">
-                                    Authorization payload active for <br />
+                                    Verification active for <br />
                                     <span className="text-gold font-bold">{email}</span>
                                 </p>
                             </div>
@@ -264,7 +264,7 @@ export default function AuthPage() {
                                     className="premium-button w-full h-16 rounded-2xl flex items-center justify-center"
                                 >
                                     {loading ? <Loader2 className="w-5 h-5 animate-spin text-black" /> : (
-                                        <span className="text-black font-bold uppercase tracking-[0.2em] text-xs">Authorize Protocol</span>
+                                        <span className="text-black font-bold uppercase tracking-[0.2em] text-xs">Verify Code</span>
                                     )}
                                 </button>
 
@@ -275,14 +275,14 @@ export default function AuthPage() {
                                         disabled={loading}
                                         className="w-full py-3.5 text-[10px] text-gold/60 hover:text-gold uppercase tracking-[0.2em] font-bold transition-all border border-gold/10 hover:border-gold/30 rounded-xl"
                                     >
-                                        Transmit New Signal
+                                        Resend Code
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setIsVerifying(false)}
-                                        className="text-[10px] text-white/20 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors"
+                                        className="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] mb-2"
                                     >
-                                        Cancel Protocol
+                                        Back to Login
                                     </button>
                                 </div>
                             </form>
@@ -307,7 +307,7 @@ export default function AuthPage() {
 
                 <div className="text-center mt-12 opacity-30">
                     <p className="text-[9px] uppercase tracking-[0.4em] text-white font-medium">
-                        &copy; 2026 INZAN SYSTEMS • GLOBAL ACCESS GRANTED
+                        &copy; 2026 INZAN ATHLETICS • CREATED BY MICHAEL MITRY
                     </p>
                 </div>
             </motion.div>

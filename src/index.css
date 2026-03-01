@@ -111,6 +111,7 @@ h6 {
 
 .text-gradient-gold {
   background: linear-gradient(135deg, #FFE08A 0%, #CA8A04 50%, #854D0E 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

@@ -15,6 +15,8 @@ export interface Member {
   riskStatus: 'low' | 'medium' | 'high';
   code: string;
   bookedClasses: string[];
+  membershipExpiry: string | null;
+  membershipStatus: 'active' | 'suspended' | 'expired' | 'pending';
 }
 
 export interface Badge {
@@ -59,34 +61,57 @@ export interface KitchenOrder {
   created_at: string;
 }
 
-export interface IoTZone {
+// --- Context ---
+
+export interface MaintenanceLog {
   id: string;
-  name: string;
-  temp: number;
-  lights: number;
-  audio_volume: number;
-  occupancy: number;
-  max_capacity: number;
+  asset_name: string;
+  description: string;
+  status: 'completed' | 'in_progress' | 'scheduled';
+  temporal_marker: string;
+  initials: string;
+  created_at: string;
 }
 
-// --- Context ---
+export interface SystemSettings {
+  brandName: string;
+  timezone: string;
+  currency: string;
+  notificationsEnabled: boolean;
+  mfaRequired: boolean;
+  encryptionLevel: string;
+}
 
 interface DataContextType {
   members: Member[];
   classes: ClassSession[];
   kitchenItems: KitchenItem[];
   orders: KitchenOrder[];
-  iotZones: IoTZone[];
+  maintenanceLogs: MaintenanceLog[];
+  settings: SystemSettings;
   currentUser: Member | null;
   loading: boolean;
   error: string | null;
+  systemAlert: { message: string; type: 'info' | 'warning' | 'error' | 'success' } | null;
+  setSystemAlert: (alert: { message: string; type: 'info' | 'warning' | 'error' | 'success' } | null) => void;
   setCurrentUser: (user: Member | null) => void;
   bookClass: (classId: string) => Promise<void>;
   cancelClass: (classId: string) => Promise<void>;
   placeOrder: (items: any, totalPrice: number) => Promise<void>;
-  updateIoT: (zoneId: string, updates: Partial<IoTZone>) => Promise<void>;
   updateOrderStatus: (orderId: string, status: KitchenOrder['status']) => Promise<void>;
+  updateSettings: (updates: Partial<SystemSettings>) => Promise<void>;
+  addMaintenanceLog: (log: Omit<MaintenanceLog, 'id' | 'created_at'>) => Promise<void>;
   refreshData: () => Promise<void>;
+  // Administrative functions
+  addMember: (data: Partial<Member>) => Promise<void>;
+  deleteMember: (memberId: string) => Promise<void>;
+  updateMemberStatus: (memberId: string, status: Member['membershipStatus']) => Promise<void>;
+  renewMembership: (memberId: string) => Promise<void>;
+  resetUserPassword: (email: string) => Promise<void>;
+  addCoach: (data: Partial<Member>) => Promise<void>;
+  addClass: (data: any) => Promise<void>;
+  registerAttendance: (memberCode: string) => Promise<void>;
+  broadcastAlert: (message: string, type: 'info' | 'warning' | 'error' | 'success') => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -96,10 +121,37 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [classes, setClasses] = useState<ClassSession[]>([]);
   const [kitchenItems, setKitchenItems] = useState<KitchenItem[]>([]);
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
-  const [iotZones, setIotZones] = useState<IoTZone[]>([]);
+  const [maintenanceLogs, setMaintenanceLogs] = useState<MaintenanceLog[]>([]);
+  const [settings, setSettings] = useState<SystemSettings>({
+    brandName: 'INZAN Athletics',
+    timezone: 'UTC+2 (Cairo)',
+    currency: 'EGP',
+    notificationsEnabled: true,
+    mfaRequired: true,
+    encryptionLevel: 'AES-256'
+  });
+
   const [currentUser, setCurrentUser] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [systemAlert, setSystemAlert] = useState<{ message: string; type: 'info' | 'warning' | 'error' | 'success' } | null>(null);
+
+  const broadcastAlert = (message: string, type: 'info' | 'warning' | 'error' | 'success') => {
+    setSystemAlert({ message, type });
+    setTimeout(() => setSystemAlert(null), 5000);
+  };
+
+  const updateSettings = async (updates: Partial<SystemSettings>) => {
+    setSettings(prev => ({ ...prev, ...updates }));
+    broadcastAlert('System parameters adjusted.', 'success');
+  };
+
+  const addMaintenanceLog = async (log: Omit<MaintenanceLog, 'id' | 'created_at'>) => {
+    const { error } = await supabase.from('maintenance_logs').insert(log);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert(`Maintenance event logged for ${log.asset_name}.`, 'success');
+  };
 
   const fetchAllData = async () => {
     try {
@@ -107,16 +159,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         { data: profilesData },
         { data: classesData },
         { data: inventoryData },
-        { data: zonesData },
         { data: bookingsData },
-        { data: ordersData }
+        { data: ordersData },
+        { data: maintenanceData }
       ] = await Promise.all([
         supabase.from('profiles').select('*'),
         supabase.from('classes').select('*, coach:coaches(profiles(full_name))'),
         supabase.from('kitchen_inventory').select('*'),
-        supabase.from('facility_zones').select('*'),
         supabase.from('bookings').select('*'),
-        supabase.from('kitchen_orders').select('*').order('created_at', { ascending: false })
+        supabase.from('kitchen_orders').select('*').order('created_at', { ascending: false }),
+        supabase.from('maintenance_logs').select('*').order('created_at', { ascending: false })
       ]);
 
       const mappedMembers: Member[] = profilesData?.map(p => ({
@@ -124,13 +176,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         name: p.full_name,
         email: p.email,
         role: p.role,
-        avatar: p.avatar_url || 'https://i.pravatar.cc/150',
+        avatar: p.avatar_url || `https://i.pravatar.cc/150?u=${p.id}`,
         strain: p.current_strain,
         recovery: p.current_recovery,
-        badges: p.athletic_passport_badges,
-        riskStatus: p.risk_status,
-        code: p.member_code,
-        bookedClasses: bookingsData?.filter(b => b.member_id === p.id).map(b => b.class_id) || []
+        badges: p.athletic_passport_badges || [],
+        riskStatus: p.risk_status || 'low',
+        code: p.member_code || p.id.substring(0, 8).toUpperCase(),
+        bookedClasses: bookingsData?.filter(b => b.member_id === p.id).map(b => b.class_id) || [],
+        membershipExpiry: p.membership_expiry,
+        membershipStatus: p.membership_status || 'active'
       })) || [];
 
       setMembers(mappedMembers);
@@ -161,16 +215,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         image_url: i.image_url
       })) || []);
 
-      setIotZones(zonesData?.map(z => ({
-        id: z.id,
-        name: z.name,
-        temp: z.temperature_c,
-        lights: z.lighting_percent,
-        audio_volume: z.audio_volume_percent,
-        occupancy: z.current_occupancy,
-        max_capacity: z.max_capacity
-      })) || []);
-
       setOrders(ordersData?.map(o => ({
         id: o.id,
         member_id: o.member_id,
@@ -180,7 +224,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         created_at: o.created_at
       })) || []);
 
-      // Update current user from members list if logged in
+      setMaintenanceLogs(maintenanceData || []);
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const found = mappedMembers.find(m => m.id === session.user.id);
@@ -190,6 +235,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
 
     } catch (err: any) {
+      console.error('Data Fetch Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -198,22 +244,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchAllData();
-
     const { data: { subscription: authListener } } = supabase.auth.onAuthStateChange(() => {
       fetchAllData();
     });
-
-    const zonesSubscription = supabase
-      .channel('facility-updates')
-      .on(
-        'postgres_changes' as any,
-        { event: '*', table: 'facility_zones', schema: 'public' },
-        () => fetchAllData()
-      )
-      .subscribe();
-
     return () => {
-      supabase.removeChannel(zonesSubscription);
       authListener.unsubscribe();
     };
   }, []);
@@ -256,14 +290,100 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     await fetchAllData();
   };
 
-  const updateIoT = async (zoneId: string, updates: Partial<IoTZone>) => {
-    const { error } = await supabase.from('facility_zones').update({
-      temperature_c: updates.temp,
-      lighting_percent: updates.lights,
-      audio_volume_percent: updates.audio_volume
-    }).eq('id', zoneId);
+  const addMember = async (data: Partial<Member>) => {
+    const { error } = await supabase.from('profiles').insert({
+      full_name: data.name,
+      email: data.email,
+      role: 'member',
+      member_code: data.code || Math.random().toString(36).substring(2, 10).toUpperCase(),
+      current_strain: 0,
+      current_recovery: 100,
+      athletic_passport_badges: []
+    });
     if (error) throw error;
     await fetchAllData();
+    broadcastAlert('New member registered in system.', 'success');
+  };
+
+  const deleteMember = async (memberId: string) => {
+    const { error } = await supabase.from('profiles').delete().eq('id', memberId);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert('Member profile deleted.', 'warning');
+  };
+
+  const updateMemberStatus = async (memberId: string, status: Member['membershipStatus']) => {
+    const { error } = await supabase.from('profiles').update({ membership_status: status }).eq('id', memberId);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert(`Member status updated to ${status}.`, 'info');
+  };
+
+  const renewMembership = async (memberId: string) => {
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
+    const { error } = await supabase.from('profiles').update({
+      membership_expiry: expiryDate.toISOString(),
+      membership_status: 'active'
+    }).eq('id', memberId);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert('Membership renewed for 1 cycle.', 'success');
+  };
+
+  const resetUserPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+    broadcastAlert(`Password reset payload transmitted to ${email}.`, 'success');
+  };
+
+  const addCoach = async (data: Partial<Member>) => {
+    const { data: profile, error: pError } = await supabase.from('profiles').insert({
+      full_name: data.name,
+      email: data.email,
+      role: 'coach',
+      member_code: data.code || `COACH-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+    }).select().single();
+
+    if (pError) throw pError;
+
+    const { error: cError } = await supabase.from('coaches').insert({
+      id: profile.id,
+      specialization: 'General Athletics'
+    });
+
+    if (cError) throw cError;
+    await fetchAllData();
+    broadcastAlert('New coach profile created.', 'success');
+  };
+
+  const addClass = async (data: any) => {
+    const { error } = await supabase.from('classes').insert({
+      name: data.title,
+      coach_id: data.coach_id,
+      start_time: data.start_time,
+      duration_minutes: data.duration_minutes,
+      capacity: data.capacity,
+      tags: data.tags
+    });
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert('Class session updated in schedule.', 'success');
+  };
+
+  const registerAttendance = async (memberCode: string) => {
+    const member = members.find(m => m.code === memberCode);
+    if (!member) throw new Error('Member not found in system.');
+
+    const { error } = await supabase.from('profiles').update({
+      last_attendance: new Date().toISOString()
+    }).eq('id', member.id);
+
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert(`Attendance registered for ${member.name}.`, 'success');
   };
 
   return (
@@ -272,17 +392,30 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       classes,
       kitchenItems,
       orders,
-      iotZones,
+      maintenanceLogs,
+      settings,
       currentUser,
       loading,
       error,
+      systemAlert,
+      setSystemAlert,
       setCurrentUser,
       bookClass,
       cancelClass,
       placeOrder,
-      updateIoT,
       updateOrderStatus,
-      refreshData: fetchAllData
+      updateSettings,
+      addMaintenanceLog,
+      refreshData: fetchAllData,
+      addMember,
+      deleteMember,
+      updateMemberStatus,
+      renewMembership,
+      resetUserPassword,
+      addCoach,
+      addClass,
+      registerAttendance,
+      broadcastAlert
     }}>
       {children}
     </DataContext.Provider>

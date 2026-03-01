@@ -5,7 +5,7 @@ export default function MoreTab() {
     return (
         <div className="p-6 pt-12 flex flex-col gap-8">
             <header className="flex justify-between items-center mb-4">
-                <h2 className="text-3xl font-light tracking-tight">More</h2>
+                <h2 className="text-3xl font-light tracking-tight">Settings</h2>
                 <button className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
                     <Bell size={18} />
                 </button>
@@ -21,6 +21,9 @@ export default function MoreTab() {
                 <MoreItem icon={<Users size={20} />} label="Rules & Regulations" />
                 <div className="h-px bg-white/10 my-2 mx-4" />
                 <MoreItem icon={<Users size={20} />} label="Contact Us" />
+                <div className="mt-8 pt-8 border-t border-white/5 text-center opacity-20">
+                    <p className="text-[10px] uppercase tracking-widest font-black">Created by Michael Mitry</p>
+                </div>
             </div>
         </div>
     );

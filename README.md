@@ -1,6 +1,6 @@
 # INZAN Athletics Platform
 
-A premium, dual-interface fitness management system featuring a mobile-first User App and a desktop-first Admin Hub. The platform is designed with a futuristic, high-performance aesthetic, utilizing heavy glassmorphism, ambient lighting, and brutalist typography.
+Premium fitness platform designed and developed by Michael Mitry. Built with a focus on elite user experience, clean architecture, and high-performance design, utilizing heavy glassmorphism, ambient lighting, and brutalist typography.
 
 ## Architecture
 
@@ -8,6 +8,12 @@ The application is a Single Page Application (SPA) built with React and Vite. It
 
 *   **`/` (User App):** A mobile-first interface designed for gym members. It features a bottom navigation bar and is constrained to a `max-w-md` container to simulate a mobile device on desktop browsers.
 *   **`/admin` (Admin Hub):** A desktop-first dashboard designed for gym staff and management. It features a sidebar navigation and expansive data visualizations.
+
+## Project Overview
+
+-   **Designed & Developed by Michael Mitry** (2026)
+-   **Tech Stack**: React 19, Vite, Supabase, Framer Motion, Tailwind CSS
+-   **Design Philosophy**: High Craft, Premium Aesthetics, Functional Excellence
 
 ## Tech Stack
 
