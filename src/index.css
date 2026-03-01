@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Montserrat:wght@100;300;400;500;700;900&family=Inter:wght@400;500;600&display=swap');
+
+@theme {
+  --font-heading: "Syne", sans-serif;
+  --font-body: "Montserrat", sans-serif;
+
+  --color-gold: #CA8A04;
+  --color-gold-light: #FACC15;
+  --color-gold-dark: #854D0E;
+
+  --color-dark: #050505;
+  --color-dark-soft: #141414;
+  --color-primary: #050505;
+  /* Keeping existing primary, as it's not explicitly removed/replaced by new dark/dark-soft */
+  --color-secondary: #141414;
+  --color-accent: #CA8A04;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+body {
+  background-color: #050505;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-card-gold {
+  background: rgba(202, 138, 4, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(202, 138, 4, 0.1);
+}
+
+.premium-button {
+  @apply relative overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer;
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+}
+
+.premium-button::after {
+  content: '';
+  @apply absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300;
+}
+
+.premium-button:hover::after {
+  @apply opacity-100;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFE08A 0%, #CA8A04 50%, #854D0E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
