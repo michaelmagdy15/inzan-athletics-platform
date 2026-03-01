@@ -1,0 +1,7 @@
+node_modules
+dist
+.git
+.env
+.ipynb_checkpoints
+Dockerfile
+.dockerignore
