@@ -12,7 +12,10 @@ COPY . .
 
 # Build the application
 # Note: Vite uses environment variables at build time. 
-# If you have VITE_ specific variables, they should be available here.
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 RUN npm run build
 
 # Runtime Stage
@@ -23,11 +26,11 @@ FROM nginx:stable-alpine
 RUN echo 'server { \
     listen 8080; \
     location / { \
-        root /usr/share/nginx/html; \
-        index index.html index.htm; \
-        try_files $uri $uri/ /index.html; \
+    root /usr/share/nginx/html; \
+    index index.html index.htm; \
+    try_files $uri $uri/ /index.html; \
     } \
-}' > /etc/nginx/conf.d/default.conf
+    }' > /etc/nginx/conf.d/default.conf
 
 # Copy build artifacts from the build stage
 COPY --from=build /app/dist /usr/share/nginx/html
