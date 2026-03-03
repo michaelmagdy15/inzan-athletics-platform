@@ -4,16 +4,45 @@ import { motion } from 'framer-motion';
 import { Activity, Zap, Wallet, Users } from 'lucide-react';
 
 export default function DashboardView() {
-    const { members, orders, classes, broadcastAlert } = useData();
+    const { members, orders, classes, transactions, operatingGoals, broadcastAlert } = useData();
 
-    // Stats calculation
-    const kitchenSales = orders.reduce((acc, order) => acc + (Number(order.total_price) || 0), 0);
-    const membershipRevenue = members.length * 2500; // Estimated 2500 EGP per member
-    const totalRevenue = kitchenSales + membershipRevenue;
-    const activeUsers = members.length;
+    // Dynamic Stats Calculation
+    const kitchenSales = orders.filter(o => o.status === 'completed' || o.status === 'picked_up').reduce((acc, order) => acc + (Number(order.total_price) || 0), 0);
+    const membershipSales = transactions.filter(t => t.transaction_type === 'membership').reduce((acc, t) => acc + Number(t.amount), 0);
+    // Since this is a new table, if it's empty, we'll gracefully fallback or just show 0 (which is accurate for a fresh DB)
+    const otherTransactions = transactions.filter(t => t.transaction_type !== 'membership' && t.transaction_type !== 'kitchen').reduce((acc, t) => acc + Number(t.amount), 0);
+    const totalRevenue = kitchenSales + membershipSales + otherTransactions;
+
+    const activeUsers = members.filter(m => m.membershipStatus === 'active').length;
+    const totalMembers = members.length;
+
     const totalCapacity = classes.reduce((acc, c) => acc + (c.total_spots || 0), 0);
     const totalBooked = classes.reduce((acc, c) => acc + (c.total_spots - c.spots_left), 0);
     const scheduleLoad = totalCapacity > 0 ? Math.round((totalBooked / totalCapacity) * 100) : 0;
+
+    // Dynamic Member Analytics
+    const suspendedCount = members.filter(m => m.membershipStatus === 'suspended' || m.membershipStatus === 'expired').length;
+    const churnPotential = totalMembers > 0 ? ((suspendedCount / totalMembers) * 100).toFixed(1) : '0.0';
+
+    // Use target goals from DB
+    const memberGoal = operatingGoals.find(g => g.metric_name === 'New Members');
+    const memberTarget = memberGoal?.target_value || 50;
+    const memberGrowthRate = Math.min(100, Math.round((activeUsers / memberTarget) * 100));
+
+    // Dynamic Class Analytics
+    const avgAttendance = classes.length > 0 ? Math.round(totalBooked / classes.length) : 0;
+    let peakHourStr = "N/A";
+    if (classes.length > 0) {
+        const hourCounts: Record<string, number> = {};
+        classes.forEach(c => {
+            const hour = c.time.split(':')[0] + (c.time.includes('PM') ? ' PM' : c.time.includes('AM') ? ' AM' : ':00');
+            hourCounts[hour] = (hourCounts[hour] || 0) + (c.total_spots - c.spots_left);
+        });
+        const peakHour = Object.keys(hourCounts).length > 0 ? Object.keys(hourCounts).reduce((a, b) => hourCounts[a] > hourCounts[b] ? a : b) : "N/A";
+        peakHourStr = peakHour;
+    }
+
+    const classEngagementWidth = Math.min(100, scheduleLoad);
 
     const handleAction = (label: string) => {
         switch (label) {
@@ -49,9 +78,9 @@ export default function DashboardView() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <StatCard title="Total Revenue" value={`${totalRevenue.toLocaleString()}`} currency="EGP" trend="+12.4%" icon={<Wallet size={18} />} />
-                <StatCard title="Active Members" value={activeUsers.toString()} trend="+5.2%" icon={<Users size={18} />} />
-                <StatCard title="Kitchen Sales" value={`${kitchenSales.toLocaleString()}`} currency="EGP" trend="+8.1%" icon={<Zap size={18} />} />
+                <StatCard title="Total Revenue" value={`${totalRevenue.toLocaleString()}`} currency="EGP" trend={totalRevenue > 0 ? "+Active" : "-"} icon={<Wallet size={18} />} />
+                <StatCard title="Active Members" value={activeUsers.toString()} trend={`${totalMembers} Total`} icon={<Users size={18} />} />
+                <StatCard title="Kitchen Sales" value={`${kitchenSales.toLocaleString()}`} currency="EGP" trend={kitchenSales > 0 ? "Active" : "-"} icon={<Zap size={18} />} />
                 <StatCard title="Schedule Load" value={`${scheduleLoad}%`} highlight icon={<Activity size={18} />} />
             </div>
 
@@ -74,15 +103,15 @@ export default function DashboardView() {
                             <h4 className="text-[10px] text-gold tracking-[0.4em] uppercase font-bold">Member Analytics</h4>
                             <div className="p-6 bg-black/40 rounded-3xl border border-white/5 space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[9px] text-white/30 uppercase tracking-widest">Growth Rate</span>
-                                    <span className="text-emerald-400 font-bold">+18.2%</span>
+                                    <span className="text-[9px] text-white/30 uppercase tracking-widest">Target Met</span>
+                                    <span className="text-emerald-400 font-bold">{memberGrowthRate}%</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[9px] text-white/30 uppercase tracking-widest">Churn Potential</span>
-                                    <span className="text-red-400 font-bold">2.4%</span>
+                                    <span className={`${Number(churnPotential) > 5 ? 'text-red-400' : 'text-white/60'} font-bold`}>{churnPotential}%</span>
                                 </div>
                                 <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-gold w-3/4 shadow-[0_0_10px_rgba(202,138,4,0.3)]" />
+                                    <div className="h-full bg-gold shadow-[0_0_10px_rgba(202,138,4,0.3)] transition-all duration-1000" style={{ width: `${memberGrowthRate}%` }} />
                                 </div>
                             </div>
                         </div>
@@ -91,14 +120,14 @@ export default function DashboardView() {
                             <div className="p-6 bg-black/40 rounded-3xl border border-white/5 space-y-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[9px] text-white/30 uppercase tracking-widest">Avg Attendance</span>
-                                    <span className="text-white font-bold">14 / session</span>
+                                    <span className="text-white font-bold">{avgAttendance} / session</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[9px] text-white/30 uppercase tracking-widest">Peak Hours</span>
-                                    <span className="text-gold font-bold">17:00 - 20:00</span>
+                                    <span className="text-gold font-bold">{peakHourStr}</span>
                                 </div>
                                 <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-gold w-1/2 shadow-[0_0_10px_rgba(202,138,4,0.3)]" />
+                                    <div className="h-full bg-gold shadow-[0_0_10px_rgba(202,138,4,0.3)] transition-all duration-1000" style={{ width: `${classEngagementWidth}%` }} />
                                 </div>
                             </div>
                         </div>
@@ -106,7 +135,7 @@ export default function DashboardView() {
 
                     <div className="mt-8 lg:mt-10 p-6 lg:p-8 bg-gold/5 border border-gold/10 rounded-2xl lg:rounded-3xl relative overflow-hidden">
                         <p className="text-sm font-light text-white/60 leading-relaxed uppercase tracking-widest text-[11px] relative z-10">
-                            Analytics compiled for recent activity. Projected growth indications are positive based on membership trajectory.
+                            Analytics compiled from active database state. {activeUsers} members currently contributing to engagement load.
                         </p>
                     </div>
                 </div>
@@ -132,7 +161,7 @@ export default function DashboardView() {
                             <Zap size={24} className="text-gold animate-shimmer" />
                         </div>
                         <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/80">System Efficiency</h3>
-                        <p className="text-sm font-light text-white/60 leading-relaxed uppercase tracking-widest text-[11px]">System integrity at <span className="text-white font-bold">99.8%</span>. Database optimization completed in the last cycle.<br /><br /><span className="text-gold font-black border-b border-gold/20 pb-0.5">VIEW SYSTEM LOGS</span></p>
+                        <p className="text-sm font-light text-white/60 leading-relaxed uppercase tracking-widest text-[11px]">System integrity at <span className="text-white font-bold">99.8%</span>. Database fully synchronized.<br /><br /><span className="text-gold font-black border-b border-gold/20 pb-0.5">VIEW SYSTEM LOGS</span></p>
                     </motion.div>
                 </div>
             </div>

@@ -3,6 +3,7 @@ import { Search, Bell, LayoutDashboard, Users, Calendar, UserCheck, Coffee, LogO
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData, Member } from '../context/DataContext';
 import { supabase } from '../lib/supabase';
+import NotificationBell from '../components/shared/NotificationBell';
 
 // Lazy load views for optimization
 const DashboardView = lazy(() => import('../components/admin/DashboardView'));
@@ -138,16 +139,16 @@ export default function AdminHub() {
               </div>
             </div>
 
-            <nav className="flex-1 px-6 flex flex-col gap-2">
+            <nav className="flex-1 px-6 flex flex-col gap-2 overflow-y-auto scrollbar-hide py-4 pb-20">
               <NavItem icon={<LayoutDashboard size={18} />} label="Dashboard" isActive={activeTab === 'dashboard'} onClick={() => { setActiveTab('dashboard'); closeMobileMenu(); }} />
               <NavItem icon={<Users size={18} />} label="Members" isActive={activeTab === 'members'} onClick={() => { setActiveTab('members'); closeMobileMenu(); }} />
               <NavItem icon={<Calendar size={18} />} label="Classes" isActive={activeTab === 'classes'} onClick={() => { setActiveTab('classes'); closeMobileMenu(); }} />
               <NavItem icon={<UserCheck size={18} />} label="Coaches" isActive={activeTab === 'coaches'} onClick={() => { setActiveTab('coaches'); closeMobileMenu(); }} />
-              <div className="h-px bg-white/5 my-4 mx-4" />
+              <div className="h-px bg-white/5 my-4 mx-4 shrink-0" />
               <NavItem icon={<Dumbbell size={18} />} label="PT Sessions" isActive={activeTab === 'pt_sessions'} onClick={() => { setActiveTab('pt_sessions'); closeMobileMenu(); }} />
               <NavItem icon={<BarChart3 size={18} />} label="PT Reports" isActive={activeTab === 'pt_reports'} onClick={() => { setActiveTab('pt_reports'); closeMobileMenu(); }} />
               <NavItem icon={<Shield size={18} />} label="Session Policies" isActive={activeTab === 'session_policies'} onClick={() => { setActiveTab('session_policies'); closeMobileMenu(); }} />
-              <div className="h-px bg-white/5 my-4 mx-4" />
+              <div className="h-px bg-white/5 my-4 mx-4 shrink-0" />
               <NavItem icon={<DollarSign size={18} />} label="Financials" isActive={activeTab === 'financials'} onClick={() => { setActiveTab('financials'); closeMobileMenu(); }} />
               <NavItem icon={<Coffee size={18} />} label="EK Kitchen" isActive={activeTab === 'ek_kitchen'} onClick={() => { setActiveTab('ek_kitchen'); closeMobileMenu(); }} />
               <NavItem icon={<Package size={18} />} label="Inventory" isActive={activeTab === 'inventory'} onClick={() => { setActiveTab('inventory'); closeMobileMenu(); }} />
@@ -203,10 +204,9 @@ export default function AdminHub() {
           </div>
 
           <div className="flex items-center gap-4 lg:gap-8">
-            <button className="relative w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/[0.08] hover:border-gold/20 transition-all group">
-              <Bell size={18} className="text-white/40 group-hover:text-gold transition-colors" />
-              <span className="absolute top-2.5 right-2.5 lg:top-3 lg:right-3.5 w-2 h-2 bg-gold rounded-full border-2 border-[#050505] shadow-[0_0_10px_rgba(202,138,4,0.5)]" />
-            </button>
+            <div className="scale-[1.1] lg:scale-[1.2]">
+              <NotificationBell />
+            </div>
 
             <div className="flex items-center gap-3 lg:gap-4 lg:pl-8 lg:border-l lg:border-white/5">
               <div className="hidden sm:flex flex-col items-end">

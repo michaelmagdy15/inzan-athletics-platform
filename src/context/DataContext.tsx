@@ -82,6 +82,45 @@ export interface SystemSettings {
   encryptionLevel: string;
 }
 
+export interface FinancialTransaction {
+  id: string;
+  amount: number;
+  transaction_type: 'membership' | 'package' | 'kitchen' | 'refund' | 'other';
+  status: 'completed' | 'pending' | 'failed';
+  description: string;
+  member_id: string | null;
+  created_at: string;
+}
+
+export interface Equipment {
+  id: string;
+  name: string;
+  category: string;
+  status: 'operational' | 'needs_maintenance' | 'out_of_orded';
+  purchase_date: string;
+  expected_lifespan_years: number;
+  created_at: string;
+}
+
+export interface FacilityZone {
+  id: string;
+  name: string;
+  status: 'Good' | 'Clean' | 'Operational' | 'Restocking' | 'Maintenance';
+  health_percentage: number;
+  requires_warning: boolean;
+  created_at: string;
+}
+
+export interface OperatingGoal {
+  id: string;
+  period: 'daily' | 'weekly' | 'monthly';
+  metric_name: string;
+  current_value: number;
+  target_value: number;
+  currency: string | null;
+  updated_at: string;
+}
+
 // --- PT Management Interfaces ---
 
 export type SessionType = 'pt_1on1' | 'partner' | 'group' | 'class' | 'nutrition' | 'trial';
@@ -184,6 +223,10 @@ interface DataContextType {
   kitchenItems: KitchenItem[];
   orders: KitchenOrder[];
   maintenanceLogs: MaintenanceLog[];
+  transactions: FinancialTransaction[];
+  equipment: Equipment[];
+  facilityZones: FacilityZone[];
+  operatingGoals: OperatingGoal[];
   settings: SystemSettings;
   currentUser: Member | null;
   loading: boolean;
@@ -242,6 +285,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [kitchenItems, setKitchenItems] = useState<KitchenItem[]>([]);
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [maintenanceLogs, setMaintenanceLogs] = useState<MaintenanceLog[]>([]);
+  const [transactions, setTransactions] = useState<FinancialTransaction[]>([]);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [facilityZones, setFacilityZones] = useState<FacilityZone[]>([]);
+  const [operatingGoals, setOperatingGoals] = useState<OperatingGoal[]>([]);
   const [settings, setSettings] = useState<SystemSettings>({
     brandName: 'INZAN Athletics',
     timezone: 'UTC+2 (Cairo)',
@@ -303,7 +350,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         { data: availabilityData },
         { data: policiesData },
         { data: notificationsData },
-        { data: membershipTiersData }
+        { data: membershipTiersData },
+        { data: transactionsData },
+        { data: equipmentData },
+        { data: facilityZonesData },
+        { data: operatingGoalsData }
       ] = await Promise.all([
         supabase.from('profiles').select('*'),
         supabase.from('classes').select('*, coach:coaches(profiles(full_name))'),
@@ -316,7 +367,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         supabase.from('coach_availabilities').select('*').order('day_of_week', { ascending: true }),
         supabase.from('session_policies').select('*'),
         supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(50),
-        supabase.from('membership_tiers').select('*')
+        supabase.from('membership_tiers').select('*'),
+        supabase.from('financial_transactions').select('*').order('created_at', { ascending: false }),
+        supabase.from('equipment').select('*'),
+        supabase.from('facility_zones').select('*'),
+        supabase.from('operating_goals').select('*')
       ]);
 
       const mappedMembers: Member[] = profilesData?.map(p => ({
@@ -374,6 +429,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       })) || []);
 
       setMaintenanceLogs(maintenanceData || []);
+      setTransactions(transactionsData || []);
+      setEquipment(equipmentData || []);
+      setFacilityZones(facilityZonesData || []);
+      setOperatingGoals(operatingGoalsData || []);
 
       // PT Data
       const memberLookup = new Map(mappedMembers.map(m => [m.id, m.name]));
@@ -929,6 +988,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       kitchenItems,
       orders,
       maintenanceLogs,
+      transactions,
+      equipment,
+      facilityZones,
+      operatingGoals,
       settings,
       currentUser,
       loading,

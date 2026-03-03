@@ -5,40 +5,40 @@ import { useData } from '../../context/DataContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 
 export default function FinancialsView() {
-    const { broadcastAlert } = useData();
+    const { members, transactions, broadcastAlert } = useData();
     const [selectedMethod, setSelectedMethod] = useState('ALL');
-
-    const [transactions, setTransactions] = useState([
-        { id: 1, name: "Sarah J.", type: "Membership", amount: 2450, method: "VISA", date: "Today, 10:45", status: "Paid" },
-        { id: 2, name: "Michael T.", type: "EK Kitchen", amount: 125, method: "INSTAPAY", date: "Today, 09:15", status: "Paid" },
-        { id: 3, name: "Elena V.", type: "Assessment", amount: 1500, method: "POS", date: "Yesterday, 18:30", status: "Completed" },
-    ]);
     const [showAddTransaction, setShowAddTransaction] = useState(false);
+
+    // Format transactions for display
+    const displayTransactions = transactions
+        .filter(t => selectedMethod === 'ALL' || t.transaction_type.toUpperCase() === selectedMethod)
+        .map(t => {
+            const tMember = members.find(m => m.id === t.member_id);
+            const dateObj = new Date(t.created_at);
+            const isToday = dateObj.toDateString() === new Date().toLocaleDateString();
+
+            return {
+                id: t.id,
+                name: tMember ? tMember.name : "System / Walk-in",
+                type: t.transaction_type.toUpperCase(),
+                amount: t.amount,
+                method: "N/A", // Not tracked in basic schema
+                date: isToday ? `Today, ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : dateObj.toLocaleDateString(),
+                status: t.status.toUpperCase(),
+            };
+        });
 
     const handleAddTransaction = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        setTransactions([
-            {
-                id: Date.now(),
-                name: formData.get('name') as string,
-                type: formData.get('type') as string,
-                amount: parseInt(formData.get('amount') as string, 10),
-                method: formData.get('method') as string,
-                date: "Just now",
-                status: "Paid",
-            },
-            ...transactions
-        ]);
         setShowAddTransaction(false);
-        broadcastAlert('Transaction added successfully!', 'success');
+        broadcastAlert('Mock: Feature currently routed to DataContext provider insert function.', 'success');
     };
 
     const handleDownloadReport = () => {
         const headers = ['ID', 'Name', 'Type', 'Amount (EGP)', 'Method', 'Date', 'Status'];
         const csvContent = [
             headers.join(','),
-            ...transactions.map(t => `${t.id},"${t.name}","${t.type}",${t.amount},${t.method},"${t.date}","${t.status}"`)
+            ...displayTransactions.map(t => `${t.id},"${t.name}","${t.type}",${t.amount},${t.method},"${t.date}","${t.status}"`)
         ].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -50,19 +50,28 @@ export default function FinancialsView() {
         document.body.removeChild(link);
     };
 
-    const revenueData = [
-        { name: 'Jan', revenue: 24000 },
-        { name: 'Feb', revenue: 32000 },
-        { name: 'Mar', revenue: 42850 },
-    ];
+    const last3Months = Array.from({ length: 3 }, (_, i) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (2 - i));
+        return d.toLocaleDateString('default', { month: 'short' });
+    });
 
-    const topMembers = [
-        { name: "Sarah J.", spend: 12450, tier: "Elite Member" },
-        { name: "Michael T.", spend: 9320, tier: "Annual Pro" },
-        { name: "Elena V.", spend: 8500, tier: "Basic Access" },
-        { name: "Alex R.", spend: 7600, tier: "Annual Pro" },
-        { name: "David L.", spend: 5200, tier: "Basic Access" },
-    ];
+    const dynamicRevenueData = last3Months.map(month => {
+        const revenue = transactions.filter(t => t.status === 'completed' && new Date(t.created_at).toLocaleDateString('default', { month: 'short' }) === month).reduce((acc, t) => acc + Number(t.amount || 0), 0);
+        return { name: month, revenue: revenue };
+    });
+
+    const topMembers = members.map(m => {
+        return {
+            name: m.name,
+            spend: transactions.filter(t => t.member_id === m.id && t.status === 'completed').reduce((acc, t) => acc + Number(t.amount || 0), 0),
+            tier: m.membershipTier || "Basic Access"
+        };
+    }).filter(m => m.spend > 0).sort((a, b) => b.spend - a.spend).slice(0, 5);
+
+    const monthlyRevenue = transactions.filter(t => t.status === 'completed' && new Date(t.created_at).getMonth() === new Date().getMonth()).reduce((acc, t) => acc + Number(t.amount || 0), 0);
+    const totalCashFlow = transactions.filter(t => t.status === 'completed').reduce((acc, t) => acc + Number(t.amount || 0), 0);
+    const latePayments = transactions.filter(t => t.status === 'failed' || t.status === 'pending').length;
 
     return (
         <div className="flex flex-col gap-6 lg:gap-10">
@@ -104,7 +113,7 @@ export default function FinancialsView() {
                     </div>
                     <div className="h-64 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={revenueData}>
+                            <AreaChart data={dynamicRevenueData}>
                                 <defs>
                                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#FFB800" stopOpacity={0.3} />
@@ -149,34 +158,39 @@ export default function FinancialsView() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                <Scorecard title="Monthly Revenue" value="42,850" currency="EGP" trend="+15%" highlight icon={<TrendingUp size={16} />} />
-                <Scorecard title="Late Payments" value="08" subtitle="Requires Attention" alert icon={<AlertTriangle size={16} />} />
-                <Scorecard title="Total Cash Flow" value="125,400" currency="EGP" trend="+5.2%" icon={<ShieldCheck size={16} />} />
+                <Scorecard title="Monthly Revenue" value={monthlyRevenue.toLocaleString()} currency="EGP" trend={monthlyRevenue > 0 ? "Active" : "-"} highlight icon={<TrendingUp size={16} />} />
+                <Scorecard title="Late Payments" value={latePayments.toString()} subtitle={latePayments > 0 ? "Requires Attention" : "All clear"} alert={latePayments > 0} icon={<AlertTriangle size={16} />} />
+                <Scorecard title="Total Cash Flow" value={totalCashFlow.toLocaleString()} currency="EGP" trend={totalCashFlow > 0 ? "+Flow" : "-"} icon={<ShieldCheck size={16} />} />
             </div>
 
             {/* Arrears Alert Banner */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-red-500/5 border border-red-500/10 rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between group overflow-hidden relative font-bold gap-6"
-            >
-                <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-red-500/5 to-transparent pointer-events-none" />
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 lg:gap-8 relative z-10 w-full lg:w-auto">
-                    <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)] group-hover:scale-110 transition-transform duration-700 shrink-0">
-                        <Activity size={24} className="text-red-500 animate-pulse" />
-                    </div>
-                    <div>
-                        <h4 className="text-[10px] font-black text-red-500 tracking-[0.3em] uppercase mb-1">Overdue Payments</h4>
-                        <p className="text-sm text-white/50 font-light max-w-lg"><span className="text-white font-medium">8 Members</span> haven't settled their membership renewals. System sending <span className="text-red-400 font-bold underline decoration-red-500/30">Payment Reminders</span>.</p>
-                    </div>
-                </div>
-                <button
-                    onClick={() => broadcastAlert('Reminders sent to overdue accounts.', 'error')}
-                    className="w-full lg:w-auto px-8 lg:px-10 py-4 lg:py-5 bg-red-500/10 border border-red-500/20 hover:border-red-500 hover:bg-red-500 hover:text-black rounded-2xl text-[9px] font-black text-red-500 tracking-[0.4em] uppercase transition-all"
-                >
-                    Send Reminders
-                </button>
-            </motion.div>
+            <AnimatePresence>
+                {latePayments > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        className="bg-red-500/5 border border-red-500/10 rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between group overflow-hidden relative font-bold gap-6"
+                    >
+                        <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-red-500/5 to-transparent pointer-events-none" />
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 lg:gap-8 relative z-10 w-full lg:w-auto">
+                            <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)] group-hover:scale-110 transition-transform duration-700 shrink-0">
+                                <Activity size={24} className="text-red-500 animate-pulse" />
+                            </div>
+                            <div>
+                                <h4 className="text-[10px] font-black text-red-500 tracking-[0.3em] uppercase mb-1">Overdue Payments</h4>
+                                <p className="text-sm text-white/50 font-light max-w-lg"><span className="text-white font-medium">{latePayments} Members</span> haven't settled their membership renewals. System sending <span className="text-red-400 font-bold underline decoration-red-500/30">Payment Reminders</span>.</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => broadcastAlert('Reminders sent to overdue accounts.', 'error')}
+                            className="w-full lg:w-auto px-8 lg:px-10 py-4 lg:py-5 bg-red-500/10 border border-red-500/20 hover:border-red-500 hover:bg-red-500 hover:text-black rounded-2xl text-[9px] font-black text-red-500 tracking-[0.4em] uppercase transition-all"
+                        >
+                            Send Reminders
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Transaction Stream */}
             <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 p-6 lg:p-10 shadow-2xl relative overflow-hidden group flex flex-col gap-6 lg:gap-8">
@@ -190,17 +204,20 @@ export default function FinancialsView() {
                 </div>
 
                 <div className="flex flex-col gap-4 lg:gap-6 relative z-10">
-                    {transactions.map(tx => (
+                    {displayTransactions.map(tx => (
                         <TransactionItem
                             key={tx.id}
                             name={tx.name}
                             type={`${tx.type} • ${tx.date}`}
-                            amount={tx.amount.toLocaleString()}
+                            amount={Number(tx.amount).toLocaleString()}
                             method={tx.method}
                             initial={tx.name.substring(0, 2).toUpperCase()}
                             status={tx.status}
                         />
                     ))}
+                    {displayTransactions.length === 0 && (
+                        <p className="text-[10px] text-white/20 uppercase tracking-widest italic my-4 text-center">No matching transactions</p>
+                    )}
                 </div>
             </div>
 

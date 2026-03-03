@@ -24,6 +24,17 @@ export default function ClassesView() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedClass, setSelectedClass] = useState<any | null>(null);
 
+    const lowestAttendanceClass = classes.length > 0 ? [...classes].sort((a, b) => {
+        const aFill = (a.total_spots - a.spots_left) / a.total_spots;
+        const bFill = (b.total_spots - b.spots_left) / b.total_spots;
+        return aFill - bFill;
+    })[0] : null;
+
+    const insightDay = lowestAttendanceClass ? new Date(lowestAttendanceClass.time).toLocaleDateString('en-US', { weekday: 'long' }) : 'Thursday';
+    const insightTime = lowestAttendanceClass ? (lowestAttendanceClass.time.includes(' ') ? lowestAttendanceClass.time.split(' ')[1] : new Date(lowestAttendanceClass.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })) : '14:00';
+    const insightTitle = lowestAttendanceClass ? lowestAttendanceClass.title : 'Flow';
+    const insightCapacity = lowestAttendanceClass ? (((lowestAttendanceClass.total_spots - lowestAttendanceClass.spots_left) / lowestAttendanceClass.total_spots) * 100).toFixed(0) : '0';
+
     const enrolledMembers = React.useMemo(() => {
         if (!selectedClass) return [];
         return members.filter(m => m.bookedClasses.includes(selectedClass.id));
@@ -76,27 +87,32 @@ export default function ClassesView() {
             </div>
 
             {/* Attendance Insight */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="glass-card rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between shadow-2xl relative overflow-hidden group font-bold gap-6"
-            >
-                <div className="absolute top-0 left-0 w-1 h-full bg-gold opacity-50 shadow-[0_0_15px_rgba(202,138,4,0.3)]" />
-                <div className="flex flex-col sm:flex-row items-start lg:items-center gap-6 lg:gap-8 relative z-10 w-full lg:w-auto">
-                    <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-[0_0_30px_rgba(202,138,4,0.1)] group-hover:scale-110 transition-transform duration-700 shrink-0">
-                        <Zap className="text-gold" size={24} lg:size={28} />
-                    </div>
-                    <div className="max-w-xl">
-                        <h3 className="text-[10px] font-black text-gold tracking-[0.4em] uppercase mb-2 lg:mb-4">Attendance Insight</h3>
-                        <p className="text-sm text-white/70 leading-relaxed font-light">
-                            Thursday 14:00 <span className="text-white font-medium">"Flow"</span> classes are showing low attendance. <span className="text-white font-medium">Adjust scheduling accordingly</span> during this slot.
-                        </p>
-                    </div>
-                </div>
-                <button onClick={() => setShowAddModal(true)} className="w-full lg:w-auto premium-button px-8 lg:px-10 py-4 lg:py-5 rounded-2xl transition-all hover:scale-[1.05] relative z-10 shadow-2xl shadow-gold/20">
-                    <span className="text-[10px] font-black tracking-[0.3em] uppercase text-black">Update Schedule</span>
-                </button>
-            </motion.div>
+            <AnimatePresence>
+                {lowestAttendanceClass && Number(insightCapacity) < 50 && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        className="glass-card rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between shadow-2xl relative overflow-hidden group font-bold gap-6"
+                    >
+                        <div className="absolute top-0 left-0 w-1 h-full bg-gold opacity-50 shadow-[0_0_15px_rgba(202,138,4,0.3)]" />
+                        <div className="flex flex-col sm:flex-row items-start lg:items-center gap-6 lg:gap-8 relative z-10 w-full lg:w-auto">
+                            <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-[0_0_30px_rgba(202,138,4,0.1)] group-hover:scale-110 transition-transform duration-700 shrink-0">
+                                <Zap className="text-gold" size={24} lg:size={28} />
+                            </div>
+                            <div className="max-w-xl">
+                                <h3 className="text-[10px] font-black text-gold tracking-[0.4em] uppercase mb-2 lg:mb-4">Attendance Insight</h3>
+                                <p className="text-sm text-white/70 leading-relaxed font-light">
+                                    {insightDay} {insightTime} <span className="text-white font-medium">"{insightTitle}"</span> classes are showing low attendance ({insightCapacity}% capacity). <span className="text-white font-medium">Adjust scheduling accordingly</span> during this slot.
+                                </p>
+                            </div>
+                        </div>
+                        <button onClick={() => setShowAddModal(true)} className="w-full lg:w-auto premium-button px-8 lg:px-10 py-4 lg:py-5 rounded-2xl transition-all hover:scale-[1.05] relative z-10 shadow-2xl shadow-gold/20">
+                            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-black">Update Schedule</span>
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Day Selector */}
             <div className="flex gap-2 lg:gap-4 p-2 bg-black/40 rounded-[1.5rem] lg:rounded-3xl border border-white/5 font-bold overflow-x-auto scrollbar-hide">
@@ -130,7 +146,7 @@ export default function ClassesView() {
             <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 p-6 lg:p-10 shadow-2xl flex flex-col gap-6 lg:gap-8 relative overflow-hidden">
                 <div className="flex items-center justify-between mb-2 font-bold">
                     <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase">Upcoming Classes</h3>
-                    <span className="text-[9px] text-gold/60 font-bold tracking-widest uppercase">3 Classes Scheduled</span>
+                    <span className="text-[9px] text-gold/60 font-bold tracking-widest uppercase">{classes.length} Classes Scheduled</span>
                 </div>
                 <div className={viewMode === 'List' ? "flex flex-col gap-4 font-bold" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-bold"}>
                     {classes.map((c, idx) => (

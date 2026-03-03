@@ -4,8 +4,27 @@ import { Package, Wrench, ShieldCheck, ClipboardCheck, ChevronRight, Zap, Plus, 
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function InventoryView() {
-    const { maintenanceLogs, addMaintenanceLog, broadcastAlert } = useData();
+    const { maintenanceLogs, equipment, facilityZones, addMaintenanceLog, broadcastAlert } = useData();
     const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+
+    // Dynamic stats
+    const totalMachines = equipment.length;
+    const operationalMachines = equipment.filter(e => e.status === 'operational').length;
+    const conditionPercentage = totalMachines > 0 ? Math.round((operationalMachines / totalMachines) * 100) : 100;
+    const conditionTrend = conditionPercentage >= 90 ? 'GOOD' : conditionPercentage >= 75 ? 'FAIR' : 'POOR';
+
+    const serviceRate = maintenanceLogs.length > 0 ? Math.round((maintenanceLogs.filter(m => m.status === 'completed').length / maintenanceLogs.length) * 100) : 100;
+    const safeZones = facilityZones.filter(z => !z.requires_warning).length;
+    const auditScore = facilityZones.length > 0 ? Math.round((safeZones / facilityZones.length) * 100) : 100;
+
+    // Lifespan calculations
+    const nowYear = new Date().getFullYear();
+    const sumAges = equipment.reduce((acc, e) => acc + (nowYear - new Date(e.purchase_date).getFullYear()), 0);
+    const avgAge = totalMachines > 0 ? (sumAges / totalMachines).toFixed(1) : '0';
+
+    const acquisitionsNeeded = equipment.filter(e => (nowYear - new Date(e.purchase_date).getFullYear()) >= e.expected_lifespan_years).length;
+    const maxLifespan = totalMachines > 0 ? Math.max(...equipment.map(e => e.expected_lifespan_years)) : 10;
+    const ageProgressWidth = Math.min(100, (Number(avgAge) / (maxLifespan || 10)) * 100);
 
     const handleAddLog = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -39,10 +58,10 @@ export default function InventoryView() {
 
             {/* Facility Overview Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-                <Scorecard title="Equipment Condition" value="98%" trend="GOOD" icon={<ShieldCheck size={18} />} highlight />
-                <Scorecard title="Total Machines" value="142" trend="+3" icon={<Package size={18} />} />
-                <Scorecard title="Service Rate" value="92%" trend="-1.2%" icon={<Wrench size={18} />} />
-                <Scorecard title="Safety Audit" value="100%" trend="OK" icon={<ClipboardCheck size={18} />} />
+                <Scorecard title="Equipment Condition" value={`${conditionPercentage}%`} trend={conditionTrend} icon={<ShieldCheck size={18} />} highlight={conditionPercentage >= 90} />
+                <Scorecard title="Total Machines" value={totalMachines.toString()} trend="ACTIVE" icon={<Package size={18} />} />
+                <Scorecard title="Service Rate" value={`${serviceRate}%`} trend="LOGS" icon={<Wrench size={18} />} />
+                <Scorecard title="Safety Audit" value={`${auditScore}%`} trend={auditScore >= 95 ? "OK" : "WARN"} icon={<ClipboardCheck size={18} />} />
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
@@ -92,15 +111,15 @@ export default function InventoryView() {
                             <div className="flex flex-col gap-4">
                                 <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-white/40">
                                     <span>Avg. Equipment Age</span>
-                                    <span className="text-white">1.4 YRS</span>
+                                    <span className="text-white">{avgAge} YRS</span>
                                 </div>
                                 <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="w-[35%] h-full bg-gold/40 shadow-[0_0_10px_rgba(202,138,4,0.2)]" />
+                                    <div className="h-full bg-gold/40 shadow-[0_0_10px_rgba(202,138,4,0.2)] transition-all duration-1000" style={{ width: `${ageProgressWidth}%` }} />
                                 </div>
                             </div>
 
                             <p className="text-[11px] text-white/40 leading-relaxed uppercase tracking-widest font-bold">
-                                Analysis indicates <span className="text-white">8 new equipment acquisitions</span> suggested for <span className="text-gold italic">this year</span>.
+                                Analysis indicates <span className="text-white">{acquisitionsNeeded} equipment replacement(s)</span> suggested for <span className="text-gold italic">this year</span>.
                             </p>
 
                             <button className="w-full py-5 bg-white/5 hover:bg-gold hover:text-black border border-white/5 hover:border-gold rounded-2xl flex justify-between items-center px-8 transition-all duration-500 group/btn font-bold">
@@ -113,10 +132,11 @@ export default function InventoryView() {
                     <div className="glass-card rounded-[3rem] border border-white/5 p-10 shadow-2xl relative overflow-hidden font-bold">
                         <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase mb-10">Facility Index</h3>
                         <div className="flex flex-col gap-6">
-                            <ZoneStatus label="Main Workout Floor" status="Good" health={100} />
-                            <ZoneStatus label="Weight Room" status="Clean" health={98} />
-                            <ZoneStatus label="Storage Modules" status="Operational" health={94} />
-                            <ZoneStatus label="Locker Rooms" status="Restocking" health={84} warning />
+                            {facilityZones.length > 0 ? facilityZones.map(zone => (
+                                <ZoneStatus key={zone.id} label={zone.name} status={zone.status} health={zone.health_percentage} warning={zone.requires_warning} />
+                            )) : (
+                                <p className="text-[10px] text-white/20 uppercase tracking-widest italic my-4 text-center">No Zones Tracked</p>
+                            )}
                         </div>
                     </div>
                 </div>

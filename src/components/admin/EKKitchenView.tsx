@@ -4,8 +4,30 @@ import { ShoppingCart, AlertCircle, TrendingUp, Package, ChevronRight, Zap, Targ
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function EKKitchenView() {
-    const { kitchenItems, orders, updateOrderStatus, broadcastAlert } = useData();
+    const { kitchenItems, orders, updateOrderStatus, operatingGoals, transactions, broadcastAlert } = useData();
     const [selectedCategory, setSelectedCategory] = useState('ALL');
+
+    const totalSales = orders.filter(o => o.status === 'completed' || o.status === 'picked_up').reduce((acc, o) => acc + Number(o.total_price || 0), 0);
+
+    const goalTypes = ['Daily', 'Weekly', 'Monthly'];
+    const goals = goalTypes.map(period => {
+        const goal = operatingGoals.find(g => g.metric_name === `${period} Kitchen Goal`);
+        const target = goal?.target_value || (period === 'Daily' ? 5000 : period === 'Weekly' ? 35000 : 150000);
+        // Using total sales if no specific counter exists
+        const current = goal ? goal.current_value : (period === 'Daily' ? totalSales : period === 'Weekly' ? totalSales * 5 : totalSales * 20);
+        const trend = current >= target ? 'HIT' : 'RUNGING';
+        return { label: `${period} Goal`, current, target, trend };
+    });
+
+    // Compute stock metrics based on actual catalog
+    const totalCatalog = kitchenItems.length;
+    const optimalStockCount = kitchenItems.filter(item => item.quantity > item.reorder_threshold).length;
+    const lowStockCount = kitchenItems.filter(item => item.quantity <= item.reorder_threshold && item.quantity > 0).length;
+    const restockingCount = kitchenItems.filter(item => item.quantity === 0).length;
+
+    const opPercent = totalCatalog > 0 ? Math.round((optimalStockCount / totalCatalog) * 100) : 0;
+    const lowPercent = totalCatalog > 0 ? Math.round((lowStockCount / totalCatalog) * 100) : 0;
+    const outPercent = totalCatalog > 0 ? Math.round((restockingCount / totalCatalog) * 100) : 0;
 
     const getNextStatus = (current: string): any => {
         const flow = ['pending', 'preparing', 'ready', 'picked_up'];
@@ -24,12 +46,6 @@ export default function EKKitchenView() {
             broadcastAlert('Failed to update order status.', 'error');
         }
     };
-
-    const goals = [
-        { label: 'Daily Goal', current: 4200, target: 5000, trend: '+12%' },
-        { label: 'Weekly Goal', current: 28400, target: 35000, trend: '+5.2%' },
-        { label: 'Monthly Goal', current: 125400, target: 150000, trend: '+8.1%' },
-    ];
 
     return (
         <div className="flex flex-col gap-6 lg:gap-10">

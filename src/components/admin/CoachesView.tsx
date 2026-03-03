@@ -13,17 +13,30 @@ export default function CoachesView() {
     const coachData = useMemo(() => {
         return coaches.map(coach => {
             const coachSessions = ptSessions.filter(s => s.coach_id === coach.id);
-            const activeClients = new Set(ptPackages.filter(p => p.coach_name === coach.name && p.status === 'active').map(p => p.member_id)).size;
+            const allCoachPackages = ptPackages.filter(p => p.coach_id === coach.id || p.coach_name === coach.name);
+            const activePackages = allCoachPackages.filter(p => p.status === 'active');
 
-            // Simulating retention and spend for chart visual until real financial logic exists per coach
+            const activeClients = new Set(activePackages.map(p => p.member_id)).size;
+            const revenue = allCoachPackages.reduce((acc, p) => acc + Number(p.price_paid || 0), 0);
+            const avgSpend = activeClients > 0 ? Math.round(revenue / activeClients) : 0;
+
+            const allClientIds = allCoachPackages.map(p => p.member_id);
+            const uniqueClients = new Set(allClientIds);
+            let repeatClients = 0;
+            uniqueClients.forEach(uid => {
+                if (allClientIds.filter(id => id === uid).length > 1) repeatClients++;
+            });
+            const retention = uniqueClients.size > 0 ? Math.round((repeatClients / uniqueClients.size) * 100) : 100;
+            const sessionsTaught = coachSessions.filter(s => s.status === 'completed').length;
+
             return {
                 id: coach.id,
                 name: coach.name,
-                retention: 85 + Math.floor(Math.random() * 15),
-                spend: 100 + Math.floor(Math.random() * 100),
-                clients: activeClients || Math.floor(Math.random() * 20),
-                sessionsTaught: coachSessions.filter(s => s.status === 'completed').length,
-                rating: 4.5 + Math.random() * 0.5,
+                retention: retention,
+                spend: avgSpend,
+                clients: activeClients,
+                sessionsTaught: sessionsTaught,
+                rating: 5.0, // Operational default until reviews DB is implemented
                 avatar: coach.avatar
             }
         });
