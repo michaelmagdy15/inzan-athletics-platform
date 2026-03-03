@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '../../context/DataContext';
 
 export default function CoachesView() {
-    const { members, ptSessions, ptPackages, addCoach, setSystemAlert } = useData();
+    const { members, ptSessions, ptPackages, coachReviews, addCoach, setSystemAlert } = useData();
     const coaches = members.filter(m => m.role === 'coach');
     const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -29,6 +29,11 @@ export default function CoachesView() {
             const retention = uniqueClients.size > 0 ? Math.round((repeatClients / uniqueClients.size) * 100) : 100;
             const sessionsTaught = coachSessions.filter(s => s.status === 'completed').length;
 
+            const reviewsForCoach = coachReviews ? coachReviews.filter(r => r.coach_id === coach.id) : [];
+            const avgRating = reviewsForCoach.length > 0
+                ? reviewsForCoach.reduce((sum, r) => sum + Number(r.rating), 0) / reviewsForCoach.length
+                : 5.0;
+
             return {
                 id: coach.id,
                 name: coach.name,
@@ -36,11 +41,11 @@ export default function CoachesView() {
                 spend: avgSpend,
                 clients: activeClients,
                 sessionsTaught: sessionsTaught,
-                rating: 5.0, // Operational default until reviews DB is implemented
+                rating: avgRating,
                 avatar: coach.avatar
             }
         });
-    }, [coaches, ptSessions, ptPackages]);
+    }, [coaches, ptSessions, ptPackages, coachReviews]);
 
     // Average stats
     const avgRating = (coachData.reduce((acc, c) => acc + c.rating, 0) / Math.max(1, coachData.length)).toFixed(2);
@@ -66,16 +71,12 @@ export default function CoachesView() {
     const handleAddCoach = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
+        const name = formData.get('name') as string;
         try {
-            await addCoach({
-                name: formData.get('name') as string,
-                email: formData.get('email') as string,
-                role: 'coach',
-            });
+            await addCoach({ name, ptPackages: [], reviews: [], ptSessions: [] });
+            setSystemAlert?.({ message: 'Coach added successfully.', type: 'success' });
             setShowAddModal(false);
-            setSystemAlert?.({ message: 'Instructor recruited successfully.', type: 'success' });
         } catch (error: any) {
-            console.error('Failed to add coach:', error);
             setSystemAlert?.({ message: error.message || 'Failed to add coach. Please try again.', type: 'error' });
         }
     };
@@ -196,19 +197,19 @@ export default function CoachesView() {
                             </button>
 
                             <div className="text-center font-bold">
-                                <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">Recruit Instructor</h2>
-                                <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">New Registry Entry</p>
+                                <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">Hire Instructor</h2>
+                                <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">New Coach</p>
                             </div>
 
                             <div className="flex flex-col gap-4 font-bold">
-                                <input name="name" required placeholder="COACH FULL IDENTITY" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
-                                <input name="email" type="email" required placeholder="COACH ENDPOINT" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
-                                <input name="specialty" required placeholder="DOMAIN SPECIALTY" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
+                                <input name="name" required placeholder="COACH NAME" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
+                                <input name="email" type="email" required placeholder="COACH EMAIL" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
+                                <input name="specialty" required placeholder="SPECIALTY" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
                             </div>
 
-                            <div className="flex gap-4 lg:gap-6 pt-2 font-bold">
-                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors">Abort</button>
-                                <button type="submit" className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20">Confirm</button>
+                            <div className="flex gap-6 pt-2 font-bold">
+                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors">Cancel</button>
+                                <button type="submit" className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20">Add Coach</button>
                             </div>
                         </motion.form>
                     </div>

@@ -226,12 +226,12 @@ export default function ClassesView() {
                             </button>
 
                             <div className="text-center font-bold">
-                                <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">Deploy Class</h2>
+                                <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">Add Class</h2>
                                 <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">New Schedule Entry</p>
                             </div>
 
                             <div className="flex flex-col gap-4 font-bold">
-                                <input name="title" required placeholder="CLASS DESIGNATION (e.g. Flow, Core)" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
+                                <input name="title" required placeholder="CLASS NAME (e.g. Flow, Core)" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
 
                                 <div className="relative group">
                                     <select name="trainer" required className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white appearance-none uppercase tracking-widest cursor-pointer focus:border-gold/30 transition-all font-bold">
@@ -252,13 +252,13 @@ export default function ClassesView() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <input name="duration" type="number" required placeholder="DURATION (MINS)" defaultValue="60" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
-                                    <input name="spots" type="number" required placeholder="CAPACITY LIMIT" defaultValue="20" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
+                                    <input name="spots" type="number" required placeholder="CAPACITY" defaultValue="20" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
                                 </div>
                             </div>
 
                             <div className="flex gap-4 lg:gap-6 pt-2 font-bold">
-                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors">Abort</button>
-                                <button type="submit" className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20">Initialize</button>
+                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors">Cancel</button>
+                                <button type="submit" className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20">Create</button>
                             </div>
                         </motion.form>
                     </div>

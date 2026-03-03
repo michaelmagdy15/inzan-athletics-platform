@@ -160,8 +160,8 @@ export default function InventoryView() {
                             </div>
 
                             <div className="flex flex-col gap-6">
-                                <input name="asset" required placeholder="ASSET DESIGNATION (e.g. Treadmill X1)" className="form-input font-bold" />
-                                <input name="desc" required placeholder="FAILURE/SERVICE DESCRIPTION" className="form-input font-bold" />
+                                <input name="asset" required placeholder="EQUIPMENT NAME (e.g. Treadmill X1)" className="form-input font-bold" />
+                                <input name="desc" required placeholder="SERVICE DESCRIPTION" className="form-input font-bold" />
                                 <div className="relative group">
                                     <select name="status" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white appearance-none uppercase tracking-widest cursor-pointer focus:border-gold/30 transition-all font-bold">
                                         <option value="scheduled" className="bg-black">Scheduled</option>
@@ -173,7 +173,7 @@ export default function InventoryView() {
                             </div>
 
                             <div className="flex gap-6 pt-4 font-bold">
-                                <button type="button" onClick={() => setIsLogModalOpen(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors">Abort</button>
+                                <button type="button" onClick={() => setIsLogModalOpen(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors">Cancel</button>
                                 <button type="submit" className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20">Authorize Entry</button>
                             </div>
                         </motion.form>

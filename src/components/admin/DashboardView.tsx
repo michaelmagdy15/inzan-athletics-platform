@@ -68,11 +68,11 @@ export default function DashboardView() {
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">Admin Dashboard</h1>
-                    <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Real-time Performance & Operations Oversight</p>
+                    <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Real-time Performance & Gym Overview</p>
                 </div>
                 <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-4 lg:px-5 py-2 lg:py-2.5 rounded-xl lg:rounded-2xl backdrop-blur-xl transition-all hover:border-gold/30 group cursor-pointer shadow-xl">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                    <span className="text-[10px] font-bold text-white/60 tracking-widest uppercase group-hover:text-white transition-colors">Systems Online</span>
+                    <span className="text-[10px] font-bold text-white/60 tracking-widest uppercase group-hover:text-white transition-colors">System Online</span>
                 </div>
             </div>
 
@@ -94,7 +94,10 @@ export default function DashboardView() {
                             <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-[0_0_15px_rgba(202,138,4,0.1)]">
                                 <Activity size={20} className="text-gold" />
                             </div>
-                            <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-white/80">Operations Oversight</h3>
+                            <div>
+                                <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-white/80">Gym Overview</h3>
+                                <p className="text-[10px] text-white/40 tracking-widest font-black uppercase mt-1">Live Statistics</p>
+                            </div>
                         </div>
                     </div>
 
@@ -148,7 +151,7 @@ export default function DashboardView() {
                         <div className="flex flex-col gap-5">
                             <ActionButton label="Send Member Announcement" onClick={() => handleAction('Send Member Announcement')} />
                             <ActionButton label="Export Daily Report" onClick={() => handleAction('Export Daily Report')} />
-                            <ActionButton label="Sync System Time" onClick={() => handleAction('Sync System Time')} />
+                            <ActionButton label="Sync Time" onClick={() => handleAction('Sync System Time')} />
                             <ActionButton label="Run Security Check" variant="danger" onClick={() => handleAction('Run Security Check')} />
                         </div>
                     </div>
@@ -160,7 +163,7 @@ export default function DashboardView() {
                         <div className="absolute top-0 right-0 p-6">
                             <Zap size={24} className="text-gold animate-shimmer" />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/80">System Efficiency</h3>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/80">Platform Status</h3>
                         <p className="text-sm font-light text-white/60 leading-relaxed uppercase tracking-widest text-[11px]">System integrity at <span className="text-white font-bold">99.8%</span>. Database fully synchronized.<br /><br /><span className="text-gold font-black border-b border-gold/20 pb-0.5">VIEW SYSTEM LOGS</span></p>
                     </motion.div>
                 </div>

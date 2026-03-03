@@ -40,7 +40,7 @@ export default function EKKitchenView() {
             const next = getNextStatus(currentStatus);
             if (next !== currentStatus) {
                 await updateOrderStatus(orderId, next);
-                broadcastAlert(`Order TX-${orderId.slice(-4).toUpperCase()} updated to ${next.toUpperCase()}.`, 'success');
+                broadcastAlert(`Order #${orderId.slice(-4).toUpperCase()} updated to ${next.toUpperCase()}.`, 'success');
             }
         } catch (err) {
             broadcastAlert('Failed to update order status.', 'error');
@@ -176,7 +176,7 @@ export default function EKKitchenView() {
                                     className="bg-[#121212]/30 border border-white/5 hover:border-gold/20 rounded-[2rem] p-6 relative overflow-hidden group cursor-pointer transition-all duration-500"
                                 >
                                     <div className="flex justify-between items-start mb-4">
-                                        <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase font-bold">TX-{o.id.toString().slice(-6).toUpperCase()}</span>
+                                        <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase font-bold">Order #{o.id.toString().slice(-6).toUpperCase()}</span>
                                         <div className="flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
                                             <span className="text-[8px] font-black text-gold uppercase tracking-[0.2em] font-bold">{o.status}</span>

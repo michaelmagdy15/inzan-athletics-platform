@@ -195,7 +195,7 @@ export default function AdminHub() {
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold transition-colors hidden sm:block" size={18} />
               <input
                 type="text"
-                placeholder="Query protocol..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-4 sm:pl-14 pr-4 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-gold/30 focus:bg-white/[0.08] transition-all duration-500 shadow-inner uppercase tracking-widest"
@@ -437,25 +437,25 @@ export default function AdminHub() {
                 <div className="flex flex-col gap-4 lg:gap-6">
                   {creationMode === 'member' && (
                     <>
-                      <input name="name" required placeholder="FULL IDENTITY NAME" className="form-input" />
-                      <input name="email" type="email" required placeholder="COMMUNICATION ENDPOINT" className="form-input" />
+                      <input name="name" required placeholder="FULL NAME" className="form-input" />
+                      <input name="email" type="email" required placeholder="EMAIL ADDRESS" className="form-input" />
                       <Select name="tier" options={['High Performance', 'Fuel Plan', 'Holistic Flow']} />
                     </>
                   )}
                   {creationMode === 'coach' && (
                     <>
-                      <input name="name" required placeholder="COACH FULL IDENTITY" className="form-input" />
-                      <input name="email" type="email" required placeholder="COACH ENDPOINT" className="form-input" />
-                      <input name="specialty" required placeholder="DOMAIN SPECIALTY" className="form-input" />
-                      <textarea name="bio" placeholder="ASSET BIOGRAPHY" className="form-input h-24 pt-4 lg:pt-6 resize-none" />
+                      <input name="name" required placeholder="COACH NAME" className="form-input" />
+                      <input name="email" type="email" required placeholder="COACH EMAIL" className="form-input" />
+                      <input name="specialty" required placeholder="SPECIALTY" className="form-input" />
+                      <textarea name="bio" placeholder="BIOGRAPHY" className="form-input h-24 pt-4 lg:pt-6 resize-none" />
                     </>
                   )}
                   {creationMode === 'class' && (
                     <>
-                      <input name="title" required placeholder="CLASS DESIGNATION" className="form-input" />
-                      <input name="trainer" required placeholder="INSTRUCTOR ASSIGNMENT" className="form-input" />
-                      <input name="time" required placeholder="TEMPORAL WINDOW (e.g. 12:00 PM)" className="form-input" />
-                      <input name="spots" type="number" required placeholder="CAPACITY LIMIT" className="form-input" />
+                      <input name="title" required placeholder="CLASS NAME" className="form-input" />
+                      <input name="trainer" required placeholder="INSTRUCTOR NAME" className="form-input" />
+                      <input name="time" required placeholder="TIME (e.g. 12:00 PM)" className="form-input" />
+                      <input name="spots" type="number" required placeholder="CAPACITY" className="form-input" />
                       <Select name="category" options={['Strength', 'Cardio', 'Yoga', 'HIIT']} />
                     </>
                   )}

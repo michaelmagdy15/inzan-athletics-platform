@@ -204,6 +204,15 @@ export interface PTSession {
   coach_name?: string;
 }
 
+export interface CoachReview {
+  id: string;
+  coach_id: string;
+  member_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+}
+
 export interface AppNotification {
   id: string;
   user_id: string;
@@ -269,12 +278,16 @@ interface DataContextType {
 
   // Membership Actions
   membershipTiers: MembershipTier[];
-  addMembershipTier: (tier: Omit<MembershipTier, 'id'>) => Promise<void>;
+  addMembershipTier: (tier: Omit<MembershipTier, 'id' | 'created_at'>) => Promise<void>;
   deleteMembershipTier: (tierId: string) => Promise<void>;
   assignMembership: (memberId: string, tierId: string) => Promise<void>;
   markNotificationRead: (notificationId: string) => Promise<void>;
   markAllNotificationsRead: () => Promise<void>;
   confirmPackagePayment: (packageId: string) => Promise<void>;
+
+  // New Global Functions
+  coachReviews: CoachReview[];
+  addTransaction: (data: Omit<FinancialTransaction, 'id' | 'created_at'>) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -309,12 +322,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [coachAvailabilities, setCoachAvailabilities] = useState<CoachAvailability[]>([]);
   const [sessionPolicies, setSessionPolicies] = useState<SessionPolicy[]>([]);
   const [appNotifications, setAppNotifications] = useState<AppNotification[]>([]);
+  const [coachReviews, setCoachReviews] = useState<CoachReview[]>([]);
 
-  const [membershipTiers, setMembershipTiers] = useState<MembershipTier[]>([
-    { id: 'm1', name: 'Basic Access', price: 900, billing_cycle: 'monthly', features: ['Gym Access', '1 Class/wk'] },
-    { id: 'm2', name: 'Elite Member', price: 1500, billing_cycle: 'monthly', features: ['Unlimited Gym', 'Unlimited Classes'] },
-    { id: 'm3', name: 'Annual Pro', price: 12000, billing_cycle: 'yearly', features: ['Unlimited Everything', '2 PT Sessions/mo'] },
-  ]);
+  const [membershipTiers, setMembershipTiers] = useState<MembershipTier[]>([]);
 
   const broadcastAlert = (message: string, type: 'info' | 'warning' | 'error' | 'success') => {
     setSystemAlert({ message, type });
@@ -367,11 +377,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         supabase.from('coach_availabilities').select('*').order('day_of_week', { ascending: true }),
         supabase.from('session_policies').select('*'),
         supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(50),
-        supabase.from('membership_tiers').select('*'),
+        supabase.from('membership_tiers').select('*').order('price', { ascending: true }),
         supabase.from('financial_transactions').select('*').order('created_at', { ascending: false }),
         supabase.from('equipment').select('*'),
         supabase.from('facility_zones').select('*'),
-        supabase.from('operating_goals').select('*')
+        supabase.from('operating_goals').select('*'),
+        supabase.from('coach_reviews').select('*')
       ]);
 
       const mappedMembers: Member[] = profilesData?.map(p => ({
@@ -453,6 +464,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setSessionPolicies(policiesData || []);
       setAppNotifications(notificationsData || []);
       setMembershipTiers(membershipTiersData || []);
+
+      const reviewsResponse = await supabase.from('coach_reviews').select('*');
+      setCoachReviews(reviewsResponse.data || []);
 
       // Auth
       const { data: { session } } = await supabase.auth.getSession();
@@ -955,26 +969,39 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ============================================================
-  // MEMBERSHIP ACTIONS (MOCK)
+  // FINAL FEATURES (Tiers, Transactions, Reviews)
   // ============================================================
-  const addMembershipTier = async (tier: Omit<MembershipTier, 'id'>) => {
-    const newTier = { ...tier, id: crypto.randomUUID() };
-    setMembershipTiers(prev => [...prev, newTier]);
-    broadcastAlert('Membership tier added.', 'success');
+  const addMembershipTier = async (tier: Omit<MembershipTier, 'id' | 'created_at'>) => {
+    const { error } = await supabase.from('membership_tiers').insert(tier);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert(`Membership tier '${tier.name}' added.`, 'success');
   };
 
   const deleteMembershipTier = async (tierId: string) => {
-    setMembershipTiers(prev => prev.filter(t => t.id !== tierId));
+    const { error } = await supabase.from('membership_tiers').delete().eq('id', tierId);
+    if (error) throw error;
+    await fetchAllData();
     broadcastAlert('Membership tier removed.', 'success');
   };
 
   const assignMembership = async (memberId: string, tierId: string) => {
     // In a real app we would update the member's profile or active_subscriptions table.
-    // For now we just alert.
     const tier = membershipTiers.find(t => t.id === tierId);
     if (!tier) throw new Error("Tier not found");
-    // Pseudo-backend update
+    const { error } = await supabase.from('profiles').update({ membership_tier_id: tier.id }).eq('id', memberId);
+    if (error) throw error;
+
+    // Log it as a transaction organically if we wanted to, or let webhook handle. Here we just update profile.
+    await fetchAllData();
     broadcastAlert(`Assigned ${tier.name} to member successfully.`, 'success');
+  };
+
+  const addTransaction = async (data: Omit<FinancialTransaction, 'id' | 'created_at'>) => {
+    const { error } = await supabase.from('financial_transactions').insert(data);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert('Transaction recorded successfully.', 'success');
   };
 
   // ============================================================
@@ -992,6 +1019,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       equipment,
       facilityZones,
       operatingGoals,
+      coachReviews,
       settings,
       currentUser,
       loading,
@@ -1039,6 +1067,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       addMembershipTier,
       deleteMembershipTier,
       assignMembership,
+      addTransaction
     }}>
       {children}
     </DataContext.Provider>

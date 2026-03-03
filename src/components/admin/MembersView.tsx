@@ -202,7 +202,7 @@ export default function MembersView({ members, selectedMember, setSelectedMember
                                     autoFocus
                                     value={attendanceCode}
                                     onChange={(e) => setAttendanceCode(e.target.value)}
-                                    placeholder="INPUT MEMBER CODE"
+                                    placeholder="ENTER MEMBER CODE"
                                     className="w-full bg-black/40 border border-white/5 rounded-2xl p-6 text-xl text-center text-white placeholder:text-white/5 focus:border-gold/30 outline-none transition-all uppercase tracking-[0.5em] font-heading shadow-inner"
                                 />
                                 <div className="flex items-center justify-center gap-3 text-white/20 font-bold">

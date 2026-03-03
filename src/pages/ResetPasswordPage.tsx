@@ -215,7 +215,7 @@ export default function ResetPasswordPage() {
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                                         <input
                                             type="email"
-                                            placeholder="IDENTITY@PROTOCOL.COM"
+                                            placeholder="EMAIL ADDRESS"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#FFB800]/50 transition-all uppercase tracking-wider"
@@ -304,7 +304,7 @@ export default function ResetPasswordPage() {
                                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                                             <input
                                                 type="password"
-                                                placeholder="NEW PASSPHRASE"
+                                                placeholder="NEW PASSWORD"
                                                 value={newPassword}
                                                 onChange={(e) => setNewPassword(e.target.value)}
                                                 className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#FFB800]/50 transition-all uppercase tracking-wider"
@@ -316,7 +316,7 @@ export default function ResetPasswordPage() {
                                             <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                                             <input
                                                 type="password"
-                                                placeholder="CONFIRM PASSPHRASE"
+                                                placeholder="CONFIRM PASSWORD"
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                                 className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-[#FFB800]/50 transition-all uppercase tracking-wider"

@@ -92,7 +92,7 @@ export default function SettingsView() {
                         <span className="text-[10px] font-black text-white/40 tracking-widest uppercase">Version 2.0.9</span>
                         <span className="text-[8px] font-black text-gold/40 tracking-widest uppercase italic">By Michael Mitry</span>
                     </div>
-                    <button onClick={() => broadcastAlert('System reset requested.', 'warning')} className="flex-1 lg:flex-none premium-button px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Reset System</button>
+                    <button onClick={() => broadcastAlert('Data reset requested.', 'warning')} className="flex-1 lg:flex-none premium-button px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Reset Data</button>
                 </div>
             </div>
 
@@ -141,7 +141,7 @@ export default function SettingsView() {
                 <div className="hidden sm:block w-1 h-1 rounded-full bg-white/10" />
                 <div className="flex items-center gap-3">
                     <Zap size={14} className="text-gold/40" />
-                    <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em]">99.9% SYSTEM UPTIME</span>
+                    <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em]">99.9% UPTIME</span>
                 </div>
             </div>
         </div>

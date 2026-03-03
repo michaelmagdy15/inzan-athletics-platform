@@ -177,7 +177,7 @@ export default function AuthPage() {
                                         </div>
                                         <input
                                             type="email"
-                                            placeholder="IDENTITY@PROTOCOL.COM"
+                                            placeholder="EMAIL ADDRESS"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             className="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-12 pr-4 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-gold/40 focus:bg-black/60 transition-all duration-300 tracking-wider"

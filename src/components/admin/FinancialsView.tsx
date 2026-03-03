@@ -5,7 +5,7 @@ import { useData } from '../../context/DataContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 
 export default function FinancialsView() {
-    const { members, transactions, broadcastAlert } = useData();
+    const { members, transactions, broadcastAlert, addTransaction } = useData();
     const [selectedMethod, setSelectedMethod] = useState('ALL');
     const [showAddTransaction, setShowAddTransaction] = useState(false);
 
@@ -28,10 +28,25 @@ export default function FinancialsView() {
             };
         });
 
-    const handleAddTransaction = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleAddTransaction = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setShowAddTransaction(false);
-        broadcastAlert('Mock: Feature currently routed to DataContext provider insert function.', 'success');
+        const formData = new FormData(e.currentTarget);
+        const name = formData.get('name') as string;
+        const type = formData.get('type') as any;
+        const amount = Number(formData.get('amount'));
+
+        try {
+            await addTransaction({
+                amount,
+                transaction_type: type === 'PT Session' ? 'package' : type === 'Membership' ? 'membership' : type === 'EK Kitchen' ? 'kitchen' : 'other',
+                status: 'completed',
+                description: `Manual Entry: ${type} by ${name}`,
+                member_id: null // Simplified for manual entry
+            });
+            setShowAddTransaction(false);
+        } catch (error) {
+            broadcastAlert('Failed to add transaction.', 'error');
+        }
     };
 
     const handleDownloadReport = () => {
