@@ -37,7 +37,7 @@ export default function SettingsView() {
                     </div>
                 </div>
 
-                <div className="glass-card rounded-[3rem] p-12 border border-white/5 shadow-2xl relative overflow-hidden font-bold">
+                <div className="glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-12 border border-white/5 shadow-2xl relative overflow-hidden font-bold">
                     {activeSubPanel === 'core' && (
                         <div className="flex flex-col gap-8 max-w-xl">
                             <SettingField label="Gym Platform Name" value={settings.brandName} onChange={(val) => updateSettings({ brandName: val })} />
@@ -165,7 +165,7 @@ function SettingField({ label, value, onChange, readOnly }: any) {
 
 function SettingToggle({ label, active, onToggle }: any) {
     return (
-        <div className="flex justify-between items-center p-8 bg-white/5 border border-white/5 rounded-3xl group hover:border-gold/20 transition-all font-bold">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 p-6 lg:p-8 bg-white/5 border border-white/5 rounded-[1.5rem] lg:rounded-3xl group hover:border-gold/20 transition-all font-bold">
             <span className="text-sm font-medium text-white/70 uppercase tracking-widest">{label}</span>
             <button
                 onClick={onToggle}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Calendar, Users, XCircle, CheckCircle2, AlertTriangle, Clock, Filter, RefreshCw, Search } from 'lucide-react';
-import { useData, SessionStatus, SESSION_TYPE_LABELS } from '../../context/DataContext';
+import { Calendar, Users, XCircle, CheckCircle2, AlertTriangle, Clock, Filter, RefreshCw, Search, Plus, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useData, SessionStatus, SessionType, SESSION_TYPE_LABELS } from '../../context/DataContext';
 
 const STATUS_CONFIG: Record<SessionStatus, { color: string; label: string }> = {
     scheduled: { color: 'text-blue-400 bg-blue-500/10 border-blue-500/20', label: 'Scheduled' },
@@ -11,11 +12,12 @@ const STATUS_CONFIG: Record<SessionStatus, { color: string; label: string }> = {
 };
 
 export default function PTSessionsView() {
-    const { ptSessions, members, updateSessionStatus, cancelPTSession } = useData();
+    const { ptSessions, members, updateSessionStatus, cancelPTSession, adminAddSession } = useData();
     const [statusFilter, setStatusFilter] = useState<SessionStatus | 'all'>('all');
     const [coachFilter, setCoachFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [processing, setProcessing] = useState<string | null>(null);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     const coaches = members.filter(m => m.role === 'coach');
     const today = new Date().toISOString().split('T')[0];
@@ -58,11 +60,34 @@ export default function PTSessionsView() {
         return `${hour > 12 ? hour - 12 : hour}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
     };
 
+    const handleAddSession = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        try {
+            await adminAddSession({
+                coach_id: formData.get('coach_id') as string,
+                member_id: formData.get('member_id') as string,
+                session_type: formData.get('session_type') as SessionType,
+                scheduled_date: formData.get('date') as string,
+                scheduled_time: formData.get('time') as string,
+                duration_minutes: parseInt(formData.get('duration') as string, 10)
+            });
+            setShowAddModal(false);
+        } catch (err: any) {
+            alert(err.message);
+        }
+    };
+
     return (
         <div className="flex flex-col gap-6 lg:gap-10">
-            <div>
-                <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">PT Sessions</h1>
-                <p className="text-[10px] tracking-[0.4em] text-white/30 uppercase font-medium">Front Desk Session Management</p>
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+                <div>
+                    <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">PT Sessions</h1>
+                    <p className="text-[10px] tracking-[0.4em] text-white/30 uppercase font-medium">Front Desk Session Management</p>
+                </div>
+                <button onClick={() => setShowAddModal(true)} className="flex items-center justify-center gap-2 premium-button px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black w-full lg:w-auto">
+                    <Plus size={14} /> Book Session
+                </button>
             </div>
 
             {/* Stats */}
@@ -149,6 +174,68 @@ export default function PTSessionsView() {
                     </table>
                 </div>
             </div>
+
+            {/* Add Session Modal */}
+            <AnimatePresence>
+                {showAddModal && (
+                    <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+                        <motion.form
+                            onSubmit={handleAddSession}
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-[#0a0a0a] rounded-[2rem] p-6 lg:p-10 w-full max-w-lg flex flex-col gap-6 shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/5 relative max-h-[90vh] overflow-y-auto scrollbar-hide"
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setShowAddModal(false)}
+                                className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                            >
+                                <X size={20} className="text-white/50" />
+                            </button>
+
+                            <div className="text-center font-bold">
+                                <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">Book Session</h2>
+                                <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">Front Desk Override</p>
+                            </div>
+
+                            <div className="flex flex-col gap-4 font-bold">
+                                <select name="member_id" required className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white appearance-none cursor-pointer focus:border-gold/30">
+                                    <option value="" disabled selected className="text-white/20">SELECT CLIENT</option>
+                                    {members.filter(m => m.role === 'member').map(m => (
+                                        <option key={m.id} value={m.id} className="bg-black">{m.name} ({m.code})</option>
+                                    ))}
+                                </select>
+
+                                <select name="coach_id" required className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white appearance-none cursor-pointer focus:border-gold/30">
+                                    <option value="" disabled selected className="text-white/20">SELECT INSTRUCTOR</option>
+                                    {coaches.map(c => (
+                                        <option key={c.id} value={c.id} className="bg-black">{c.name}</option>
+                                    ))}
+                                </select>
+
+                                <select name="session_type" required className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white appearance-none cursor-pointer focus:border-gold/30">
+                                    <option value="" disabled selected className="text-white/20">SESSION TYPE</option>
+                                    {Object.entries(SESSION_TYPE_LABELS).map(([k, label]) => (
+                                        <option key={k} value={k} className="bg-black">{label}</option>
+                                    ))}
+                                </select>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input name="date" type="date" required className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30" />
+                                    <input name="time" type="time" required className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30" />
+                                </div>
+                                <input name="duration" type="number" defaultValue="60" required placeholder="DURATION (MINS)" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 placeholder-white/20" />
+                            </div>
+
+                            <div className="flex gap-4 lg:gap-6 pt-2 font-bold">
+                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] tracking-[0.3em] hover:text-white transition-colors">Cancel</button>
+                                <button type="submit" className="premium-button flex-1 h-14 rounded-2xl text-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20">Confirm Booking</button>
+                            </div>
+                        </motion.form>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

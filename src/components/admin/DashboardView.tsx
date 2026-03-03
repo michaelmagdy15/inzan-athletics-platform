@@ -57,7 +57,7 @@ export default function DashboardView() {
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
                 {/* Operations Insights */}
-                <div className="xl:col-span-2 glass-card rounded-[3rem] p-10 relative overflow-hidden group shadow-2xl">
+                <div className="xl:col-span-2 glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 relative overflow-hidden group shadow-2xl">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
                     <div className="flex justify-between items-center mb-10 relative z-10 font-bold">
@@ -104,7 +104,7 @@ export default function DashboardView() {
                         </div>
                     </div>
 
-                    <div className="mt-10 p-8 bg-gold/5 border border-gold/10 rounded-3xl relative overflow-hidden">
+                    <div className="mt-8 lg:mt-10 p-6 lg:p-8 bg-gold/5 border border-gold/10 rounded-2xl lg:rounded-3xl relative overflow-hidden">
                         <p className="text-sm font-light text-white/60 leading-relaxed uppercase tracking-widest text-[11px] relative z-10">
                             Analytics compiled for recent activity. Projected growth indications are positive based on membership trajectory.
                         </p>
@@ -112,8 +112,8 @@ export default function DashboardView() {
                 </div>
 
                 {/* Quick Actions Panel */}
-                <div className="flex flex-col gap-10 font-bold">
-                    <div className="glass-card rounded-[3rem] p-10 flex flex-col gap-10 shadow-2xl relative overflow-hidden group">
+                <div className="flex flex-col gap-6 lg:gap-10 font-bold">
+                    <div className="glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 flex flex-col gap-6 lg:gap-10 shadow-2xl relative overflow-hidden group">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                         <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Quick Actions</h3>
                         <div className="flex flex-col gap-5">
@@ -126,7 +126,7 @@ export default function DashboardView() {
 
                     <motion.div
                         whileHover={{ scale: 1.02 }}
-                        className="bg-gold/5 border border-gold/10 rounded-[3rem] p-10 flex flex-col gap-6 relative overflow-hidden group shadow-xl"
+                        className="bg-gold/5 border border-gold/10 rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 flex flex-col gap-6 relative overflow-hidden group shadow-xl"
                     >
                         <div className="absolute top-0 right-0 p-6">
                             <Zap size={24} className="text-gold animate-shimmer" />

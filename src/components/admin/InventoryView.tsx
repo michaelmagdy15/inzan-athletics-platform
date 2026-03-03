@@ -131,7 +131,7 @@ export default function InventoryView() {
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="glass-card rounded-[3rem] p-12 w-full max-w-lg flex flex-col gap-10 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-white/10"
+                            className="glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-12 w-full max-w-lg flex flex-col gap-6 lg:gap-10 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-white/10"
                             style={{ background: 'rgba(20, 20, 20, 0.8)' }}
                         >
                             <div className="text-center">

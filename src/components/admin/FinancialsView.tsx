@@ -1,17 +1,67 @@
 import React, { useState } from 'react';
-import { ArrowUpRight, TrendingUp, CreditCard, Activity, ChevronRight, Wallet, AlertTriangle, ShieldCheck, Smartphone, Landmark, Zap } from 'lucide-react';
+import { ArrowUpRight, TrendingUp, CreditCard, Activity, ChevronRight, Wallet, AlertTriangle, ShieldCheck, Smartphone, Landmark, Zap, Plus, X, Download, BarChart3, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '../../context/DataContext';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 
 export default function FinancialsView() {
     const { broadcastAlert } = useData();
     const [selectedMethod, setSelectedMethod] = useState('ALL');
 
-    const paymentMethods = [
-        { id: 'VISA', icon: <CreditCard size={14} />, label: 'VISA / DC' },
-        { id: 'INSTAPAY', icon: <Smartphone size={14} />, label: 'INSTAPAY' },
-        { id: 'BANK', icon: <Landmark size={14} />, label: 'BANK XFER' },
-        { id: 'POS', icon: <Zap size={14} />, label: 'POS TERMINAL' },
+    const [transactions, setTransactions] = useState([
+        { id: 1, name: "Sarah J.", type: "Membership", amount: 2450, method: "VISA", date: "Today, 10:45", status: "Paid" },
+        { id: 2, name: "Michael T.", type: "EK Kitchen", amount: 125, method: "INSTAPAY", date: "Today, 09:15", status: "Paid" },
+        { id: 3, name: "Elena V.", type: "Assessment", amount: 1500, method: "POS", date: "Yesterday, 18:30", status: "Completed" },
+    ]);
+    const [showAddTransaction, setShowAddTransaction] = useState(false);
+
+    const handleAddTransaction = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        setTransactions([
+            {
+                id: Date.now(),
+                name: formData.get('name') as string,
+                type: formData.get('type') as string,
+                amount: parseInt(formData.get('amount') as string, 10),
+                method: formData.get('method') as string,
+                date: "Just now",
+                status: "Paid",
+            },
+            ...transactions
+        ]);
+        setShowAddTransaction(false);
+        broadcastAlert('Transaction added successfully!', 'success');
+    };
+
+    const handleDownloadReport = () => {
+        const headers = ['ID', 'Name', 'Type', 'Amount (EGP)', 'Method', 'Date', 'Status'];
+        const csvContent = [
+            headers.join(','),
+            ...transactions.map(t => `${t.id},"${t.name}","${t.type}",${t.amount},${t.method},"${t.date}","${t.status}"`)
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', `financial_report_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const revenueData = [
+        { name: 'Jan', revenue: 24000 },
+        { name: 'Feb', revenue: 32000 },
+        { name: 'Mar', revenue: 42850 },
+    ];
+
+    const topMembers = [
+        { name: "Sarah J.", spend: 12450, tier: "Elite Member" },
+        { name: "Michael T.", spend: 9320, tier: "Annual Pro" },
+        { name: "Elena V.", spend: 8500, tier: "Basic Access" },
+        { name: "Alex R.", spend: 7600, tier: "Annual Pro" },
+        { name: "David L.", spend: 5200, tier: "Basic Access" },
     ];
 
     return (
@@ -34,8 +84,65 @@ export default function FinancialsView() {
                         ))}
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <button className="flex-1 sm:flex-none px-4 lg:px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">Download Report</button>
-                        <button onClick={() => broadcastAlert('Financial accounts reconciled.', 'success')} className="flex-1 sm:flex-none premium-button px-4 lg:px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Reconcile Now</button>
+                        <button onClick={handleDownloadReport} className="flex-1 sm:flex-none px-4 lg:px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white hover:bg-white/10 transition-all flex items-center gap-2">
+                            <Download size={14} /> Report
+                        </button>
+                        <button onClick={() => setShowAddTransaction(true)} className="flex-1 sm:flex-none px-4 lg:px-6 py-3 bg-gold/10 border border-gold/20 rounded-xl text-[9px] font-black text-gold tracking-widest uppercase hover:bg-gold hover:text-black transition-all flex items-center gap-2">
+                            <Plus size={14} /> Add Payment
+                        </button>
+                        <button onClick={() => broadcastAlert('Financial accounts reconciled.', 'success')} className="flex-1 sm:flex-none premium-button px-4 lg:px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Reconcile</button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                <div className="lg:col-span-2 glass-card rounded-[2rem] border border-white/5 p-6 lg:p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                        <BarChart3 size={16} className="text-gold/50" />
+                        <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">Revenue Overview</h3>
+                    </div>
+                    <div className="h-64 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={revenueData}>
+                                <defs>
+                                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#FFB800" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#FFB800" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <XAxis dataKey="name" stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v / 1000}k`} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                                    itemStyle={{ color: '#FFB800', fontWeight: 'bold' }}
+                                />
+                                <Area type="monotone" dataKey="revenue" stroke="#FFB800" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                <div className="glass-card rounded-[2rem] border border-white/5 p-6 lg:p-8 flex flex-col">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Users size={16} className="text-gold/50" />
+                        <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">Top Members list</h3>
+                    </div>
+                    <div className="flex flex-col gap-4 flex-1 justify-center">
+                        {topMembers.map((member, i) => (
+                            <div key={i} className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white/50">
+                                        {i + 1}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-white">{member.name}</p>
+                                        <p className="text-[9px] text-white/40 uppercase tracking-widest">{member.tier}</p>
+                                    </div>
+                                </div>
+                                <span className="text-xs font-bold text-gold">{member.spend.toLocaleString()} EGP</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -80,22 +187,69 @@ export default function FinancialsView() {
                         <Wallet size={16} className="text-gold/50" />
                         <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">Recent Transactions</h3>
                     </div>
-                    <div className="flex flex-wrap gap-2 lg:gap-4">
-                        {paymentMethods.map(m => (
-                            <div key={m.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/5">
-                                <span className="text-gold/50">{m.icon}</span>
-                                <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">{m.id}</span>
-                            </div>
-                        ))}
-                    </div>
                 </div>
 
                 <div className="flex flex-col gap-4 lg:gap-6 relative z-10">
-                    <TransactionItem name="Sarah J." type="Membership • Today, 10:45" amount="2,450" method="VISA" initial="SJ" status="Paid" />
-                    <TransactionItem name="Michael T." type="EK Kitchen • Today, 09:15" amount="125" method="INSTAPAY" initial="MT" status="Paid" />
-                    <TransactionItem name="Elena V." type="Assessment • Yesterday" amount="1,500" method="POS" initial="EV" status="Completed" />
+                    {transactions.map(tx => (
+                        <TransactionItem
+                            key={tx.id}
+                            name={tx.name}
+                            type={`${tx.type} • ${tx.date}`}
+                            amount={tx.amount.toLocaleString()}
+                            method={tx.method}
+                            initial={tx.name.substring(0, 2).toUpperCase()}
+                            status={tx.status}
+                        />
+                    ))}
                 </div>
             </div>
+
+            {/* Add Transaction Modal */}
+            <AnimatePresence>
+                {showAddTransaction && (
+                    <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
+                        <motion.form
+                            onSubmit={handleAddTransaction}
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="glass-card rounded-[2.5rem] p-8 lg:p-12 w-full max-w-md flex flex-col gap-8 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-white/10"
+                        >
+                            <div className="text-center font-bold">
+                                <h2 className="text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">New Payment</h2>
+                                <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">Manual Transaction Entry</p>
+                            </div>
+
+                            <div className="flex flex-col gap-5">
+                                <input name="name" required placeholder="MEMBER NAME" className="form-input" />
+                                <select name="type" required className="appearance-none bg-white/5 border border-white/10 rounded-xl p-4 text-xs font-bold uppercase tracking-widest text-white outline-none focus:border-gold/30">
+                                    <option value="PT Session" className="bg-[#050505]">PT Session</option>
+                                    <option value="Membership" className="bg-[#050505]">Membership</option>
+                                    <option value="EK Kitchen" className="bg-[#050505]">EK Kitchen</option>
+                                    <option value="Apparel" className="bg-[#050505]">Apparel</option>
+                                </select>
+                                <div className="flex gap-4">
+                                    <input name="amount" type="number" required placeholder="AMOUNT (EGP)" className="form-input flex-1" />
+                                    <select name="method" required className="appearance-none w-1/3 bg-white/5 border border-white/10 rounded-xl p-4 text-xs font-bold uppercase tracking-widest text-white outline-none focus:border-gold/30">
+                                        <option value="VISA" className="bg-[#050505]">VISA</option>
+                                        <option value="CASH" className="bg-[#050505]">CASH</option>
+                                        <option value="INSTAPAY" className="bg-[#050505]">INSTA</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-6 font-bold">
+                                <button type="button" onClick={() => setShowAddTransaction(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors">
+                                    Cancel
+                                </button>
+                                <button type="submit" className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20">
+                                    Add Entry
+                                </button>
+                            </div>
+                        </motion.form>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

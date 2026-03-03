@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BarChart3, Users, TrendingUp, Calendar, Package } from 'lucide-react';
+import { BarChart3, Users, TrendingUp, Calendar, Package, Download } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useData, SESSION_TYPE_LABELS } from '../../context/DataContext';
 
@@ -62,11 +62,31 @@ export default function PTReportsView() {
     const completionRate = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
     const totalRevenue = ptPackages.reduce((sum, p) => sum + p.price_paid, 0);
 
+    const handleDownloadReport = () => {
+        const headers = ['Client', 'Remaining Sessions', 'Total Sessions', 'Usage Percentage'];
+        const rows = clientBalances.map(c => [
+            c.name, c.remaining, c.total, c.total > 0 ? Math.round(((c.total - c.remaining) / c.total) * 100) + '%' : '0%'
+        ]);
+        const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pt_client_balances_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="flex flex-col gap-6 lg:gap-10">
-            <div>
-                <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">PT Reports</h1>
-                <p className="text-[10px] tracking-[0.4em] text-white/30 uppercase font-medium">Analytics & Performance Tracking</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
+                <div>
+                    <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">PT Reports</h1>
+                    <p className="text-[10px] tracking-[0.4em] text-white/30 uppercase font-medium">Analytics & Performance Tracking</p>
+                </div>
+                <button onClick={handleDownloadReport} className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5 text-[9px] uppercase tracking-widest font-black text-white/60 hover:text-white w-full sm:w-auto">
+                    <Download size={14} /> Download Balances
+                </button>
             </div>
 
             {/* KPI Cards */}

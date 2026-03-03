@@ -84,7 +84,7 @@ export interface SystemSettings {
 
 // --- PT Management Interfaces ---
 
-export type SessionType = 'pt_1on1' | 'partner' | 'group' | 'class' | 'nutrition';
+export type SessionType = 'pt_1on1' | 'partner' | 'group' | 'class' | 'nutrition' | 'trial';
 export type SessionStatus = 'scheduled' | 'completed' | 'no_show' | 'rescheduled' | 'canceled';
 export type PackageStatus = 'active' | 'expired' | 'exhausted' | 'cancelled';
 
@@ -94,6 +94,7 @@ export const SESSION_TYPE_LABELS: Record<SessionType, string> = {
   group: 'Small Group (3-5)',
   class: 'Class',
   nutrition: 'Nutrition Consultation',
+  trial: 'Trial Session',
 };
 
 export interface SessionPolicy {
@@ -137,6 +138,14 @@ export interface PTPackage {
   // joined fields
   member_name?: string;
   coach_name?: string;
+}
+
+export interface MembershipTier {
+  id: string;
+  name: string;
+  price: number;
+  billing_cycle: 'monthly' | 'yearly';
+  features: string[];
 }
 
 export interface PTSession {
@@ -192,6 +201,7 @@ interface DataContextType {
   addMember: (data: Partial<Member>) => Promise<void>;
   deleteMember: (memberId: string) => Promise<void>;
   updateMemberStatus: (memberId: string, status: Member['membershipStatus']) => Promise<void>;
+  updateMemberRole: (memberId: string, role: Member['role']) => Promise<void>;
   renewMembership: (memberId: string) => Promise<void>;
   resetUserPassword: (email: string) => Promise<void>;
   addCoach: (data: Partial<Member>) => Promise<void>;
@@ -206,12 +216,19 @@ interface DataContextType {
   notifications: AppNotification[];
   createPackage: (data: Omit<PTPackage, 'id' | 'created_at' | 'member_name' | 'coach_name' | 'reschedules_used'>) => Promise<void>;
   bookPTSession: (data: { package_id: string; coach_id: string; member_id: string; session_type: SessionType; scheduled_date: string; scheduled_time: string; duration_minutes?: number }) => Promise<void>;
+  adminAddSession: (data: { coach_id: string; member_id: string; session_type: SessionType; scheduled_date: string; scheduled_time: string; duration_minutes?: number }) => Promise<void>;
   cancelPTSession: (sessionId: string) => Promise<void>;
   reschedulePTSession: (sessionId: string, newDate: string, newTime: string) => Promise<void>;
   updateSessionStatus: (sessionId: string, status: SessionStatus) => Promise<void>;
   setCoachAvailability: (data: Omit<CoachAvailability, 'id'>) => Promise<void>;
   deleteCoachAvailability: (slotId: string) => Promise<void>;
   updateSessionPolicy: (policyId: string, updates: Partial<SessionPolicy>) => Promise<void>;
+
+  // Membership Actions
+  membershipTiers: MembershipTier[];
+  addMembershipTier: (tier: Omit<MembershipTier, 'id'>) => Promise<void>;
+  deleteMembershipTier: (tierId: string) => Promise<void>;
+  assignMembership: (memberId: string, tierId: string) => Promise<void>;
   markNotificationRead: (notificationId: string) => Promise<void>;
   markAllNotificationsRead: () => Promise<void>;
   confirmPackagePayment: (packageId: string) => Promise<void>;
@@ -246,6 +263,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [sessionPolicies, setSessionPolicies] = useState<SessionPolicy[]>([]);
   const [appNotifications, setAppNotifications] = useState<AppNotification[]>([]);
 
+  const [membershipTiers, setMembershipTiers] = useState<MembershipTier[]>([
+    { id: 'm1', name: 'Basic Access', price: 900, billing_cycle: 'monthly', features: ['Gym Access', '1 Class/wk'] },
+    { id: 'm2', name: 'Elite Member', price: 1500, billing_cycle: 'monthly', features: ['Unlimited Gym', 'Unlimited Classes'] },
+    { id: 'm3', name: 'Annual Pro', price: 12000, billing_cycle: 'yearly', features: ['Unlimited Everything', '2 PT Sessions/mo'] },
+  ]);
+
   const broadcastAlert = (message: string, type: 'info' | 'warning' | 'error' | 'success') => {
     setSystemAlert({ message, type });
     setTimeout(() => setSystemAlert(null), 5000);
@@ -279,7 +302,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         { data: sessionsData },
         { data: availabilityData },
         { data: policiesData },
-        { data: notificationsData }
+        { data: notificationsData },
+        { data: membershipTiersData }
       ] = await Promise.all([
         supabase.from('profiles').select('*'),
         supabase.from('classes').select('*, coach:coaches(profiles(full_name))'),
@@ -291,7 +315,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         supabase.from('pt_sessions').select('*').order('scheduled_date', { ascending: true }),
         supabase.from('coach_availabilities').select('*').order('day_of_week', { ascending: true }),
         supabase.from('session_policies').select('*'),
-        supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(50)
+        supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(50),
+        supabase.from('membership_tiers').select('*')
       ]);
 
       const mappedMembers: Member[] = profilesData?.map(p => ({
@@ -368,6 +393,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setCoachAvailabilities(availabilityData || []);
       setSessionPolicies(policiesData || []);
       setAppNotifications(notificationsData || []);
+      setMembershipTiers(membershipTiersData || []);
 
       // Auth
       const { data: { session } } = await supabase.auth.getSession();
@@ -465,6 +491,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
     await fetchAllData();
     broadcastAlert(`Member status updated to ${status}.`, 'info');
+  };
+
+  const updateMemberRole = async (memberId: string, role: Member['role']) => {
+    const { error } = await supabase.from('profiles').update({ role }).eq('id', memberId);
+    if (error) throw error;
+
+    // If changing to coach, make sure they have a coach record
+    if (role === 'coach') {
+      const { data: existingCoach } = await supabase.from('coaches').select('id').eq('id', memberId).single();
+      if (!existingCoach) {
+        await supabase.from('coaches').insert({ id: memberId, specialization: 'General Athletics' });
+      }
+    }
+
+    await fetchAllData();
+    broadcastAlert(`Entity protocol upgraded to ${role.toUpperCase()}.`, 'success');
   };
 
   const renewMembership = async (memberId: string) => {
@@ -633,6 +675,41 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     broadcastAlert('Session booked successfully.', 'success');
   };
 
+  const adminAddSession = async (data: {
+    coach_id: string; member_id: string; session_type: SessionType;
+    scheduled_date: string; scheduled_time: string; duration_minutes?: number;
+  }) => {
+    // Admin directly creating a session (trial or otherwise). Create a 1-session package on the fly.
+    const { data: newPackage, error: pkgError } = await supabase.from('pt_packages').insert({
+      member_id: data.member_id,
+      coach_id: data.coach_id,
+      package_type: data.session_type,
+      total_sessions: 1,
+      remaining_sessions: 1,
+      price_paid: 0,
+      payment_confirmed: true,
+      status: 'active'
+    }).select().single();
+
+    if (pkgError) throw pkgError;
+
+    const { data: newSession, error: sessionError } = await supabase.from('pt_sessions').insert({
+      package_id: newPackage.id,
+      coach_id: data.coach_id,
+      member_id: data.member_id,
+      session_type: data.session_type,
+      scheduled_date: data.scheduled_date,
+      scheduled_time: data.scheduled_time,
+      duration_minutes: data.duration_minutes || 60,
+      status: 'scheduled',
+    }).select().single();
+
+    if (sessionError) throw sessionError;
+
+    await fetchAllData();
+    broadcastAlert(`Session created for member.`, 'success');
+  };
+
   const cancelPTSession = async (sessionId: string) => {
     if (!currentUser) throw new Error('Auth required');
     const session = ptSessions.find(s => s.id === sessionId);
@@ -665,9 +742,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const memberName = members.find(m => m.id === session.member_id)?.name || 'Client';
     const coachName = members.find(m => m.id === session.coach_id)?.name || 'Coach';
     await Notifications.notifyCancellation(
-      session.member_id, session.coach_id, sessionId,
-      coachName, memberName, session.scheduled_date, session.scheduled_time,
-      currentUser.name
+      session.member_id, session.coach_id, session.id,
+      coachName, memberName, session.scheduled_date, session.scheduled_time, currentUser?.name || 'System'
     );
 
     await fetchAllData();
@@ -820,6 +896,29 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ============================================================
+  // MEMBERSHIP ACTIONS (MOCK)
+  // ============================================================
+  const addMembershipTier = async (tier: Omit<MembershipTier, 'id'>) => {
+    const newTier = { ...tier, id: crypto.randomUUID() };
+    setMembershipTiers(prev => [...prev, newTier]);
+    broadcastAlert('Membership tier added.', 'success');
+  };
+
+  const deleteMembershipTier = async (tierId: string) => {
+    setMembershipTiers(prev => prev.filter(t => t.id !== tierId));
+    broadcastAlert('Membership tier removed.', 'success');
+  };
+
+  const assignMembership = async (memberId: string, tierId: string) => {
+    // In a real app we would update the member's profile or active_subscriptions table.
+    // For now we just alert.
+    const tier = membershipTiers.find(t => t.id === tierId);
+    if (!tier) throw new Error("Tier not found");
+    // Pseudo-backend update
+    broadcastAlert(`Assigned ${tier.name} to member successfully.`, 'success');
+  };
+
+  // ============================================================
   // PROVIDER
   // ============================================================
 
@@ -847,6 +946,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       addMember,
       deleteMember,
       updateMemberStatus,
+      updateMemberRole,
       renewMembership,
       resetUserPassword,
       addCoach,
@@ -861,6 +961,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       notifications: appNotifications,
       createPackage,
       bookPTSession,
+      adminAddSession,
       cancelPTSession,
       reschedulePTSession,
       updateSessionStatus,
@@ -870,6 +971,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       markNotificationRead,
       markAllNotificationsRead,
       confirmPackagePayment,
+      // Membership Actions
+      membershipTiers,
+      addMembershipTier,
+      deleteMembershipTier,
+      assignMembership,
     }}>
       {children}
     </DataContext.Provider>

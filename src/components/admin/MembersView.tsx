@@ -113,7 +113,7 @@ export default function MembersView({ members, selectedMember, setSelectedMember
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead className="bg-[#0c0c0c]/50 font-bold">
                             <tr>
                                 <th className="px-10 py-6 text-[9px] text-white/20 uppercase tracking-[0.3em] font-black border-b border-white/5">Member Name</th>
@@ -181,7 +181,7 @@ export default function MembersView({ members, selectedMember, setSelectedMember
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="glass-card rounded-[3rem] p-12 w-full max-w-lg flex flex-col gap-6 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-white/10"
+                            className="glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-12 w-full max-w-lg flex flex-col gap-6 lg:gap-10 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-white/10"
                             style={{ background: 'rgba(20, 20, 20, 0.8)' }}
                         >
                             <div className="text-center font-bold">

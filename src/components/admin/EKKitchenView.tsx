@@ -104,7 +104,7 @@ export default function EKKitchenView() {
                             </button>
                         </div>
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse font-bold">
+                            <table className="w-full text-left border-collapse font-bold min-w-[500px]">
                                 <thead className="bg-[#0c0c0c]/50">
                                     <tr>
                                         <th className="px-10 py-6 text-[9px] text-white/20 uppercase tracking-[0.4em] font-black border-b border-white/5">Item Name</th>
@@ -145,9 +145,9 @@ export default function EKKitchenView() {
                 </div>
 
                 {/* Real-time Order Stream */}
-                <div className="flex flex-col gap-10">
-                    <div className="glass-card rounded-[3rem] border border-white/5 p-10 shadow-2xl h-fit font-bold">
-                        <div className="flex items-center justify-between mb-10">
+                <div className="flex flex-col gap-6 lg:gap-10">
+                    <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 p-6 lg:p-10 shadow-2xl h-fit font-bold">
+                        <div className="flex items-center justify-between mb-6 lg:mb-10">
                             <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase">Active Orders</h3>
                             <button onClick={() => broadcastAlert('Order list updated.', 'info')} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/5 hover:bg-gold/10 transition-all text-white/20 hover:text-gold">
                                 <RefreshCcw size={12} />
@@ -182,8 +182,8 @@ export default function EKKitchenView() {
                     </div>
 
                     {/* Stock Distribution Stats */}
-                    <div className="glass-card rounded-[3rem] border border-white/5 p-10 shadow-2xl relative overflow-hidden font-bold">
-                        <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase mb-8">Stock Distribution</h3>
+                    <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 p-6 lg:p-10 shadow-2xl relative overflow-hidden font-bold">
+                        <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase mb-6 lg:mb-8">Stock Distribution</h3>
                         <div className="flex flex-col gap-4">
                             <StockBar label="Optimal reserves" percent={65} color="bg-emerald-400" />
                             <StockBar label="Low Stock" percent={12} color="bg-red-400" />

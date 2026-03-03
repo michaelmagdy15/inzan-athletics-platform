@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
-import { UserCheck, Zap, Activity, Award, ChevronRight } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { UserCheck, Zap, Activity, Award, ChevronRight, X, Download, Plus } from 'lucide-react';
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '../../context/DataContext';
 
 export default function CoachesView() {
-    const { members, ptSessions, ptPackages } = useData();
+    const { members, ptSessions, ptPackages, addCoach, setSystemAlert } = useData();
     const coaches = members.filter(m => m.role === 'coach');
+    const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     const coachData = useMemo(() => {
         return coaches.map(coach => {
@@ -33,16 +35,52 @@ export default function CoachesView() {
     const totalSessionsThisWeek = coachData.reduce((acc, c) => acc + c.sessionsTaught, 0); // simplifying to all completed
     const avgRetention = Math.round(coachData.reduce((acc, c) => acc + c.retention, 0) / Math.max(1, coachData.length));
 
+    const handleDownloadReport = () => {
+        const headers = ['ID', 'Name', 'Rating', 'Clients', 'Retention Rate', 'Avg Spend', 'Sessions Taught'];
+        const rows = coachData.map(c => [
+            c.id, c.name, c.rating.toFixed(2), c.clients, `${c.retention}%`, c.spend, c.sessionsTaught
+        ]);
+        const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `coaches_report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+
+    const handleAddCoach = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        try {
+            await addCoach({
+                name: formData.get('name') as string,
+                email: formData.get('email') as string,
+                role: 'coach',
+            });
+            setShowAddModal(false);
+            setSystemAlert?.({ message: 'Instructor recruited successfully.', type: 'success' });
+        } catch (error: any) {
+            console.error('Failed to add coach:', error);
+            setSystemAlert?.({ message: error.message || 'Failed to add coach. Please try again.', type: 'error' });
+        }
+    };
+
     return (
-        <div className="flex flex-col gap-6 lg:gap-10">
+        <div className="flex flex-col gap-6 lg:gap-10 relative">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
                 <div>
                     <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">Coaches & Trainers</h1>
                     <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">Coach Performance & Analytics</p>
                 </div>
                 <div className="flex items-center gap-3 lg:gap-4 font-bold w-full lg:w-auto">
-                    <button className="flex-1 lg:flex-none px-4 lg:px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">Download Report</button>
-                    <button className="flex-1 lg:flex-none premium-button px-4 lg:px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">Add New Coach</button>
+                    <button onClick={handleDownloadReport} className="flex items-center justify-center gap-2 flex-1 lg:flex-none px-4 lg:px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white transition-all">
+                        <Download size={14} /> Report
+                    </button>
+                    <button onClick={() => setShowAddModal(true)} className="flex items-center justify-center gap-2 flex-1 lg:flex-none premium-button px-4 lg:px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase text-black">
+                        <Plus size={14} /> Add Coach
+                    </button>
                 </div>
             </div>
 
@@ -117,12 +155,121 @@ export default function CoachesView() {
                         clients={coach.clients}
                         rating={coach.rating.toFixed(1)}
                         avatar={coach.avatar}
+                        onClick={() => setSelectedCoach(coach)}
                     />
                 ))}
                 {coachData.length === 0 && (
                     <p className="text-white/30 text-sm">No coaches found. Add one from the header.</p>
                 )}
             </div>
+
+            {/* Add Coach Modal */}
+            <AnimatePresence>
+                {showAddModal && (
+                    <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+                        <motion.form
+                            onSubmit={handleAddCoach}
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-[#0a0a0a] rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-12 w-full max-w-lg flex flex-col gap-6 lg:gap-8 shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/5 max-h-[90vh] overflow-y-auto scrollbar-hide relative"
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setShowAddModal(false)}
+                                className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                            >
+                                <X size={20} className="text-white/50" />
+                            </button>
+
+                            <div className="text-center font-bold">
+                                <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">Recruit Instructor</h2>
+                                <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">New Registry Entry</p>
+                            </div>
+
+                            <div className="flex flex-col gap-4 font-bold">
+                                <input name="name" required placeholder="COACH FULL IDENTITY" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
+                                <input name="email" type="email" required placeholder="COACH ENDPOINT" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
+                                <input name="specialty" required placeholder="DOMAIN SPECIALTY" className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20" />
+                            </div>
+
+                            <div className="flex gap-4 lg:gap-6 pt-2 font-bold">
+                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors">Abort</button>
+                                <button type="submit" className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20">Confirm</button>
+                            </div>
+                        </motion.form>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Coach Details Sidebar */}
+            <AnimatePresence>
+                {selectedCoach && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-[#050505]/80 backdrop-blur-sm z-40"
+                            onClick={() => setSelectedCoach(null)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, x: '100%' }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed right-0 top-0 bottom-0 w-full sm:w-[400px] bg-[#0a0a0a] border-l border-white/10 shadow-2xl z-50 flex flex-col"
+                        >
+                            <div className="p-6 lg:p-8 border-b border-white/5 flex justify-between items-start bg-black/20">
+                                <div className="flex flex-col gap-4">
+                                    <img src={selectedCoach.avatar} alt="" className="w-16 h-16 rounded-2xl object-cover border border-white/10" />
+                                    <div>
+                                        <h3 className="text-2xl font-heading text-white mb-1 uppercase">{selectedCoach.name}</h3>
+                                        <span className="px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-[9px] text-gold font-bold uppercase tracking-widest">Inzan Coach</span>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedCoach(null)} className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors">
+                                    <X size={20} className="text-white/50" />
+                                </button>
+                            </div>
+
+                            <div className="p-6 lg:p-8 flex flex-col gap-6 overflow-y-auto flex-1 scrollbar-hide">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white/5 rounded-2xl p-4 flex flex-col items-center justify-center border border-white/5">
+                                        <span className="text-2xl font-heading text-white mb-1">{selectedCoach.clients}</span>
+                                        <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Active Clients</span>
+                                    </div>
+                                    <div className="bg-white/5 rounded-2xl p-4 flex flex-col items-center justify-center border border-white/5">
+                                        <span className="text-2xl font-heading text-gold mb-1">{selectedCoach.rating.toFixed(1)}</span>
+                                        <span className="text-[8px] text-gold/50 uppercase tracking-widest font-bold">Avg Rating</span>
+                                    </div>
+                                    <div className="bg-white/5 rounded-2xl p-4 flex flex-col items-center justify-center border border-white/5">
+                                        <span className="text-xl font-heading text-emerald-400 mb-1">{selectedCoach.retention}%</span>
+                                        <span className="text-[8px] text-emerald-400/50 uppercase tracking-widest font-bold">Retention</span>
+                                    </div>
+                                    <div className="bg-white/5 rounded-2xl p-4 flex flex-col items-center justify-center border border-white/5">
+                                        <span className="text-xl font-heading text-white mb-1">{selectedCoach.sessionsTaught}</span>
+                                        <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Sessions</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-4 bg-black/20 p-5 lg:p-6 rounded-3xl border border-white/5 mt-4">
+                                    <div className="flex justify-between items-center group cursor-help">
+                                        <span className="text-[9px] text-white/30 uppercase tracking-widest group-hover:text-white/50 transition-colors">Avg Spend per Session</span>
+                                        <span className="text-[10px] lg:text-[11px] text-white font-medium truncate max-w-[120px]">{selectedCoach.spend} EGP</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-6 border-t border-white/5 bg-black/40">
+                                <button className="w-full py-4 premium-button rounded-xl font-black text-[10px] tracking-[0.3em] uppercase text-black">
+                                    Message Coach
+                                </button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
@@ -151,7 +298,7 @@ function Scorecard({ title, value, trend, subtitle, highlight, icon }: any) {
     );
 }
 
-function CoachCard({ name, tier, clients, rating, avatar }: any) {
+function CoachCard({ name, tier, clients, rating, avatar, onClick }: any) {
     return (
         <motion.div
             whileHover={{ y: -5 }}
@@ -183,7 +330,7 @@ function CoachCard({ name, tier, clients, rating, avatar }: any) {
                 </div>
             </div>
 
-            <button className="w-full mt-8 lg:mt-10 py-4 lg:py-5 bg-white/5 hover:bg-gold/10 border border-white/5 hover:border-gold/30 rounded-2xl flex justify-between items-center px-6 lg:px-8 group/btn transition-all duration-500">
+            <button onClick={onClick} className="w-full mt-8 lg:mt-10 py-4 lg:py-5 bg-white/5 hover:bg-gold/10 border border-white/5 hover:border-gold/30 rounded-2xl flex justify-between items-center px-6 lg:px-8 group/btn transition-all duration-500">
                 <span className="text-[9px] font-black tracking-[0.3em] uppercase text-white/30 group-hover/btn:text-gold transition-colors">Coach Profile</span>
                 <ChevronRight size={14} className="text-white/10 group-hover/btn:text-gold transition-all" />
             </button>
