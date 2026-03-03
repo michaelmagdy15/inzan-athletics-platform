@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, lazy, Suspense } from 'react';
-import { Search, Bell, LayoutDashboard, Users, Calendar, UserCheck, Coffee, LogOut, DollarSign, Package, Settings, ChevronRight, X, AlertCircle, CheckCircle2, Info, Activity } from 'lucide-react';
+import { Search, Bell, LayoutDashboard, Users, Calendar, UserCheck, Coffee, LogOut, DollarSign, Package, Settings, ChevronRight, X, AlertCircle, CheckCircle2, Info, Activity, Dumbbell, BarChart3, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData, Member } from '../context/DataContext';
 import { supabase } from '../lib/supabase';
@@ -13,6 +13,9 @@ const EKKitchenView = lazy(() => import('../components/admin/EKKitchenView'));
 const FinancialsView = lazy(() => import('../components/admin/FinancialsView'));
 const InventoryView = lazy(() => import('../components/admin/InventoryView'));
 const SettingsView = lazy(() => import('../components/admin/SettingsView'));
+const PTSessionsView = lazy(() => import('../components/admin/PTSessionsView'));
+const PTReportsView = lazy(() => import('../components/admin/PTReportsView'));
+const SessionPoliciesView = lazy(() => import('../components/admin/SessionPoliciesView'));
 
 const ViewLoading = () => (
   <div className="flex-1 flex items-center justify-center p-12">
@@ -137,6 +140,10 @@ export default function AdminHub() {
               <NavItem icon={<Calendar size={18} />} label="Classes" isActive={activeTab === 'classes'} onClick={() => { setActiveTab('classes'); closeMobileMenu(); }} />
               <NavItem icon={<UserCheck size={18} />} label="Coaches" isActive={activeTab === 'coaches'} onClick={() => { setActiveTab('coaches'); closeMobileMenu(); }} />
               <div className="h-px bg-white/5 my-4 mx-4" />
+              <NavItem icon={<Dumbbell size={18} />} label="PT Sessions" isActive={activeTab === 'pt_sessions'} onClick={() => { setActiveTab('pt_sessions'); closeMobileMenu(); }} />
+              <NavItem icon={<BarChart3 size={18} />} label="PT Reports" isActive={activeTab === 'pt_reports'} onClick={() => { setActiveTab('pt_reports'); closeMobileMenu(); }} />
+              <NavItem icon={<Shield size={18} />} label="Session Policies" isActive={activeTab === 'session_policies'} onClick={() => { setActiveTab('session_policies'); closeMobileMenu(); }} />
+              <div className="h-px bg-white/5 my-4 mx-4" />
               <NavItem icon={<DollarSign size={18} />} label="Financials" isActive={activeTab === 'financials'} onClick={() => { setActiveTab('financials'); closeMobileMenu(); }} />
               <NavItem icon={<Coffee size={18} />} label="EK Kitchen" isActive={activeTab === 'ek_kitchen'} onClick={() => { setActiveTab('ek_kitchen'); closeMobileMenu(); }} />
               <NavItem icon={<Package size={18} />} label="Inventory" isActive={activeTab === 'inventory'} onClick={() => { setActiveTab('inventory'); closeMobileMenu(); }} />
@@ -233,6 +240,9 @@ export default function AdminHub() {
                   {activeTab === 'financials' && <FinancialsView />}
                   {activeTab === 'inventory' && <InventoryView />}
                   {activeTab === 'settings' && <SettingsView />}
+                  {activeTab === 'pt_sessions' && <PTSessionsView />}
+                  {activeTab === 'pt_reports' && <PTReportsView />}
+                  {activeTab === 'session_policies' && <SessionPoliciesView />}
                 </motion.div>
               </AnimatePresence>
             </Suspense>

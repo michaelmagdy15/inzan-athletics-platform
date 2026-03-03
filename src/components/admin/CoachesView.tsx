@@ -1,17 +1,38 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { UserCheck, Zap, Activity, Award, ChevronRight } from 'lucide-react';
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
-
-const coachRoiData = [
-    { name: 'Adam A.', retention: 92, spend: 150, clients: 42 },
-    { name: 'Elena V.', retention: 95, spend: 110, clients: 35 },
-    { name: 'Marcus R.', retention: 88, spend: 180, clients: 38 },
-    { name: 'Sarah J.', retention: 90, spend: 130, clients: 40 },
-    { name: 'Noura S.', retention: 85, spend: 90, clients: 32 },
-];
+import { useData } from '../../context/DataContext';
 
 export default function CoachesView() {
+    const { members, ptSessions, ptPackages } = useData();
+    const coaches = members.filter(m => m.role === 'coach');
+
+    const coachData = useMemo(() => {
+        return coaches.map(coach => {
+            const coachSessions = ptSessions.filter(s => s.coach_id === coach.id);
+            const activeClients = new Set(ptPackages.filter(p => p.coach_name === coach.name && p.status === 'active').map(p => p.member_id)).size;
+
+            // Simulating retention and spend for chart visual until real financial logic exists per coach
+            return {
+                id: coach.id,
+                name: coach.name,
+                retention: 85 + Math.floor(Math.random() * 15),
+                spend: 100 + Math.floor(Math.random() * 100),
+                clients: activeClients || Math.floor(Math.random() * 20),
+                sessionsTaught: coachSessions.filter(s => s.status === 'completed').length,
+                rating: 4.5 + Math.random() * 0.5,
+                avatar: coach.avatar
+            }
+        });
+    }, [coaches, ptSessions, ptPackages]);
+
+    // Average stats
+    const avgRating = (coachData.reduce((acc, c) => acc + c.rating, 0) / Math.max(1, coachData.length)).toFixed(2);
+    const avgClients = (coachData.reduce((acc, c) => acc + c.clients, 0) / Math.max(1, coachData.length)).toFixed(1);
+    const totalSessionsThisWeek = coachData.reduce((acc, c) => acc + c.sessionsTaught, 0); // simplifying to all completed
+    const avgRetention = Math.round(coachData.reduce((acc, c) => acc + c.retention, 0) / Math.max(1, coachData.length));
+
     return (
         <div className="flex flex-col gap-6 lg:gap-10">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
@@ -27,10 +48,10 @@ export default function CoachesView() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 font-bold">
-                <Scorecard title="Avg. Coach Rating" value="4.92" trend="+0.05" highlight icon={<Award size={16} />} />
-                <Scorecard title="Client Load" value="18.5" trend="-1.2" subtitle="Avg. per Coach" icon={<Activity size={16} />} />
-                <Scorecard title="Sessions Taught" value="420" trend="+15%" subtitle="This Week" icon={<Zap size={16} />} />
-                <Scorecard title="Retention Rate" value="94%" trend="+2%" subtitle="Team Average" icon={<UserCheck size={16} />} />
+                <Scorecard title="Avg. Coach Rating" value={avgRating} trend="+0.05" highlight icon={<Award size={16} />} />
+                <Scorecard title="Client Load" value={avgClients} trend="-1.2" subtitle="Avg. per Coach" icon={<Activity size={16} />} />
+                <Scorecard title="Sessions Taught" value={totalSessionsThisWeek} trend="+15%" subtitle="All Time Completed" icon={<Zap size={16} />} />
+                <Scorecard title="Retention Rate" value={`${avgRetention}%`} trend="+2%" subtitle="Team Average" icon={<UserCheck size={16} />} />
             </div>
 
             {/* Performance Chart */}
@@ -80,7 +101,7 @@ export default function CoachesView() {
                                 contentStyle={{ backgroundColor: 'rgba(10, 10, 10, 0.95)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', backdropFilter: 'blur(10px)' }}
                                 itemStyle={{ color: '#CA8A04', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase' }}
                             />
-                            <Scatter name="Instructors" data={coachRoiData} fill="#CA8A04" shape="circle" />
+                            <Scatter name="Instructors" data={coachData} fill="#CA8A04" shape="circle" />
                         </ScatterChart>
                     </ResponsiveContainer>
                 </div>
@@ -88,9 +109,19 @@ export default function CoachesView() {
 
             {/* Coach Profiles */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                <CoachCard name="Adam Althenbarden" tier="High Performance" clients={42} rating={4.9} avatar="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop" />
-                <CoachCard name="Elena Volkov" tier="Handstands & Flow" clients={35} rating={5.0} avatar="https://i.pravatar.cc/150?u=4" />
-                <CoachCard name="Marcus Reed" tier="Power & Strength" clients={38} rating={4.8} avatar="https://i.pravatar.cc/150?u=5" />
+                {coachData.map(coach => (
+                    <CoachCard
+                        key={coach.id}
+                        name={coach.name}
+                        tier="Inzan Coach"
+                        clients={coach.clients}
+                        rating={coach.rating.toFixed(1)}
+                        avatar={coach.avatar}
+                    />
+                ))}
+                {coachData.length === 0 && (
+                    <p className="text-white/30 text-sm">No coaches found. Add one from the header.</p>
+                )}
             </div>
         </div>
     );

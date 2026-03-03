@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import UserApp from './pages/UserApp';
 import AdminHub from './pages/AdminHub';
+import CoachApp from './pages/CoachApp';
 import AuthPage from './pages/AuthPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import UserSubPage from './pages/UserSubPage';
@@ -33,7 +34,12 @@ export default function App() {
 
         <Route
           path="/"
-          element={currentUser ? <UserApp /> : <Navigate to="/auth" />}
+          element={
+            !currentUser ? <Navigate to="/auth" /> :
+              currentUser.role === 'admin' ? <Navigate to="/admin" /> :
+                currentUser.role === 'coach' ? <CoachApp /> :
+                  <UserApp />
+          }
         />
 
         <Route
