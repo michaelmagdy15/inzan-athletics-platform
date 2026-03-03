@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Member, useData } from '../../context/DataContext';
 import { AlertCircle, Plus, Search, Filter, ShieldAlert, Fingerprint, QrCode, UserCheck, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface MembersViewProps {
     members: Member[];
@@ -14,6 +15,12 @@ export default function MembersView({ members, selectedMember, setSelectedMember
     const { registerAttendance, broadcastAlert } = useData();
     const [attendanceCode, setAttendanceCode] = useState('');
     const [isAttendanceTerminalOpen, setIsAttendanceTerminalOpen] = useState(false);
+    const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'expired'>('all');
+
+    const displayedMembers = useMemo(() => {
+        if (statusFilter === 'all') return members;
+        return members.filter(m => m.membershipStatus === statusFilter);
+    }, [members, statusFilter]);
 
     const handleAttendance = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,10 +36,13 @@ export default function MembersView({ members, selectedMember, setSelectedMember
     const stats = useMemo(() => {
         const activeCount = members.filter(m => m.membershipStatus === 'active').length;
         const riskyCount = members.filter(m => m.riskStatus === 'high').length;
+        const liveCount = members.filter(m => m.lastAttendance && (Date.now() - new Date(m.lastAttendance).getTime() < 2 * 60 * 60 * 1000)).length;
+
         return {
             total: members.length,
             active: activeCount,
-            risky: riskyCount
+            risky: riskyCount,
+            live: liveCount
         };
     }, [members]);
 
@@ -85,7 +95,7 @@ export default function MembersView({ members, selectedMember, setSelectedMember
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Scorecard title="Total Members" value={stats.total.toString()} trend="+2.1%" />
                 <Scorecard title="Active Status" value={stats.active.toString()} highlight icon={<Activity size={14} />} />
-                <Scorecard title="Live Attendance" value="12" subtitle="Active in facility" />
+                <Scorecard title="Live Attendance" value={stats.live.toString()} subtitle="Active in facility" />
                 <Scorecard title="Churn Risk" value={stats.risky.toString()} icon={<AlertCircle size={14} />} />
             </div>
 
@@ -97,8 +107,8 @@ export default function MembersView({ members, selectedMember, setSelectedMember
                         <h3 className="text-[10px] font-black text-white/30 tracking-[0.3em] uppercase">List Overview</h3>
                     </div>
                     <div className="flex gap-4">
-                        <button className="flex items-center gap-2 px-6 py-2.5 bg-white/5 rounded-xl text-[9px] font-bold text-white/40 tracking-widest uppercase border border-white/5 hover:text-white hover:border-gold/30 transition-all"><Filter size={12} /> Filter</button>
-                        <button className="px-6 py-2.5 bg-gold/10 rounded-xl text-[9px] font-black text-gold tracking-widest uppercase border border-gold/20">All Status</button>
+                        <button onClick={() => setStatusFilter(prev => prev === 'all' ? 'active' : prev === 'active' ? 'suspended' : prev === 'suspended' ? 'expired' : 'all')} className="flex items-center gap-2 px-6 py-2.5 bg-white/5 rounded-xl text-[9px] font-bold text-white/40 tracking-widest uppercase border border-white/5 hover:text-white hover:border-gold/30 transition-all"><Filter size={12} /> Filter</button>
+                        <button className="px-6 py-2.5 bg-gold/10 rounded-xl text-[9px] font-black text-gold tracking-widest uppercase border border-gold/20">{statusFilter === 'all' ? 'All Status' : statusFilter.toUpperCase()}</button>
                     </div>
                 </div>
 
@@ -114,7 +124,7 @@ export default function MembersView({ members, selectedMember, setSelectedMember
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5 font-bold">
-                            {members.map((member, idx) => (
+                            {displayedMembers.map((member, idx) => (
                                 <motion.tr
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
@@ -171,7 +181,7 @@ export default function MembersView({ members, selectedMember, setSelectedMember
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="glass-card rounded-[3rem] p-12 w-full max-w-lg flex flex-col gap-10 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-white/10"
+                            className="glass-card rounded-[3rem] p-12 w-full max-w-lg flex flex-col gap-6 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-white/10"
                             style={{ background: 'rgba(20, 20, 20, 0.8)' }}
                         >
                             <div className="text-center font-bold">
@@ -180,6 +190,11 @@ export default function MembersView({ members, selectedMember, setSelectedMember
                                 </div>
                                 <h2 className="text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">Member Access Scan</h2>
                                 <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold italic">Member Entry Scan</p>
+                            </div>
+
+                            <div className="flex flex-col items-center justify-center bg-white p-4 rounded-3xl mx-auto my-2 mt-0">
+                                <QRCodeSVG value={`${window.location.origin}/attendance`} size={140} />
+                                <p className="text-black font-bold uppercase tracking-[0.2em] text-[8px] mt-3">Scan to check-in</p>
                             </div>
 
                             <div className="flex flex-col gap-6">

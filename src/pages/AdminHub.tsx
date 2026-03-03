@@ -86,10 +86,11 @@ export default function AdminHub() {
         });
       }
       setCreationMode(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Failed to create ${creationMode}:`, err);
+      setSystemAlert({ message: err.message || 'Failed to initialize entity', type: 'error' });
     }
-  }, [creationMode, addMember, addCoach, addClass]);
+  }, [creationMode, addMember, addCoach, addClass, setSystemAlert]);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
@@ -294,7 +295,13 @@ export default function AdminHub() {
                   <div className="absolute top-0 right-0 w-16 h-16 bg-gold/10 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2" />
                   <p className="text-[10px] text-white/60 leading-relaxed italic relative z-10">Member demonstrating peak performance levels. Strategy maintenance advised.</p>
                   <button
-                    onClick={() => resetUserPassword(selectedMember.email)}
+                    onClick={async () => {
+                      try {
+                        await resetUserPassword(selectedMember.email);
+                      } catch (err: any) {
+                        setSystemAlert({ message: err.message, type: 'error' });
+                      }
+                    }}
                     className="premium-button w-full py-3 rounded-xl mt-4 lg:mt-6 group/btn overflow-hidden relative"
                   >
                     <div className="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
@@ -305,14 +312,26 @@ export default function AdminHub() {
 
               <div className="flex flex-col gap-3 mt-auto">
                 <button
-                  onClick={() => renewMembership(selectedMember.id)}
+                  onClick={async () => {
+                    try {
+                      await renewMembership(selectedMember.id);
+                    } catch (err: any) {
+                      setSystemAlert({ message: err.message, type: 'error' });
+                    }
+                  }}
                   className="w-full py-3.5 lg:py-4 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all font-bold"
                 >
                   Renew Membership
                 </button>
                 <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => updateMemberStatus(selectedMember.id, selectedMember.membershipStatus === 'active' ? 'suspended' : 'active')}
+                    onClick={async () => {
+                      try {
+                        await updateMemberStatus(selectedMember.id, selectedMember.membershipStatus === 'active' ? 'suspended' : 'active');
+                      } catch (err: any) {
+                        setSystemAlert({ message: err.message, type: 'error' });
+                      }
+                    }}
                     className={`py-3 lg:py-3.5 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all font-bold ${selectedMember.membershipStatus === 'active' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500/20' : 'bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20'}`}
                   >
                     {selectedMember.membershipStatus === 'active' ? 'Suspend' : 'Activate'}
@@ -320,8 +339,12 @@ export default function AdminHub() {
                   <button
                     onClick={async () => {
                       if (confirm('Are you sure you want to purge this entity?')) {
-                        await deleteMember(selectedMember.id);
-                        setSelectedMember(null);
+                        try {
+                          await deleteMember(selectedMember.id);
+                          setSelectedMember(null);
+                        } catch (err: any) {
+                          setSystemAlert({ message: err.message, type: 'error' });
+                        }
                       }
                     }}
                     className="py-3 lg:py-3.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500 text-red-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all font-bold"

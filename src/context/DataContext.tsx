@@ -18,6 +18,7 @@ export interface Member {
   bookedClasses: string[];
   membershipExpiry: string | null;
   membershipStatus: 'active' | 'suspended' | 'expired' | 'pending';
+  lastAttendance: string | null;
 }
 
 export interface Badge {
@@ -306,7 +307,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         code: p.member_code || p.id.substring(0, 8).toUpperCase(),
         bookedClasses: bookingsData?.filter(b => b.member_id === p.id).map(b => b.class_id) || [],
         membershipExpiry: p.membership_expiry,
-        membershipStatus: p.membership_status || 'active'
+        membershipStatus: p.membership_status || 'active',
+        lastAttendance: p.last_attendance || null
       })) || [];
 
       setMembers(mappedMembers);
@@ -437,6 +439,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const addMember = async (data: Partial<Member>) => {
     const { error } = await supabase.from('profiles').insert({
+      id: crypto.randomUUID(),
       full_name: data.name,
       email: data.email,
       role: 'member',
@@ -486,6 +489,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const addCoach = async (data: Partial<Member>) => {
     const { data: profile, error: pError } = await supabase.from('profiles').insert({
+      id: crypto.randomUUID(),
       full_name: data.name,
       email: data.email,
       role: 'coach',
