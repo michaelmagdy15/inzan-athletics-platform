@@ -11,11 +11,10 @@ RUN npm install
 COPY . .
 
 # Build the application
-# Note: Vite uses environment variables at build time. 
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_ANON_KEY
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
-ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+# Build the application
+# Note: Vite uses environment variables at build time. We explicitly write them in so the Cloud Build environment doesn't miss them.
+RUN echo "VITE_SUPABASE_URL=https://axjpzootzbocwdrsbgmp.supabase.co" > .env
+RUN echo "VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4anB6b290emJvY3dkcnNiZ21wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNzcxNzIsImV4cCI6MjA4Nzk1MzE3Mn0.yBQSGUYYMUQ_K3GVkU7TI2hWNxRWgkKML6sdbkt5QzE" >> .env
 RUN npm run build
 
 # Runtime Stage
