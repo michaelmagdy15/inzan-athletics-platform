@@ -80,6 +80,24 @@ export default function App() {
           }
         />
 
+        {/* Admin Preview Routes */}
+        <Route
+          path="/preview-member"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <UserApp />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/preview-coach"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <CoachApp />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Strictly Admin Protected Area */}
         <Route
           path="/admin/*"
