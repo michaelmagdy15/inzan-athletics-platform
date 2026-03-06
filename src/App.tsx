@@ -1,12 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import UserApp from './pages/UserApp';
-import AdminHub from './pages/AdminHub';
-import CoachApp from './pages/CoachApp';
-import AuthPage from './pages/AuthPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import UserSubPage from './pages/UserSubPage';
-import { useData } from './context/DataContext';
-import { Loader2 } from 'lucide-react';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import UserApp from "./pages/UserApp";
+import AdminHub from "./pages/AdminHub";
+import CoachApp from "./pages/CoachApp";
+import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import UserSubPage from "./pages/UserSubPage";
+import PaymentResult from "./pages/PaymentResult";
+import { useData } from "./context/DataContext";
+import { Loader2 } from "lucide-react";
+
+import ProtectedRoute from "./components/shared/ProtectedRoute";
+
+import KDSApp from "./pages/KDSApp";
 
 export default function App() {
   const { currentUser, loading } = useData();
@@ -27,32 +32,61 @@ export default function App() {
           element={!currentUser ? <AuthPage /> : <Navigate to="/" />}
         />
 
-        <Route
-          path="/reset-password"
-          element={<ResetPasswordPage />}
-        />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
+        {/* Member & Global Landing */}
         <Route
           path="/"
           element={
-            !currentUser ? <Navigate to="/auth" /> :
-              currentUser.role === 'admin' ? <Navigate to="/admin" /> :
-                currentUser.role === 'coach' ? <CoachApp /> :
-                  <UserApp />
+            <ProtectedRoute>
+              {currentUser?.role === "admin" ? (
+                <Navigate to="/admin" />
+              ) : currentUser?.role === "coach" ? (
+                <CoachApp />
+              ) : (
+                <UserApp />
+              )}
+            </ProtectedRoute>
           }
         />
 
+        {/* KDS (Kitchen Tablet Mode) */}
         <Route
-          path="/p/:pageId"
-          element={currentUser ? <UserSubPage /> : <Navigate to="/auth" />}
+          path="/kds"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <KDSApp />
+            </ProtectedRoute>
+          }
         />
 
+        {/* Member Protected SubPages */}
         <Route
-          path="/admin"
+          path="/p/:pageId"
           element={
-            currentUser?.role === 'admin'
-              ? <AdminHub />
-              : <Navigate to={currentUser ? "/" : "/auth"} />
+            <ProtectedRoute allowedRoles={["member"]}>
+              <UserSubPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Payment Webhook Redirects */}
+        <Route
+          path="/payment/:status"
+          element={
+            <ProtectedRoute>
+              <PaymentResult />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Strictly Admin Protected Area */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminHub />
+            </ProtectedRoute>
           }
         />
 
@@ -61,4 +95,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

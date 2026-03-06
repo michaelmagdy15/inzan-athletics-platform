@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Montserrat:wght@100;300;400;500;700;900&family=Inter:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Montserrat:wght@100;300;400;500;700;900&family=Inter:wght@400;500;600&display=swap");
 
 @theme {
   --font-heading: "Syne", sans-serif;
   --font-body: "Montserrat", sans-serif;
 
-  --color-gold: #CA8A04;
-  --color-gold-light: #FACC15;
-  --color-gold-dark: #854D0E;
+  --color-gold: #ca8a04;
+  --color-gold-light: #facc15;
+  --color-gold-dark: #854d0e;
 
   --color-dark: #050505;
   --color-dark-soft: #141414;
   --color-primary: #050505;
   /* Keeping existing primary, as it's not explicitly removed/replaced by new dark/dark-soft */
   --color-secondary: #141414;
-  --color-accent: #CA8A04;
+  --color-accent: #ca8a04;
 
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
@@ -25,7 +25,6 @@
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0);
@@ -78,11 +77,15 @@ h6 {
 
 .premium-button {
   @apply relative overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer;
-  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-gold) 0%,
+    var(--color-gold-dark) 100%
+  );
 }
 
 .premium-button::after {
-  content: '';
+  content: "";
   @apply absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300;
 }
 
@@ -110,7 +113,7 @@ h6 {
 }
 
 .text-gradient-gold {
-  background: linear-gradient(135deg, #FFE08A 0%, #CA8A04 50%, #854D0E 100%);
+  background: linear-gradient(135deg, #ffe08a 0%, #ca8a04 50%, #854d0e 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

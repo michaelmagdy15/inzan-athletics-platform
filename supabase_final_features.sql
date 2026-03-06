@@ -6,15 +6,18 @@ CREATE TABLE membership_tiers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     price NUMERIC NOT NULL,
+    billing_cycle TEXT NOT NULL DEFAULT 'monthly',
     features TEXT[] NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Insert default tiers
-INSERT INTO membership_tiers (name, price, features) VALUES
-('Fuel Plan', 1500, ARRAY['Gym Access', 'Locker Room']),
-('Holistic Flow', 2500, ARRAY['Gym Access', 'Classes', 'Sauna']),
-('Elite Access', 4500, ARRAY['All Access', 'Unlimited PT', 'Priority Booking']);
+-- Insert real tiers based on pricing image
+INSERT INTO membership_tiers (name, price, billing_cycle, features) VALUES
+('PREMIUM ANNUAL', 40625, 'yearly', ARRAY['12 Weeks freezing period', '30 Invitations (1 three-day pass, 1 seven-day pass)', '12 Paid classes (3 per zone)', 'Selected free classes', '6 Private group training sessions (3-5 Athletes)', '1 Free assessment with trainer', '1 Free physiotherapy assessment', '1 Free nutrition assessment', '10% Discount PADEL8 x Masr Italia']),
+('BASIC ANNUAL', 37500, 'yearly', ARRAY['8 Weeks freezing period', '14 Invitations (1 three-day pass)', '6 Paid classes (3 per zone)', 'Selected free classes', '3 Private group training sessions (3-5 Athletes)', '1 Free assessment with trainer', '1 Free physiotherapy assessment', '1 Free nutrition assessment', '10% Discount PADEL8 x Masr Italia']),
+('SEMI-ANNUAL', 20300, 'yearly', ARRAY['Access to gym facilities', 'Standard benefits']),
+('QUARTERLY', 12050, 'yearly', ARRAY['Access to gym facilities', 'Standard benefits']),
+('MONTHLY', 6000, 'monthly', ARRAY['Access to gym facilities', 'Standard benefits']);
 
 -- Enable RLS for membership_tiers
 ALTER TABLE membership_tiers ENABLE ROW LEVEL SECURITY;
