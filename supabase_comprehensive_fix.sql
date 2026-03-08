@@ -20,6 +20,13 @@ INSERT INTO public.membership_tiers (name, price, billing_cycle, features)
 SELECT 'BASIC ANNUAL', 37500, 'yearly', ARRAY['8 Weeks freezing period', '14 Invitations (1 three-day pass)']
 WHERE NOT EXISTS (SELECT 1 FROM public.membership_tiers LIMIT 1);
 
+-- 2.5. Safe Enum Update
+-- Attempt to add 'nutritionist' to the enum if it exists. 
+-- Note: This is idempotent and should be run manually if the sequence below fails.
+ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'nutritionist';
+ALTER TYPE membership_status ADD VALUE IF NOT EXISTS 'pending';
+ALTER TYPE membership_status ADD VALUE IF NOT EXISTS 'canceled';
+
 -- 4. Create/Fix Profiles Table
 -- Using a DO block to handle complex schema updates safely
 DO $$ 
@@ -47,16 +54,21 @@ BEGIN
         );
     END IF;
 
-    -- Ensure 'nutritionist' is allowed in the role constraint
-    -- First, drop the old constraint if it exists
+    -- Ensure 'nutritionist' is allowed
+    -- We drop old constraints first
     ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
-    ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check 
-        CHECK (role IN ('member', 'admin', 'coach', 'nutritionist'));
-
-    -- Ensure 'pending' is allowed in membership_status
     ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_membership_status_check;
+
+    -- If the column type is still the ENUM, we skip the CHECK constraint or use a text-cast version
+    -- The ADD VALUE above ensures the enum itself allows it.
+    -- To facilitate further role additions, we prefer the column to be text, but we won't force a type change here.
+    
+    -- Check if we can add a check constraint safely by casting
+    ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check 
+        CHECK (role::text IN ('member', 'admin', 'coach', 'nutritionist'));
+
     ALTER TABLE public.profiles ADD CONSTRAINT profiles_membership_status_check 
-        CHECK (membership_status IN ('active', 'suspended', 'expired', 'pending', 'canceled'));
+        CHECK (membership_status::text IN ('active', 'suspended', 'expired', 'pending', 'canceled'));
 
     -- Ensure invitations_balance exists
     IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='profiles' AND COLUMN_NAME='invitations_balance') THEN
