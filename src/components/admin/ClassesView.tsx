@@ -27,35 +27,35 @@ export default function ClassesView() {
   const lowestAttendanceClass =
     classes.length > 0
       ? [...classes].sort((a, b) => {
-          const aFill = (a.total_spots - a.spots_left) / a.total_spots;
-          const bFill = (b.total_spots - b.spots_left) / b.total_spots;
-          return aFill - bFill;
-        })[0]
+        const aFill = (a.total_spots - a.spots_left) / a.total_spots;
+        const bFill = (b.total_spots - b.spots_left) / b.total_spots;
+        return aFill - bFill;
+      })[0]
       : null;
 
   const insightDay = lowestAttendanceClass
     ? new Date(lowestAttendanceClass.time).toLocaleDateString("en-US", {
-        weekday: "long",
-      })
+      weekday: "long",
+    })
     : "Thursday";
   const insightTime = lowestAttendanceClass
     ? lowestAttendanceClass.time.includes(" ")
       ? lowestAttendanceClass.time.split(" ")[1]
       : new Date(lowestAttendanceClass.time).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : "14:00";
   const insightTitle = lowestAttendanceClass
     ? lowestAttendanceClass.title
     : "Flow";
   const insightCapacity = lowestAttendanceClass
     ? (
-        ((lowestAttendanceClass.total_spots -
-          lowestAttendanceClass.spots_left) /
-          lowestAttendanceClass.total_spots) *
-        100
-      ).toFixed(0)
+      ((lowestAttendanceClass.total_spots -
+        lowestAttendanceClass.spots_left) /
+        lowestAttendanceClass.total_spots) *
+      100
+    ).toFixed(0)
     : "0";
 
   const enrolledMembers = React.useMemo(() => {
@@ -159,7 +159,7 @@ export default function ClassesView() {
       </AnimatePresence>
 
       {/* Day Selector */}
-      <div className="flex gap-2 lg:gap-4 p-2 bg-black/40 rounded-[1.5rem] lg:rounded-3xl border border-white/5 font-bold overflow-x-auto scrollbar-hide">
+      <div className="flex gap-1.5 sm:gap-4 p-1.5 sm:p-2 bg-black/40 rounded-2xl sm:rounded-3xl border border-white/5 font-bold overflow-x-auto scrollbar-hide snap-x">
         {next30Days.map((date) => {
           const isSelected = activeDate.toDateString() === date.toDateString();
           const dayName = date
@@ -174,9 +174,8 @@ export default function ClassesView() {
             <button
               key={date.toISOString()}
               onClick={() => setActiveDate(date)}
-              className={`flex flex-col items-center justify-center min-w-[70px] lg:min-w-[80px] py-3 lg:py-4 rounded-xl lg:rounded-2xl transition-all duration-500 relative overflow-hidden group ${
-                isSelected ? "text-white" : "text-white/30 hover:text-white/70"
-              }`}
+              className={`flex flex-col items-center justify-center min-w-[65px] sm:min-w-[80px] py-2.5 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-500 relative overflow-hidden group snap-center ${isSelected ? "text-white" : "text-white/30 hover:text-white/70"
+                }`}
             >
               {isSelected && (
                 <motion.div
@@ -184,13 +183,13 @@ export default function ClassesView() {
                   className="absolute inset-0 bg-gold/10 border border-gold/30"
                 />
               )}
-              <span className="relative z-10 text-[9px] tracking-widest mb-1">
+              <span className="relative z-10 text-[8px] sm:text-[9px] tracking-widest mb-0.5 sm:mb-1">
                 {dayName}
               </span>
-              <span className="relative z-10 text-xl font-heading">
+              <span className="relative z-10 text-lg sm:text-xl font-heading">
                 {dayNumber}
               </span>
-              <span className="relative z-10 text-[8px] tracking-[0.2em] mt-1">
+              <span className="relative z-10 text-[7px] sm:text-[8px] tracking-[0.2em] mt-0.5 sm:mt-1">
                 {monthName}
               </span>
             </button>
@@ -199,13 +198,13 @@ export default function ClassesView() {
       </div>
 
       {/* Classes List */}
-      <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 p-6 lg:p-10 shadow-2xl flex flex-col gap-6 lg:gap-8 relative overflow-hidden">
-        <div className="flex items-center justify-between mb-2 font-bold">
+      <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 p-5 lg:p-10 shadow-2xl flex flex-col gap-6 lg:gap-8 relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2 font-bold">
           <h3 className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase">
-            Upcoming Classes
+            Scheduled Sessions
           </h3>
-          <span className="text-[9px] text-gold/60 font-bold tracking-widest uppercase">
-            {classes.length} Classes Scheduled
+          <span className="text-[9px] text-gold/60 font-bold tracking-widest uppercase bg-gold/5 px-3 py-1 rounded-full border border-gold/10">
+            {classes.length} Sessions Live
           </span>
         </div>
         <div
@@ -222,39 +221,39 @@ export default function ClassesView() {
               transition={{ delay: idx * 0.1 }}
               key={c.id}
               onClick={() => setSelectedClass(c)}
-              className={`group bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 hover:border-gold/20 rounded-[1.5rem] lg:rounded-3xl p-6 lg:p-8 flex ${viewMode === "List" ? "flex-col sm:flex-row justify-between items-start sm:items-center" : "flex-col justify-between items-start gap-8"} transition-all duration-500 cursor-pointer shadow-inner relative overflow-hidden`}
+              className={`group bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 hover:border-gold/20 rounded-2xl lg:rounded-3xl p-5 lg:p-8 flex ${viewMode === "List" ? "flex-col sm:flex-row gap-6 sm:justify-between sm:items-center" : "flex-col justify-between items-start gap-8"} transition-all duration-500 cursor-pointer shadow-inner relative overflow-hidden`}
             >
               <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-gold/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
               <div
-                className={`flex ${viewMode === "List" ? "items-center gap-6 lg:gap-8" : "flex-col gap-5"} relative z-10 w-full`}
+                className={`flex ${viewMode === "List" ? "items-center gap-5 sm:gap-8" : "flex-col gap-5"} relative z-10 w-full`}
               >
                 <div
-                  className={`flex flex-col ${viewMode === "List" ? "items-center" : "items-start"} min-w-[60px]`}
+                  className={`flex flex-col ${viewMode === "List" ? "items-center" : "items-start"} min-w-[50px] sm:min-w-[60px]`}
                 >
                   <span className="text-xl lg:text-2xl font-heading text-white group-hover:text-gold transition-colors">
                     {c.time.split(" ")[0]}
                   </span>
-                  <span className="text-[9px] text-white/20 font-black tracking-widest uppercase">
+                  <span className="text-[8px] sm:text-[9px] text-white/20 font-black tracking-widest uppercase">
                     {c.time.split(" ")[1]}
                   </span>
                 </div>
                 {viewMode === "List" && (
-                  <div className="w-px h-10 lg:h-12 bg-white/5" />
+                  <div className="hidden sm:block w-px h-10 lg:h-12 bg-white/5" />
                 )}
-                <div className="flex flex-col gap-1 lg:gap-1.5 flex-1">
-                  <h4 className="text-lg lg:text-xl font-heading text-white tracking-tight uppercase group-hover:text-gold transition-colors">
+                <div className="flex flex-col gap-1 lg:gap-1.5 flex-1 min-w-0">
+                  <h4 className="text-base sm:text-lg lg:text-xl font-heading text-white tracking-tight uppercase group-hover:text-gold transition-colors truncate">
                     {c.title}
                   </h4>
-                  <div className="flex flex-wrap items-center gap-3 lg:gap-4 text-[10px] text-white/30 uppercase tracking-widest font-bold">
+                  <div className="flex flex-wrap items-center gap-3 lg:gap-4 text-[9px] sm:text-[10px] text-white/30 uppercase tracking-widest font-bold">
                     <div className="flex items-center gap-1.5 group-hover:text-white/50 transition-colors">
-                      <User size={12} className="text-gold/50" />
-                      <span className="truncate max-w-[120px]">
+                      <User size={12} className="text-gold/50 shrink-0" />
+                      <span className="truncate max-w-[100px] sm:max-w-[120px]">
                         {c.trainer}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 group-hover:text-white/50 transition-colors">
-                      <Clock size={12} className="text-gold/50" />
+                      <Clock size={12} className="text-gold/50 shrink-0" />
                       <span>60 MIN</span>
                     </div>
                   </div>
@@ -262,7 +261,7 @@ export default function ClassesView() {
               </div>
 
               <div
-                className={`w-full ${viewMode === "List" ? "sm:w-auto flex justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0" : "flex justify-between border-t pt-5"} items-center gap-6 lg:gap-8 relative z-10 border-white/5`}
+                className={`w-full ${viewMode === "List" ? "sm:w-auto flex justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0" : "flex justify-between border-t pt-5"} items-center gap-4 sm:gap-8 relative z-10 border-white/5`}
               >
                 <div className="flex flex-col gap-1 text-left sm:text-right">
                   <div className="text-sm font-mono tracking-[0.2em] text-white/80">
@@ -273,23 +272,20 @@ export default function ClassesView() {
                     >
                       {c.total_spots - c.spots_left}
                     </span>
-                    <span className="text-white/20 mx-2">/</span>
+                    <span className="text-white/20 mx-1.5">/</span>
                     <span className="text-white/40">{c.total_spots}</span>
                   </div>
                   <div
-                    className={`flex items-center justify-start gap-2 ${viewMode === "List" && "sm:justify-end"}`}
+                    className={`flex items-center justify-start gap-1.5 ${viewMode === "List" && "sm:justify-end"}`}
                   >
-                    {c.spots_left > 0 && (
-                      <CheckCircle2 size={10} className="text-emerald-500/50" />
-                    )}
                     <span
-                      className={`text-[8px] font-black uppercase tracking-widest ${c.spots_left === 0 ? "text-red-500" : "text-white/20"}`}
+                      className={`text-[8px] font-black uppercase tracking-widest ${c.spots_left === 0 ? "text-red-500" : "text-emerald-500/60"}`}
                     >
-                      {c.spots_left === 0 ? "Full" : "Open"}
+                      {c.spots_left === 0 ? "Sold Out" : "Limited Slots"}
                     </span>
                   </div>
                 </div>
-                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all shrink-0">
+                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 group-hover:bg-gold/5 transition-all shrink-0">
                   <ChevronRight
                     size={16}
                     className="text-white/10 group-hover:text-gold transition-all"
@@ -304,59 +300,50 @@ export default function ClassesView() {
       {/* Add Class Modal */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-50 flex items-center justify-center p-4 overflow-y-auto">
             <motion.form
               onSubmit={handleAddClass}
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-[#0a0a0a] rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-12 w-full max-w-lg flex flex-col gap-6 lg:gap-8 shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/5 max-h-[90vh] overflow-y-auto scrollbar-hide relative"
+              className="bg-[#0a0a0a] rounded-[2rem] lg:rounded-[3rem] p-6 sm:p-10 lg:p-12 w-full max-w-lg flex flex-col gap-6 lg:gap-8 shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/5 my-auto relative"
             >
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors z-10"
               >
                 <X size={20} className="text-white/50" />
               </button>
 
-              <div className="text-center font-bold">
-                <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">
+              <div className="text-center font-bold relative">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">
                   Add Class
                 </h2>
-                <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">
-                  New Schedule Entry
+                <p className="text-[9px] sm:text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">
+                  Deploy Intelligence
                 </p>
               </div>
 
-              <div className="flex flex-col gap-4 font-bold">
+              <div className="flex flex-col gap-4 font-bold overflow-y-auto max-h-[60vh] pr-2 scrollbar-hide py-2">
                 <input
                   name="title"
                   required
-                  placeholder="CLASS NAME (e.g. Flow, Core)"
-                  className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20"
+                  placeholder="CLASS NAME"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-xs sm:text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/10"
                 />
 
                 <div className="relative group">
                   <select
                     name="trainer"
                     required
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white appearance-none uppercase tracking-widest cursor-pointer focus:border-gold/30 transition-all font-bold"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-xs sm:text-sm outline-none text-white appearance-none uppercase tracking-widest cursor-pointer focus:border-gold/30 transition-all font-bold"
                   >
-                    <option
-                      value=""
-                      disabled
-                      selected
-                      className="text-white/20"
-                    >
+                    <option value="" disabled selected className="text-white/20">
                       SELECT INSTRUCTOR
                     </option>
                     {coaches.map((coach) => (
-                      <option
-                        key={coach.id}
-                        value={coach.name}
-                        className="bg-black"
-                      >
+                      <option key={coach.id} value={coach.name} className="bg-black">
                         {coach.name}
                       </option>
                     ))}
@@ -364,26 +351,26 @@ export default function ClassesView() {
                   <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-hover:text-gold rotate-90 transition-colors pointer-events-none" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     name="date"
                     type="date"
                     required
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all uppercase tracking-widest"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-xs sm:text-sm outline-none text-white focus:border-gold/30 transition-all uppercase tracking-widest"
                   />
                   <input
                     name="time"
                     type="time"
                     required
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all uppercase tracking-widest"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-xs sm:text-sm outline-none text-white focus:border-gold/30 transition-all uppercase tracking-widest"
                   />
                 </div>
 
                 <input
                   name="location"
                   required
-                  placeholder="LOCATION (e.g. Studio 1)"
-                  className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20"
+                  placeholder="LOCATION"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-xs sm:text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/10"
                 />
 
                 <div className="grid grid-cols-2 gap-4">
@@ -391,40 +378,41 @@ export default function ClassesView() {
                     name="duration"
                     type="number"
                     required
-                    placeholder="DURATION (MINS)"
+                    placeholder="MINS"
                     defaultValue="60"
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-xs sm:text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/10"
                   />
                   <input
                     name="spots"
                     type="number"
                     required
-                    placeholder="CAPACITY"
+                    placeholder="LIMIT"
                     defaultValue="20"
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/20"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-xs sm:text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder-white/10"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-4 lg:gap-6 pt-2 font-bold">
+              <div className="flex gap-4 sm:gap-6 pt-4 font-bold">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors"
                 >
-                  Cancel
+                  Abort
                 </button>
                 <button
                   type="submit"
-                  className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20"
+                  className="premium-button flex-1 h-14 rounded-xl sm:rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20"
                 >
-                  Create
+                  Deploy
                 </button>
               </div>
             </motion.form>
           </div>
         )}
       </AnimatePresence>
+
 
       {/* Class Details Sidebar */}
       <AnimatePresence>

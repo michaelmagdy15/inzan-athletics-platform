@@ -81,8 +81,8 @@ export default function DashboardView() {
     const peakHour =
       Object.keys(hourCounts).length > 0
         ? Object.keys(hourCounts).reduce((a, b) =>
-            hourCounts[a] > hourCounts[b] ? a : b,
-          )
+          hourCounts[a] > hourCounts[b] ? a : b,
+        )
         : "N/A";
     peakHourStr = peakHour;
   }
@@ -118,95 +118,95 @@ export default function DashboardView() {
   };
 
   return (
-    <div className="flex flex-col gap-6 lg:gap-10">
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+    <div className="flex flex-col gap-5 xl:gap-8 min-h-0">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">
+          <h1 className="text-xl lg:text-3xl font-heading tracking-tight text-white mb-0.5 uppercase">
             Admin Dashboard
           </h1>
-          <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">
-            Real-time Performance & Gym Overview
+          <p className="text-[9px] lg:text-[10px] tracking-[0.3em] text-white/30 uppercase font-bold italic">
+            Real-time Systems Status
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-4 lg:px-5 py-2 lg:py-2.5 rounded-xl lg:rounded-2xl backdrop-blur-xl transition-all hover:border-gold/30 group cursor-pointer shadow-xl">
+        <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-4 lg:px-5 py-2 rounded-xl lg:rounded-2xl backdrop-blur-xl transition-all hover:border-gold/30 group cursor-pointer shadow-xl">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-          <span className="text-[10px] font-bold text-white/60 tracking-widest uppercase group-hover:text-white transition-colors">
+          <span className="text-[9px] lg:text-[10px] font-black text-white/40 tracking-widest uppercase group-hover:text-white transition-colors">
             System Online
           </span>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
         <StatCard
-          title="Total Revenue"
+          title="Revenue"
           value={`${totalRevenue.toLocaleString()}`}
           currency="EGP"
-          trend={totalRevenue > 0 ? "+Active" : "-"}
-          icon={<Wallet size={18} />}
+          trend={totalRevenue > 0 ? "+ACTV" : "-"}
+          icon={<Wallet size={16} />}
         />
         <StatCard
-          title="Active Members"
+          title="Active"
           value={activeUsers.toString()}
-          trend={`${totalMembers} Total`}
-          icon={<Users size={18} />}
+          trend={`${totalMembers} TOT`}
+          icon={<Users size={16} />}
         />
         <StatCard
-          title="Kitchen Sales"
+          title="Sales"
           value={`${kitchenSales.toLocaleString()}`}
           currency="EGP"
-          trend={kitchenSales > 0 ? "Active" : "-"}
-          icon={<Zap size={18} />}
+          trend={kitchenSales > 0 ? "LIVE" : "-"}
+          icon={<Zap size={16} />}
         />
         <StatCard
-          title="Schedule Load"
+          title="Load"
           value={`${scheduleLoad}%`}
           highlight
-          icon={<Activity size={18} />}
+          icon={<Activity size={16} />}
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 xl:gap-10">
         {/* Operations Insights */}
-        <div className="xl:col-span-2 glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 relative overflow-hidden group shadow-2xl">
+        <div className="xl:col-span-2 glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-8 xl:p-10 relative overflow-hidden group shadow-2xl border border-white/5">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-          <div className="flex justify-between items-center mb-10 relative z-10 font-bold">
+          <div className="flex justify-between items-center mb-6 xl:mb-10 relative z-10 font-bold">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-[0_0_15px_rgba(202,138,4,0.1)]">
                 <Activity size={20} className="text-gold" />
               </div>
               <div>
-                <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-white/80">
-                  Gym Overview
+                <h3 className="text-[10px] lg:text-xs font-black uppercase tracking-[0.3em] text-white/80 leading-none">
+                  Facility Overview
                 </h3>
-                <p className="text-[10px] text-white/40 tracking-widest font-black uppercase mt-1">
-                  Live Statistics
+                <p className="text-[8px] lg:text-[9px] text-white/30 tracking-widest font-black uppercase mt-1.5 italic">
+                  Neural Intelligence
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative z-10 font-bold">
-            <div className="flex flex-col gap-6">
-              <h4 className="text-[10px] text-gold tracking-[0.4em] uppercase font-bold">
-                Member Analytics
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 xl:gap-10 relative z-10 font-bold">
+            <div className="flex flex-col gap-4">
+              <h4 className="text-[9px] text-gold/60 tracking-[0.4em] uppercase font-black">
+                Members
               </h4>
-              <div className="p-6 bg-black/40 rounded-3xl border border-white/5 space-y-4">
+              <div className="p-5 lg:p-6 bg-black/40 rounded-3xl border border-white/5 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-white/30 uppercase tracking-widest">
+                  <span className="text-[8px] text-white/30 uppercase tracking-widest">
                     Target Met
                   </span>
-                  <span className="text-emerald-400 font-bold">
+                  <span className="text-emerald-400 font-bold text-[11px] lg:text-sm">
                     {memberGrowthRate}%
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-white/30 uppercase tracking-widest">
-                    Churn Potential
+                  <span className="text-[8px] text-white/30 uppercase tracking-widest">
+                    Churn
                   </span>
                   <span
-                    className={`${Number(churnPotential) > 5 ? "text-red-400" : "text-white/60"} font-bold`}
+                    className={`${Number(churnPotential) > 5 ? "text-red-400" : "text-white/60"} font-bold text-[11px] lg:text-sm`}
                   >
                     {churnPotential}%
                   </span>
@@ -219,24 +219,24 @@ export default function DashboardView() {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-6">
-              <h4 className="text-[10px] text-gold tracking-[0.4em] uppercase font-bold">
-                Class Engagement
+            <div className="flex flex-col gap-4">
+              <h4 className="text-[9px] text-gold/60 tracking-[0.4em] uppercase font-black">
+                Classes
               </h4>
-              <div className="p-6 bg-black/40 rounded-3xl border border-white/5 space-y-4">
+              <div className="p-5 lg:p-6 bg-black/40 rounded-3xl border border-white/5 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-white/30 uppercase tracking-widest">
+                  <span className="text-[8px] text-white/30 uppercase tracking-widest">
                     Avg Attendance
                   </span>
-                  <span className="text-white font-bold">
-                    {avgAttendance} / session
+                  <span className="text-white font-bold text-[11px] lg:text-sm">
+                    {avgAttendance}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-white/30 uppercase tracking-widest">
-                    Peak Hours
+                  <span className="text-[8px] text-white/30 uppercase tracking-widest">
+                    Peak Times
                   </span>
-                  <span className="text-gold font-bold">{peakHourStr}</span>
+                  <span className="text-gold font-bold text-[11px] lg:text-sm truncate max-w-[80px]">{peakHourStr}</span>
                 </div>
                 <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
                   <div
@@ -248,36 +248,35 @@ export default function DashboardView() {
             </div>
           </div>
 
-          <div className="mt-8 lg:mt-10 p-6 lg:p-8 bg-gold/5 border border-gold/10 rounded-2xl lg:rounded-3xl relative overflow-hidden">
-            <p className="text-sm font-light text-white/60 leading-relaxed uppercase tracking-widest text-[11px] relative z-10">
-              Analytics compiled from active database state. {activeUsers}{" "}
-              members currently contributing to engagement load.
+          <div className="mt-8 xl:mt-10 p-5 lg:p-6 bg-gold/5 border border-gold/10 rounded-[2rem] relative overflow-hidden">
+            <p className="text-[9px] lg:text-[10px] font-bold text-white/40 leading-relaxed uppercase tracking-[0.2em] relative z-10 italic">
+              System analysis: active capacity load at {scheduleLoad}%. Operational maintenance advised for peak synchronization.
             </p>
           </div>
         </div>
 
         {/* Quick Actions Panel */}
         <div className="flex flex-col gap-6 lg:gap-10 font-bold">
-          <div className="glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 flex flex-col gap-6 lg:gap-10 shadow-2xl relative overflow-hidden group">
+          <div className="glass-card rounded-[2rem] lg:rounded-[3rem] p-6 xl:p-10 flex flex-col gap-5 xl:gap-8 shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">
-              Quick Actions
+            <h3 className="text-[9px] xl:text-[10px] font-black uppercase tracking-[0.4em] text-white/40">
+              Operations Control
             </h3>
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3.5">
               <ActionButton
-                label="Send Member Announcement"
+                label="Broadcast Alert"
                 onClick={() => handleAction("Send Member Announcement")}
               />
               <ActionButton
-                label="Export Daily Report"
+                label="Registry Export"
                 onClick={() => handleAction("Export Daily Report")}
               />
               <ActionButton
-                label="Sync Time"
+                label="System Sync"
                 onClick={() => handleAction("Sync System Time")}
               />
               <ActionButton
-                label="Run Security Check"
+                label="Hardware Audit"
                 variant="danger"
                 onClick={() => handleAction("Run Security Check")}
               />
@@ -286,22 +285,22 @@ export default function DashboardView() {
 
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="bg-gold/5 border border-gold/10 rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 flex flex-col gap-6 relative overflow-hidden group shadow-xl"
+            className="bg-gold/5 border border-gold/10 rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-8 xl:p-10 flex flex-col gap-4 relative overflow-hidden group shadow-xl"
           >
-            <div className="absolute top-0 right-0 p-6">
-              <Zap size={24} className="text-gold animate-shimmer" />
+            <div className="absolute top-0 right-0 p-6 lg:p-10">
+              <Zap size={20} className="text-gold animate-shimmer" />
             </div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/80">
-              Platform Status
+            <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-gold/80">
+              Neural Status
             </h3>
-            <p className="text-sm font-light text-white/60 leading-relaxed uppercase tracking-widest text-[11px]">
-              System integrity at{" "}
-              <span className="text-white font-bold">99.8%</span>. Database
-              fully synchronized.
+            <p className="text-[10px] lg:text-[11px] font-medium text-white/50 leading-relaxed uppercase tracking-widest leading-loose">
+              System integrity established at{" "}
+              <span className="text-white font-bold">99.8%</span>. Node
+              synchronization complete.
               <br />
               <br />
-              <span className="text-gold font-black border-b border-gold/20 pb-0.5">
-                VIEW SYSTEM LOGS
+              <span className="text-gold font-black border-b border-gold/20 pb-0.5 cursor-pointer hover:text-white transition-colors">
+                RECOVERY LOGS
               </span>
             </p>
           </motion.div>
@@ -318,27 +317,27 @@ function StatCard({ title, value, currency, trend, highlight, icon }: any) {
       className={`p-6 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer shadow-2xl font-bold ${highlight ? "bg-gold/10 border-gold/20 shadow-[0_0_60px_rgba(202,138,4,0.15)]" : "bg-white/[0.02] border-white/5 hover:border-gold/30"}`}
     >
       <div className="flex justify-between items-start mb-6 lg:mb-10">
-        <div className="text-white/20 group-hover:text-gold/50 transition-colors duration-500">
+        <div className="p-2 sm:p-0 text-white/20 group-hover:text-gold/50 transition-colors duration-500">
           {icon}
         </div>
         {trend && (
-          <span className="text-[9px] lg:text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/5 px-3 py-1.5 rounded-xl italic">
+          <span className="text-[8px] lg:text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl italic border border-emerald-400/10">
             {trend}
           </span>
         )}
       </div>
 
-      <h3 className="text-[9px] lg:text-[10px] font-black tracking-[0.3em] text-white/30 uppercase mb-3 lg:mb-4 selection:bg-gold group-hover:text-gold transition-colors">
+      <h3 className="text-[8px] lg:text-[10px] font-black tracking-[0.3em] text-white/30 uppercase mb-2 group-hover:text-gold transition-colors">
         {title}
       </h3>
-      <div className="flex items-baseline gap-2">
+      <div className="flex items-baseline gap-1 sm:gap-2">
         <span
-          className={`text-4xl lg:text-6xl font-heading tracking-tighter ${highlight ? "text-gold" : "text-white"}`}
+          className={`text-3xl sm:text-4xl lg:text-6xl font-heading tracking-tighter ${highlight ? "text-gold" : "text-white"}`}
         >
           {value}
         </span>
         {currency && (
-          <span className="text-[10px] lg:text-xs text-white/20 uppercase font-black tracking-widest italic ml-1">
+          <span className="text-[8px] lg:text-xs text-white/20 uppercase font-black tracking-widest italic">
             {currency}
           </span>
         )}
@@ -362,15 +361,15 @@ function ActionButton({
   return (
     <button
       onClick={onClick}
-      className="w-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-gold/30 rounded-2xl lg:rounded-[1.5rem] p-5 lg:p-7 flex justify-between items-center group transition-all duration-500 shadow-xl cursor-pointer overflow-hidden relative"
+      className="w-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-gold/30 rounded-xl sm:rounded-2xl lg:rounded-[1.5rem] p-4 sm:p-5 lg:p-7 flex justify-between items-center group transition-all duration-500 shadow-xl cursor-pointer overflow-hidden relative"
     >
       <div className="absolute top-0 left-0 w-1 h-full bg-gold/0 group-hover:bg-gold/40 transition-all duration-500" />
       <span
-        className={`text-[9px] lg:text-[10px] font-black tracking-[0.2em] uppercase transition-colors relative z-10 ${variant === "danger" ? "text-red-400/60 group-hover:text-red-400" : "text-white/40 group-hover:text-white"}`}
+        className={`text-[8px] lg:text-[10px] font-black tracking-[0.2em] uppercase transition-colors relative z-10 text-left ${variant === "danger" ? "text-red-400/60 group-hover:text-red-400" : "text-white/40 group-hover:text-white"}`}
       >
         {label}
       </span>
-      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all relative z-10 shadow-inner">
+      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all relative z-10 shadow-inner shrink-0 ml-4">
         <motion.div
           whileHover={{ x: 2 }}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}

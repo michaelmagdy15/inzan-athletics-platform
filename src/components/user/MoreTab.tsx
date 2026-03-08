@@ -7,6 +7,7 @@ import {
   MoreHorizontal,
   Shield,
   ArrowRight,
+  Ticket,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -41,6 +42,11 @@ export default function MoreTab() {
           icon={<MoreHorizontal size={20} />}
           label="Gallery"
           onClick={() => navigate("/p/gallery")}
+        />
+        <MoreItem
+          icon={<Ticket size={20} />}
+          label="Invitations"
+          onClick={() => navigate("/p/invitations")}
         />
         <div className="h-px bg-white/10 my-2 mx-4" />
         <MoreItem

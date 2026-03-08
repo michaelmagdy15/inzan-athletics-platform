@@ -1,24 +1,33 @@
 import React, { useState, lazy, Suspense } from "react";
-import { CalendarDays, CalendarCheck, User, LogOut } from "lucide-react";
+import { CalendarDays, CalendarCheck, User, LogOut, DollarSign } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import NavItem from "../components/user/NavItem";
 import { supabase } from "../lib/supabase";
 
 // Lazy load views
-const CoachScheduleView = lazy(
-  () => import("../components/coach/CoachScheduleView"),
-);
-const CoachSessionsView = lazy(
-  () => import("../components/coach/CoachSessionsView"),
-);
+const CoachScheduleView = lazy(() => import("../components/coach/CoachScheduleView"));
+const CoachSessionsView = lazy(() => import("../components/coach/CoachSessionsView"));
+const CoachEarningsView = lazy(() => import("../components/coach/CoachEarningsView"));
 const ProfileTab = lazy(() => import("../components/user/ProfileTab"));
 
 const LoadingFallback = () => (
   <div className="flex-1 flex items-center justify-center p-12 min-h-screen">
-    <div className="w-8 h-8 border-2 border-[#FFB800] border-t-transparent rounded-full animate-spin" />
+    <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
+/**
+ * @feature {
+ *   "role": "coach",
+ *   "title": "Coach Dashboard",
+ *   "description": "Manage your daily training schedule and mark session attendance.",
+ *   "steps": [
+ *     "1. Launch Coach App.",
+ *     "2. View your upcoming meetings for the day.",
+ *     "3. Mark sessions as complete to update student balance."
+ *   ]
+ * }
+ */
 export default function CoachApp() {
   const [activeTab, setActiveTab] = useState("schedule");
 
@@ -26,73 +35,72 @@ export default function CoachApp() {
     await supabase.auth.signOut();
   };
 
-  return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans flex flex-col max-w-md mx-auto relative overflow-hidden">
-      {/* Ambient Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[#FFB800]/5 rounded-full blur-[120px] pointer-events-none" />
+  const renderContent = () => {
+    switch (activeTab) {
+      case "schedule":
+        return <CoachScheduleView />;
+      case "sessions":
+        return <CoachSessionsView />;
+      case "earnings":
+        return <CoachEarningsView />;
+      case "profile":
+        return <ProfileTab />;
+      default:
+        return <CoachScheduleView />;
+    }
+  };
 
-      {/* Top Bar for Sign Out (optional, or rely on profile tab) */}
-      <header className="px-6 py-4 flex justify-between items-center relative z-10 border-b border-white/5">
-        <div className="flex flex-col">
-          <span className="text-lg font-heading tracking-widest text-white">
-            INZAN
-          </span>
-          <span className="text-[8px] tracking-[0.4em] uppercase text-gold/60 font-bold -mt-0.5">
-            Coach Portal
-          </span>
+  return (
+    <div className="flex flex-col h-[100dvh] bg-[#050505] text-white overflow-hidden relative">
+      {/* Background ambient glow */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Modern Header */}
+      <header className="px-6 py-5 flex items-center justify-between border-b border-white/5 backdrop-blur-md bg-black/20 z-20 shrink-0">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gold flex items-center justify-center rounded-2xl shadow-[0_0_20px_rgba(255,184,0,0.3)]">
+            <span className="text-black font-black text-xl lg:text-2xl font-heading">IN</span>
+          </div>
+          <div>
+            <h1 className="text-lg lg:text-xl font-heading tracking-tight text-white uppercase italic">Coach Terminal</h1>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]" />
+              <p className="text-[8px] lg:text-[9px] tracking-[0.3em] text-white/40 uppercase font-black">Authorized Personnel Only</p>
+            </div>
+          </div>
         </div>
         <button
           onClick={handleSignOut}
-          className="text-white/40 hover:text-red-400 transition-colors"
+          className="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-red-500/10 hover:border-red-500/20 text-white/40 hover:text-red-500 transition-all shadow-xl group"
         >
-          <LogOut size={16} />
+          <LogOut size={18} className="group-hover:scale-110 transition-transform" />
         </button>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-6 pb-28 relative z-10 scrollbar-hide">
-        <Suspense fallback={<LoadingFallback />}>
+      <main className="content-fit px-4 lg:px-10 pb-32 lg:pb-40 relative z-10 pt-6 lg:pt-10">
+        <div className="max-w-[100vw] sm:max-w-2xl lg:max-w-5xl mx-auto">
           <AnimatePresence mode="wait">
-            {activeTab === "schedule" && (
-              <motion.div
-                key="schedule"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <CoachScheduleView />
-              </motion.div>
-            )}
-            {activeTab === "sessions" && (
-              <motion.div
-                key="sessions"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <CoachSessionsView />
-              </motion.div>
-            )}
-            {activeTab === "profile" && (
-              <motion.div
-                key="profile"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <ProfileTab />
-              </motion.div>
-            )}
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -10, filter: "blur(10px)" }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Suspense fallback={<LoadingFallback />}>
+                {renderContent()}
+              </Suspense>
+            </motion.div>
           </AnimatePresence>
-        </Suspense>
+        </div>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 w-full max-w-md bg-[#0a0a0a]/80 backdrop-blur-2xl border-t border-white/5 px-4 py-5 z-50 rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-        <ul className="flex justify-around items-center">
+      {/* Fixed Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 lg:p-8 z-50 pointer-events-none">
+        <nav className="max-w-lg lg:max-w-2xl mx-auto bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/10 p-1.5 lg:p-2 rounded-3xl lg:rounded-[2.5rem] flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto relative overflow-hidden group">
+          {/* Active indicator background element could go here if needed */}
           <NavItem
             icon={<CalendarDays size={20} />}
             label="Schedule"
@@ -106,13 +114,19 @@ export default function CoachApp() {
             onClick={() => setActiveTab("sessions")}
           />
           <NavItem
+            icon={<DollarSign size={20} />}
+            label="Earnings"
+            isActive={activeTab === "earnings"}
+            onClick={() => setActiveTab("earnings")}
+          />
+          <NavItem
             icon={<User size={20} />}
             label="Profile"
             isActive={activeTab === "profile"}
             onClick={() => setActiveTab("profile")}
           />
-        </ul>
-      </nav>
+        </nav>
+      </div>
     </div>
   );
 }

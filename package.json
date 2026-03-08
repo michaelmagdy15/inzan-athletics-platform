@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
+    "manual:update": "npx tsx scripts/manual-scanner.ts",
     "deploy": "npm run build && node -e \"const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/200.html');\" && npx surge dist inzan-athletics.surge.sh"
   },
   "dependencies": {

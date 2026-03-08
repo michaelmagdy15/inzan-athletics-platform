@@ -2,14 +2,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import UserApp from "./pages/UserApp";
 import AdminHub from "./pages/AdminHub";
 import CoachApp from "./pages/CoachApp";
+import NutritionistApp from "./pages/NutritionistApp";
 import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import UserSubPage from "./pages/UserSubPage";
 import PaymentResult from "./pages/PaymentResult";
+import PendingApprovalPage from "./pages/PendingApprovalPage";
 import { useData } from "./context/DataContext";
 import { Loader2 } from "lucide-react";
 
 import ProtectedRoute from "./components/shared/ProtectedRoute";
+import HolidayDecorations from "./components/common/HolidayDecorations";
 
 import KDSApp from "./pages/KDSApp";
 
@@ -26,6 +29,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <HolidayDecorations />
       <Routes>
         <Route
           path="/auth"
@@ -39,10 +43,14 @@ export default function App() {
           path="/"
           element={
             <ProtectedRoute>
-              {currentUser?.role === "admin" ? (
+              {currentUser?.membershipStatus === "pending" ? (
+                <PendingApprovalPage />
+              ) : currentUser?.role === "admin" ? (
                 <Navigate to="/admin" />
               ) : currentUser?.role === "coach" ? (
                 <CoachApp />
+              ) : currentUser?.role === "nutritionist" ? (
+                <NutritionistApp />
               ) : (
                 <UserApp />
               )}

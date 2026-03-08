@@ -119,25 +119,25 @@ export default function EKKitchenView() {
       </div>
 
       {/* Performance Goals Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">
         {goals.map((goal, idx) => (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
             key={goal.label}
-            className="glass-card rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-8 border border-white/5 relative overflow-hidden group font-bold"
+            className="glass-card rounded-[2rem] lg:rounded-[2.5rem] p-5 sm:p-6 lg:p-8 border border-white/5 relative overflow-hidden group font-bold"
           >
-            <div className="flex justify-between items-center mb-5 lg:mb-6">
+            <div className="flex justify-between items-center mb-4 lg:mb-6">
               <h4 className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] group-hover:text-gold transition-colors">
                 {goal.label}
               </h4>
-              <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/5 px-2.5 py-1 rounded-lg italic">
+              <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/5 px-2 py-0.5 rounded-lg italic">
                 {goal.trend}
               </span>
             </div>
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-2xl lg:text-3xl font-heading text-white">
+              <span className="text-xl sm:text-2xl lg:text-3xl font-heading text-white">
                 {goal.current.toLocaleString()}
               </span>
               <span className="text-[10px] text-white/20 font-black uppercase italic tracking-widest">
@@ -148,12 +148,12 @@ export default function EKKitchenView() {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${(goal.current / goal.target) * 100}%` }}
-                className="h-full bg-gradient-to-r from-gold/50 to-gold"
+                className="h-full bg-gradient-to-r from-gold/50 to-gold shadow-[0_0_10px_rgba(202,138,4,0.3)]"
               />
             </div>
             <div className="flex justify-between mt-3 text-[8px] font-bold text-white/20 uppercase tracking-widest">
               <span>
-                {Math.round((goal.current / goal.target) * 100)}% Fulfilled
+                {Math.round((goal.current / goal.target) * 100)}%
               </span>
               <span>Target: {goal.target.toLocaleString()}</span>
             </div>
@@ -161,7 +161,7 @@ export default function EKKitchenView() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-10">
         <div className="xl:col-span-2 flex flex-col gap-6 lg:gap-10">
           {/* Inventory Registry Oversight */}
           <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl">

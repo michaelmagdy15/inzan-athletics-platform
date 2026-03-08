@@ -74,7 +74,7 @@ export default function CoachesView() {
       const avgRating =
         reviewsForCoach.length > 0
           ? reviewsForCoach.reduce((sum, r) => sum + Number(r.rating), 0) /
-            reviewsForCoach.length
+          reviewsForCoach.length
           : 5.0;
 
       return {
@@ -105,7 +105,7 @@ export default function CoachesView() {
   ); // simplifying to all completed
   const avgRetention = Math.round(
     coachData.reduce((acc, c) => acc + c.retention, 0) /
-      Math.max(1, coachData.length),
+    Math.max(1, coachData.length),
   );
 
   const handleDownloadReport = () => {
@@ -187,9 +187,9 @@ export default function CoachesView() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 font-bold">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 font-bold">
         <Scorecard
-          title="Avg. Coach Rating"
+          title="Avg. Rating"
           value={avgRating}
           trend="+0.05"
           highlight
@@ -198,22 +198,21 @@ export default function CoachesView() {
         <Scorecard
           title="Client Load"
           value={avgClients}
-          trend="-1.2"
           subtitle="Avg. per Coach"
           icon={<Activity size={16} />}
         />
         <Scorecard
-          title="Sessions Taught"
+          title="Session Load"
           value={totalSessionsThisWeek}
           trend="+15%"
-          subtitle="All Time Completed"
+          subtitle="All Time"
           icon={<Zap size={16} />}
         />
         <Scorecard
-          title="Retention Rate"
+          title="Retention"
           value={`${avgRetention}%`}
           trend="+2%"
-          subtitle="Team Average"
+          subtitle="Team Avg"
           icon={<UserCheck size={16} />}
         />
       </div>
@@ -226,28 +225,28 @@ export default function CoachesView() {
           <div className="flex items-center gap-3">
             <div className="w-1 h-4 bg-gold rounded-full shadow-[0_0_10px_rgba(202,138,4,0.5)]" />
             <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
-              Coach Performance Chart
+              Performance Index
             </h3>
           </div>
           <div className="flex flex-wrap items-center gap-4 lg:gap-6">
             <span className="text-[8px] text-white/20 uppercase tracking-widest font-black">
-              Bubble Size: Total Sessions
+              Bubble: Sessions
             </span>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-gold/50 border border-gold" />
               <span className="text-[8px] text-gold font-black tracking-widest uppercase">
-                Active Coaches
+                Coach Squad
               </span>
             </div>
           </div>
         </div>
 
-        <div className="h-64 sm:h-96 w-full relative z-10 font-bold">
+        <div className="h-48 sm:h-64 lg:h-96 w-full relative z-10 font-bold">
           <ResponsiveContainer
             width="100%"
             height="100%"
             minWidth={100}
-            minHeight={250}
+            minHeight={180}
           >
             <ScatterChart
               margin={{ top: 20, right: 20, bottom: 20, left: -20 }}
@@ -331,6 +330,7 @@ export default function CoachesView() {
             clients={coach.clients}
             rating={coach.rating.toFixed(1)}
             avatar={coach.avatar}
+            code={coachData.find(cd => cd.id === coach.id)?.code || coach.code}
             onClick={() => setSelectedCoach(coach)}
           />
         ))}
@@ -517,11 +517,10 @@ export default function CoachesView() {
 function Scorecard({ title, value, trend, subtitle, highlight, icon }: any) {
   return (
     <div
-      className={`p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${
-        highlight
-          ? "bg-gold/10 border-gold/20 shadow-[0_0_50px_rgba(202,138,4,0.15)]"
-          : "bg-[#121212]/30 border-white/5 hover:border-gold/20"
-      }`}
+      className={`p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${highlight
+        ? "bg-gold/10 border-gold/20 shadow-[0_0_50px_rgba(202,138,4,0.15)]"
+        : "bg-[#121212]/30 border-white/5 hover:border-gold/20"
+        }`}
     >
       <div className="flex justify-between items-start mb-5 lg:mb-6">
         <div className="text-white/20 group-hover:text-gold/50 transition-colors duration-500">
@@ -555,7 +554,7 @@ function Scorecard({ title, value, trend, subtitle, highlight, icon }: any) {
   );
 }
 
-function CoachCard({ name, tier, clients, rating, avatar, onClick }: any) {
+function CoachCard({ name, tier, clients, rating, avatar, code, onClick }: any) {
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -579,7 +578,7 @@ function CoachCard({ name, tier, clients, rating, avatar, onClick }: any) {
         {name}
       </h4>
       <p className="text-[9px] text-white/30 tracking-[0.3em] font-black uppercase mb-6 lg:mb-8 italic">
-        {tier}
+        {tier} • ID: {code}
       </p>
 
       <div className="w-full h-px bg-white/5 mb-6 lg:mb-8" />

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./themes.css";
 
 @import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Montserrat:wght@100;300;400;500;700;900&family=Inter:wght@400;500;600&display=swap");
 
@@ -6,16 +7,16 @@
   --font-heading: "Syne", sans-serif;
   --font-body: "Montserrat", sans-serif;
 
-  --color-gold: #ca8a04;
-  --color-gold-light: #facc15;
-  --color-gold-dark: #854d0e;
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
 
-  --color-dark: #050505;
-  --color-dark-soft: #141414;
-  --color-primary: #050505;
+  --color-dark: var(--bg-dark);
+  --color-dark-soft: var(--bg-dark-soft);
+  --color-primary: var(--bg-dark);
   /* Keeping existing primary, as it's not explicitly removed/replaced by new dark/dark-soft */
-  --color-secondary: #141414;
-  --color-accent: #ca8a04;
+  --color-secondary: var(--bg-dark-soft);
+  --color-accent: var(--gold);
 
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
@@ -25,6 +26,7 @@
 }
 
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0);
@@ -77,11 +79,9 @@ h6 {
 
 .premium-button {
   @apply relative overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer;
-  background: linear-gradient(
-    135deg,
-    var(--color-gold) 0%,
-    var(--color-gold-dark) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--color-gold) 0%,
+      var(--color-gold-dark) 100%);
 }
 
 .premium-button::after {
@@ -113,8 +113,31 @@ h6 {
 }
 
 .text-gradient-gold {
-  background: linear-gradient(135deg, #ffe08a 0%, #ca8a04 50%, #854d0e 100%);
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+@layer utilities {
+  .fit-screen {
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .content-fit {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .content-fit::-webkit-scrollbar {
+    display: none;
+  }
+
+  .form-input {
+    @apply w-full bg-black/40 border border-white/5 rounded-2xl p-4 lg:p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder:text-white/10;
+  }
 }

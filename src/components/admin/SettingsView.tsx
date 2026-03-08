@@ -44,6 +44,12 @@ export default function SettingsView() {
       icon: <Cpu size={18} />,
     },
     {
+      id: "branding",
+      title: "Branding & Themes",
+      desc: "Customize the platform look with holiday themes.",
+      icon: <Zap size={18} />,
+    },
+    {
       id: "security",
       title: "Security & Privacy",
       desc: "Manage data encryption and privacy compliance.",
@@ -146,6 +152,63 @@ export default function SettingsView() {
               </button>
             </div>
           )}
+          {activeSubPanel === "branding" && (
+            <div className="flex flex-col gap-10">
+              <div>
+                <h4 className="text-sm font-black text-white/40 uppercase tracking-[0.3em] mb-6">
+                  Select Active Theme
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[
+                    { id: "default", name: "Classic Gold", colors: "bg-[#ca8a04]" },
+                    { id: "halloween", name: "Halloween", colors: "bg-[#ff7518]" },
+                    { id: "christmas", name: "Christmas", colors: "bg-[#eb2f2f]" },
+                    { id: "ramadan", name: "Ramadan", colors: "bg-[#fcc419]" },
+                    { id: "easter", name: "Easter", colors: "bg-[#c3fae8]" },
+                    { id: "lunar-new-year", name: "Lunar New Year", colors: "bg-[#dc143c]" },
+                    { id: "st-patricks-day", name: "St. Patrick's Day", colors: "bg-[#2eb85c]" },
+                  ].map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => updateSettings({ theme: theme.id })}
+                      className={`relative p-6 rounded-2xl border transition-all flex flex-col gap-4 text-left group ${settings.theme === theme.id
+                          ? "bg-white/10 border-gold shadow-[0_0_20px_rgba(202,138,4,0.1)]"
+                          : "bg-white/5 border-white/5 hover:border-white/20"
+                        }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className={`w-8 h-8 rounded-full ${theme.colors} shadow-lg`} />
+                        {settings.theme === theme.id && (
+                          <div className="px-2 py-1 bg-gold rounded text-[8px] text-black font-black uppercase">
+                            Active
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h5 className="text-sm font-bold text-white group-hover:text-gold transition-colors">
+                          {theme.name}
+                        </h5>
+                        <p className="text-[10px] text-white/30 truncate">
+                          {theme.id === "default" ? "Pro Athletics Aesthetic" : "Limited Edition Layout"}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-8 border-t border-white/5 font-bold">
+                <SettingToggle
+                  label="Auto-switch based on season"
+                  active={false}
+                  onToggle={() => broadcastAlert("Auto-theming coming soon in Version 2.1.", "info")}
+                />
+                <p className="mt-4 text-[9px] text-white/20 uppercase tracking-widest leading-relaxed">
+                  When enabled, the platform will automatically adapt its UI to match global holidays and seasons.
+                </p>
+              </div>
+            </div>
+          )}
           {activeSubPanel === "nexus" && (
             <div className="flex flex-col gap-8 items-center justify-center py-20 text-center">
               <RefreshCcw
@@ -205,31 +268,31 @@ export default function SettingsView() {
               transition={{ delay: index * 0.1 }}
               key={index}
               onClick={() => setActiveSubPanel(category.id)}
-              className="w-full bg-[#121212]/30 hover:bg-white/[0.05] border border-white/5 hover:border-gold/30 rounded-[1.5rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col sm:flex-row justify-between items-start sm:items-center group transition-all duration-500 overflow-hidden relative gap-6"
+              className="w-full bg-[#121212]/30 hover:bg-white/[0.05] border border-white/5 hover:border-gold/30 rounded-[1.5rem] lg:rounded-[2.5rem] p-5 sm:p-6 lg:p-10 flex flex-col sm:flex-row justify-between items-start sm:items-center group transition-all duration-500 overflow-hidden relative gap-6"
             >
               <div className="absolute top-0 left-0 w-1 h-full bg-gold/0 group-hover:bg-gold/40 transition-all duration-500" />
 
-              <div className="text-left flex items-start sm:items-center gap-6 lg:gap-10">
-                <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl bg-white/[0.05] border border-white/5 flex items-center justify-center text-white/20 group-hover:text-gold transition-colors shadow-inner group-hover:scale-105 transition-transform duration-500 shrink-0">
+              <div className="text-left flex items-center gap-5 sm:gap-6 lg:gap-10">
+                <div className="w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl bg-white/[0.05] border border-white/5 flex items-center justify-center text-white/20 group-hover:text-gold transition-colors shadow-inner shrink-0 group-hover:scale-105">
                   {category.icon}
                 </div>
-                <div className="flex flex-col gap-1 lg:gap-2">
-                  <h4 className="text-lg lg:text-2xl font-heading text-white group-hover:text-gold transition-colors tracking-tight uppercase">
+                <div className="flex flex-col gap-1 lg:gap-2 min-w-0">
+                  <h4 className="text-base lg:text-2xl font-heading text-white group-hover:text-gold transition-colors tracking-tight uppercase truncate">
                     {category.title}
                   </h4>
-                  <p className="text-[11px] font-light text-white/30 sm:truncate max-w-2xl uppercase tracking-[0.1em]">
+                  <p className="text-[10px] sm:text-[11px] font-light text-white/30 uppercase tracking-[0.1em] line-clamp-1 sm:line-clamp-2">
                     {category.desc}
                   </p>
                 </div>
               </div>
 
               <div className="w-full sm:w-auto flex justify-between sm:justify-end items-center gap-6 border-t sm:border-t-0 border-white/5 pt-4 sm:pt-0">
-                <span className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] group-hover:text-gold/20 transition-colors">
-                  Configure Settings
+                <span className="text-[8px] sm:text-[9px] font-black text-white/10 uppercase tracking-[0.3em] group-hover:text-gold/20 transition-colors">
+                  Config
                 </span>
-                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all transform group-hover:rotate-12">
+                <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full border border-white/5 flex items-center justify-center group-hover:border-gold/30 transition-all shrink-0">
                   <ChevronRight
-                    size={20}
+                    size={16}
                     className="text-white/10 group-hover:text-gold transition-all"
                   />
                 </div>

@@ -30,12 +30,12 @@ export default function UserApp() {
   const [activeTab, setActiveTab] = useState("home");
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans flex flex-col max-w-md mx-auto relative overflow-hidden">
+    <div className="h-[100dvh] bg-[#050505] text-white font-sans flex flex-col w-full sm:max-w-2xl lg:max-w-3xl mx-auto relative overflow-hidden border-x border-white/5 lg:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
       {/* Ambient Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[#FFB800]/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[150%] bg-[#FFB800]/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto pb-28 relative z-10 scrollbar-hide">
+      <main className="content-fit pb-28 relative z-10 w-full px-4 sm:px-6 lg:px-8">
         <Suspense fallback={<LoadingFallback />}>
           <AnimatePresence mode="wait">
             {activeTab === "home" && (
@@ -119,53 +119,55 @@ export default function UserApp() {
         </Suspense>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 w-full max-w-md bg-[#0a0a0a]/80 backdrop-blur-2xl border-t border-white/5 px-4 py-5 z-50 rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-        <ul className="flex justify-between items-center">
-          <NavItem
-            icon={<Home size={20} />}
-            label="Home"
-            isActive={activeTab === "home"}
-            onClick={() => setActiveTab("home")}
-          />
-          <NavItem
-            icon={<Users size={20} />}
-            label="Classes"
-            isActive={activeTab === "classes"}
-            onClick={() => setActiveTab("classes")}
-          />
-          <NavItem
-            icon={<Dumbbell size={20} />}
-            label="PT"
-            isActive={activeTab === "pt"}
-            onClick={() => setActiveTab("pt")}
-          />
-          <NavItem
-            icon={<CalendarCheck size={20} />}
-            label="Sessions"
-            isActive={activeTab === "sessions"}
-            onClick={() => setActiveTab("sessions")}
-          />
-          <NavItem
-            icon={<Coffee size={20} />}
-            label="Kitchen"
-            isActive={activeTab === "kitchen"}
-            onClick={() => setActiveTab("kitchen")}
-          />
-          <NavItem
-            icon={<User size={20} />}
-            label="Profile"
-            isActive={activeTab === "profile"}
-            onClick={() => setActiveTab("profile")}
-          />
-          <NavItem
-            icon={<MoreHorizontal size={20} />}
-            label="More"
-            isActive={activeTab === "more"}
-            onClick={() => setActiveTab("more")}
-          />
-        </ul>
-      </nav>
+      {/* Bottom Navigation Container to handle fixed centering */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full sm:max-w-2xl lg:max-w-3xl z-50">
+        <nav className="bg-[#0a0a0a]/95 backdrop-blur-2xl border-t border-white/5 px-2 py-4 rounded-t-[2rem] shadow-[0_-20px_50px_rgba(0,0,0,0.8)] border-x border-white/5">
+          <ul className="flex items-center justify-around gap-1">
+            <NavItem
+              icon={<Home size={20} />}
+              label="Home"
+              isActive={activeTab === "home"}
+              onClick={() => setActiveTab("home")}
+            />
+            <NavItem
+              icon={<Users size={20} />}
+              label="Classes"
+              isActive={activeTab === "classes"}
+              onClick={() => setActiveTab("classes")}
+            />
+            <NavItem
+              icon={<Dumbbell size={20} />}
+              label="PT"
+              isActive={activeTab === "pt"}
+              onClick={() => setActiveTab("pt")}
+            />
+            <NavItem
+              icon={<CalendarCheck size={20} />}
+              label="Sessions"
+              isActive={activeTab === "sessions"}
+              onClick={() => setActiveTab("sessions")}
+            />
+            <NavItem
+              icon={<Coffee size={20} />}
+              label="Kitchen"
+              isActive={activeTab === "kitchen"}
+              onClick={() => setActiveTab("kitchen")}
+            />
+            <NavItem
+              icon={<User size={20} />}
+              label="Profile"
+              isActive={activeTab === "profile"}
+              onClick={() => setActiveTab("profile")}
+            />
+            <NavItem
+              icon={<MoreHorizontal size={20} />}
+              label="More"
+              isActive={activeTab === "more"}
+              onClick={() => setActiveTab("more")}
+            />
+          </ul>
+        </nav>
+      </div>
     </div>
   );
 }

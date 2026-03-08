@@ -1,0 +1,179 @@
+{
+  "lastUpdate": "2026-03-08T11:24:38.219Z",
+  "roles": {
+    "admin": {
+      "name": "Platform Administrator",
+      "description": "The administrative central hub where you manage members, coaches, earnings, and platform-wide configurations.",
+      "features": [
+        {
+          "title": "Member Management",
+          "description": "View, filter, and modify student records. Handle membership approvals and track their PT session balances.",
+          "steps": [
+            "1. Navigate to 'Members' in the sidebar.",
+            "2. Approve new membership requests to grant system access.",
+            "3. Search for existing members using their 4-digit ID or name.",
+            "4. Manually update PT session balances if needed."
+          ]
+        },
+        {
+          "title": "Coach & PT Scheduling",
+          "description": "Manage professional coaches and their service offerings. Set up session types, counts, and pricing packages.",
+          "steps": [
+            "1. Open 'PT Sessions' or 'Coaches' tab.",
+            "2. Define new package offerings (e.g., 12 sessions of PT).",
+            "3. Assign memberships to various students.",
+            "4. Review and approve session bookings from the coach queue."
+          ]
+        },
+        {
+          "title": "Analytical Insights",
+          "description": "Visual data summaries on platform performance, membership growth, and financial earnings.",
+          "steps": [
+            "1. Check 'Dashboard' for real-time KPIs.",
+            "2. Export monthly reports of earnings and session volume.",
+            "3. Identify peak hours and active training cohorts."
+          ]
+        },
+        {
+          "title": "Inzan KDS Control",
+          "description": "Monitor and manage Kitchen orders if integrated.",
+          "steps": [
+            "1. Access 'KDS' to view the digital order queue.",
+            "2. Update order statuses (e.g., In Progress to Ready)."
+          ]
+        },
+        {
+          "title": "Admin Dashboard",
+          "description": "The command center for Inzan Athletics. Monitor real-time KPIs and system status.",
+          "steps": [
+            "1. Log in with admin credentials.",
+            "2. View active memberships and pending approvals.",
+            "3. Monitor revenue and session volume charts."
+          ]
+        }
+      ]
+    },
+    "coach": {
+      "name": "Professional Coach",
+      "description": "Dedicated portal to manage your training schedule, client list, and earnings.",
+      "features": [
+        {
+          "title": "Schedule Management",
+          "description": "Set your weekly availability and dates where you're unavailable.",
+          "steps": [
+            "1. Open the 'Coach App'.",
+            "2. Use the 'Calendar' view to set operating hours.",
+            "3. Mark specific days off to prevent bookings."
+          ]
+        },
+        {
+          "title": "Session Fulfillment",
+          "description": "Keep track of upcoming sessions and mark them as completed.",
+          "steps": [
+            "1. View 'Active Sessions' in your dashboard.",
+            "2. Mark sessions as 'Complete' after the training ends.",
+            "3. If a student misses, mark appropriate 'No-Show' status."
+          ]
+        },
+        {
+          "title": "Earnings & Performance",
+          "description": "Monitor your active sessions and total commissions.",
+          "steps": [
+            "1. Check the 'Earnings' widget for monthly summaries.",
+            "2. View historical session logs for billing accuracy."
+          ]
+        },
+        {
+          "title": "Coach Dashboard",
+          "description": "Manage your daily training schedule and mark session attendance.",
+          "steps": [
+            "1. Launch Coach App.",
+            "2. View your upcoming meetings for the day.",
+            "3. Mark sessions as complete to update student balance."
+          ]
+        }
+      ]
+    },
+    "nutritionist": {
+      "name": "Expert Nutritionist",
+      "description": "Client-centric portal for meal planning, nutritional assessments, and tracking progress.",
+      "features": [
+        {
+          "title": "Client Assessments",
+          "description": "Record and track client metabolic indicators, goals, and allergies.",
+          "steps": [
+            "1. Open 'Nutritionist Portal'.",
+            "2. Conduct 'Initial Assessment' for a new student.",
+            "3. Update measurements (weight, fat percentage, etc.) over time."
+          ]
+        },
+        {
+          "title": "Meal Planning & Assignment",
+          "description": "Create personalized plans and assign them to students in their app.",
+          "steps": [
+            "1. Use the 'Meal Plan Library' to build templates.",
+            "2. Assign a specific plan to a student based on their caloric goal.",
+            "3. Client receives the plan directly on their 'User Portal'."
+          ]
+        }
+      ]
+    },
+    "client": {
+      "name": "Student / Client",
+      "description": "The primary interface for personal training, nutrition, and club invitations.",
+      "features": [
+        {
+          "title": "Session Booking",
+          "description": "Schedule PT sessions or classes based on your active packages.",
+          "steps": [
+            "1. Open the 'User App'.",
+            "2. Choose 'Book Session' or 'Trial Training'.",
+            "3. Select a coach, date, and available time slot.",
+            "4. Confirmation is instantly sent via push/email."
+          ]
+        },
+        {
+          "title": "Invitation System",
+          "description": "Access your 14 annual invitations to bring guests to the club.",
+          "steps": [
+            "1. Open 'Invitations' in your sub-page.",
+            "2. Enter guest details and desired date.",
+            "3. Invitation is generated and access is granted for the guest."
+          ]
+        },
+        {
+          "title": "Meal Plan Access",
+          "description": "View active meal plans assigned by your nutritionist.",
+          "steps": [
+            "1. Go to the 'Nutrition' tab.",
+            "2. View your current meal plan, macro targets, and timing."
+          ]
+        }
+      ]
+    },
+    "kitchen": {
+      "name": "Kitchen Display System (KDS)",
+      "description": "Operational order screen for food and beverage fulfillment.",
+      "features": [
+        {
+          "title": "Live Order Queue",
+          "description": "Monitor real-time orders from the front desk or students.",
+          "steps": [
+            "1. Access the 'KDS App'.",
+            "2. View incoming tickets with student name and items.",
+            "3. Mark 'Ready' when the order is fulfilled."
+          ]
+        },
+        {
+          "title": "Kitchen Display System (KDS)",
+          "description": "The real-time order management interface for Inzan Athletics kitchen staff.",
+          "steps": [
+            "1. Monitor incoming food and drink orders.",
+            "2. Mark orders as 'Ready' to notify students.",
+            "3. Track order history for the current shift."
+          ]
+        }
+      ]
+    }
+  }
+}

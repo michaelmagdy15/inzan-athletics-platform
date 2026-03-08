@@ -55,6 +55,18 @@ const ViewLoading = () => (
 
 type CreationMode = "member" | "coach" | "class" | null;
 
+/**
+ * @feature {
+ *   "role": "admin",
+ *   "title": "Admin Dashboard",
+ *   "description": "The command center for Inzan Athletics. Monitor real-time KPIs and system status.",
+ *   "steps": [
+ *     "1. Log in with admin credentials.",
+ *     "2. View active memberships and pending approvals.",
+ *     "3. Monitor revenue and session volume charts."
+ *   ]
+ * }
+ */
 export default function AdminHub() {
   const {
     members,
@@ -131,7 +143,7 @@ export default function AdminHub() {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-gold/30 flex relative overflow-hidden font-body">
+    <div className="h-[100dvh] bg-[#050505] text-white selection:bg-gold/30 flex relative overflow-hidden font-body w-full">
       {/* Dynamic Ambient Background */}
       <motion.div
         animate={{
@@ -150,14 +162,14 @@ export default function AdminHub() {
             animate={{ x: 0 }}
             exit={{ x: -320 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className={`fixed lg:relative w-80 h-full border-r border-white/5 bg-black/80 lg:bg-black/40 backdrop-blur-3xl flex flex-col z-50 lg:z-20`}
+            className={`fixed lg:relative w-[280px] xl:w-80 h-full border-r border-white/5 bg-[#050505]/95 lg:bg-black/40 backdrop-blur-3xl flex flex-col z-50 lg:z-20 shadow-2xl lg:shadow-none shrink-0`}
           >
-            <div className="p-10 flex flex-col gap-2 relative">
+            <div className="p-6 xl:p-10 flex flex-col gap-2 relative">
               <button
                 onClick={closeMobileMenu}
-                className="lg:hidden absolute top-10 right-6 text-white/40 hover:text-white"
+                className="lg:hidden absolute top-6 right-6 text-white/40 hover:text-white bg-white/5 p-2 rounded-full transition-colors"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
               <div
                 className="flex items-center gap-4 group cursor-pointer"
@@ -166,24 +178,24 @@ export default function AdminHub() {
                   closeMobileMenu();
                 }}
               >
-                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-gold/50 transition-all duration-500 shadow-2xl relative overflow-hidden">
+                <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-gold/50 transition-all duration-500 shadow-2xl relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <span className="text-2xl font-heading text-gold relative z-10">
+                  <span className="text-xl xl:text-2xl font-heading text-gold relative z-10">
                     I
                   </span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-2xl font-heading tracking-widest text-white">
+                  <span className="text-lg xl:text-2xl font-heading tracking-widest text-white">
                     INZAN
                   </span>
-                  <span className="text-[9px] tracking-[0.4em] uppercase text-gold/60 font-bold -mt-1">
+                  <span className="text-[7px] xl:text-[9px] tracking-[0.4em] uppercase text-gold/60 font-bold -mt-1">
                     Systems
                   </span>
                 </div>
               </div>
             </div>
 
-            <nav className="flex-1 px-6 flex flex-col gap-2 overflow-y-auto scrollbar-hide py-4 pb-20">
+            <nav className="flex-1 px-4 xl:px-6 flex flex-col gap-1 xl:gap-2 overflow-y-auto scrollbar-hide py-4 pb-20">
               <NavItem
                 icon={<LayoutDashboard size={18} />}
                 label="Dashboard"
@@ -220,7 +232,7 @@ export default function AdminHub() {
                   closeMobileMenu();
                 }}
               />
-              <div className="h-px bg-white/5 my-4 mx-4 shrink-0" />
+              <div className="h-px bg-white/5 my-3 xl:my-4 mx-4 shrink-0" />
               <NavItem
                 icon={<Dumbbell size={18} />}
                 label="PT Sessions"
@@ -257,7 +269,7 @@ export default function AdminHub() {
                   closeMobileMenu();
                 }}
               />
-              <div className="h-px bg-white/5 my-4 mx-4 shrink-0" />
+              <div className="h-px bg-white/5 my-3 xl:my-4 mx-4 shrink-0" />
               <NavItem
                 icon={<DollarSign size={18} />}
                 label="Financials"
@@ -296,17 +308,28 @@ export default function AdminHub() {
               />
             </nav>
 
-            <div className="p-6 border-t border-white/5">
+            <div className="p-6 border-t border-white/5 shrink-0">
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-4 text-white/30 hover:text-red-400 transition-all w-full px-6 py-5 text-[10px] font-bold tracking-[0.2em] uppercase group"
+                className="flex items-center gap-4 text-white/30 hover:text-red-400 transition-all w-full px-6 py-4 xl:py-5 text-[10px] font-bold tracking-[0.2em] uppercase group"
               >
                 <LogOut
-                  size={16}
+                  size={14}
                   className="group-hover:-translate-x-1 transition-transform"
                 />
-                Deauthorize Access
+                Deauthorize
               </button>
+              <a
+                href="/help/index.html"
+                target="_blank"
+                className="flex items-center gap-4 text-white/30 hover:text-gold transition-all w-full px-6 py-4 xl:py-5 text-[10px] font-bold tracking-[0.2em] uppercase group"
+              >
+                <Info
+                  size={14}
+                  className="group-hover:rotate-12 transition-transform"
+                />
+                Help Center
+              </a>
             </div>
           </motion.aside>
         )}
@@ -320,47 +343,47 @@ export default function AdminHub() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeMobileMenu}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
 
       {/* Main Area */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 w-full">
-        <header className="h-20 lg:h-24 border-b border-white/5 flex items-center justify-between px-6 lg:px-10 bg-[#050505]/40 backdrop-blur-md z-20">
-          <div className="flex items-center gap-4 flex-1">
+      <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden relative z-10 w-full min-w-0">
+        <header className="h-20 lg:h-24 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 xl:px-10 bg-[#050505]/60 backdrop-blur-xl z-20 shrink-0">
+          <div className="flex items-center gap-3 lg:gap-6 flex-1">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gold"
+              className="lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gold shadow-lg active:scale-95 transition-all"
             >
               <Activity size={20} />
             </button>
-            <div className="flex-1 max-w-lg relative group overflow-hidden">
+            <div className="flex-1 max-w-sm xl:max-w-lg relative group overflow-hidden">
               <Search
-                className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold transition-colors hidden sm:block"
-                size={18}
+                className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold transition-colors"
+                size={16}
               />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search Registry..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-4 sm:pl-14 pr-4 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-gold/30 focus:bg-white/[0.08] transition-all duration-500 shadow-inner uppercase tracking-widest"
+                className="w-full bg-white/5 border border-white/5 rounded-xl sm:rounded-2xl py-2.5 xl:py-3.5 pl-11 sm:pl-14 pr-4 text-[11px] sm:text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-gold/30 focus:bg-white/[0.08] transition-all duration-500 shadow-inner uppercase tracking-widest"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-4 lg:gap-8">
-            <div className="scale-[1.1] lg:scale-[1.2]">
+          <div className="flex items-center gap-3 sm:gap-6 xl:gap-10">
+            <div className="scale-90 sm:scale-100 xl:scale-[1.3]">
               <NotificationBell />
             </div>
 
-            <div className="flex items-center gap-3 lg:gap-4 lg:pl-8 lg:border-l lg:border-white/5">
+            <div className="flex items-center gap-3 xl:gap-5 xl:pl-10 xl:border-l xl:border-white/10">
               <div className="hidden sm:flex flex-col items-end">
-                <span className="text-[10px] lg:text-xs font-bold text-white tracking-widest uppercase truncate max-w-[100px]">
+                <span className="text-[10px] xl:text-xs font-bold text-white tracking-widest uppercase truncate max-w-[120px]">
                   {currentUser?.name || "Admin"}
                 </span>
-                <span className="text-[7px] lg:text-[8px] text-gold tracking-[0.3em] uppercase font-black">
+                <span className="text-[7px] xl:text-[8px] text-gold tracking-[0.3em] uppercase font-black">
                   Operator
                 </span>
               </div>
@@ -374,15 +397,16 @@ export default function AdminHub() {
                     currentUser?.avatar || "https://i.pravatar.cc/150?u=admin"
                   }
                   alt="Admin"
-                  className="w-9 h-9 lg:w-11 lg:h-11 rounded-full border border-white/10 group-hover:border-gold/50 object-cover shadow-2xl transition-all"
+                  className="w-8 h-8 sm:w-10 sm:h-10 xl:w-12 xl:h-12 rounded-full border border-white/10 group-hover:border-gold/50 object-cover shadow-2xl transition-all"
                 />
               </motion.div>
             </div>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 lg:p-10 flex flex-col lg:flex-row gap-6 lg:gap-10 scrollbar-hide">
-          <div className="flex-1 flex flex-col gap-6 lg:gap-10">
+
+        <div className="content-fit p-4 lg:p-6 xl:p-10 flex flex-col lg:flex-row gap-6 xl:gap-10 w-full max-w-[2000px] mx-auto">
+          <div className="flex-1 flex flex-col gap-6 xl:gap-10 min-w-0">
             <Suspense fallback={<ViewLoading />}>
               <AnimatePresence mode="wait">
                 <motion.div
@@ -487,6 +511,9 @@ export default function AdminHub() {
                             </option>
                             <option value="coach" className="bg-[#050505]">
                               COACH
+                            </option>
+                            <option value="nutritionist" className="bg-[#050505]">
+                              NUTRITIONIST
                             </option>
                             <option value="admin" className="bg-[#050505]">
                               ADMIN

@@ -41,10 +41,10 @@ export default function InventoryView() {
   const serviceRate =
     maintenanceLogs.length > 0
       ? Math.round(
-          (maintenanceLogs.filter((m) => m.status === "completed").length /
-            maintenanceLogs.length) *
-            100,
-        )
+        (maintenanceLogs.filter((m) => m.status === "completed").length /
+          maintenanceLogs.length) *
+        100,
+      )
       : 100;
   const safeZones = facilityZones.filter((z) => !z.requires_warning).length;
   const auditScore =
@@ -119,35 +119,35 @@ export default function InventoryView() {
       </div>
 
       {/* Facility Overview Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
         <Scorecard
-          title="Equipment Condition"
+          title="Condition"
           value={`${conditionPercentage}%`}
           trend={conditionTrend}
           icon={<ShieldCheck size={18} />}
           highlight={conditionPercentage >= 90}
         />
         <Scorecard
-          title="Total Machines"
+          title="Machines"
           value={totalMachines.toString()}
           trend="ACTIVE"
           icon={<Package size={18} />}
         />
         <Scorecard
-          title="Service Rate"
+          title="Service"
           value={`${serviceRate}%`}
           trend="LOGS"
           icon={<Wrench size={18} />}
         />
         <Scorecard
-          title="Safety Audit"
+          title="Safety"
           value={`${auditScore}%`}
           trend={auditScore >= 95 ? "OK" : "WARN"}
           icon={<ClipboardCheck size={18} />}
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-10">
         {/* Maintenance Log */}
         <div className="xl:col-span-2 flex flex-col gap-8">
           <div className="glass-card rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl relative">

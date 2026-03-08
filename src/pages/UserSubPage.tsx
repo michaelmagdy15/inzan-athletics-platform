@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, QrCode, ShieldX, CheckCircle2, Info } from "lucide-react";
+import { ChevronLeft, QrCode, ShieldX, CheckCircle2, Info, UserPlus, Ticket, Clock, Calendar as CalIcon } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useData } from "../context/DataContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function UserSubPage() {
   const { pageId } = useParams();
   const navigate = useNavigate();
-  const { currentUser, registerAttendance, membershipTiers, checkoutPay } = useData();
+  const { currentUser, registerAttendance, membershipTiers, checkoutPay, invitations, createInvitation, packageOfferings } = useData();
   const [scanStatus, setScanStatus] = useState<"idle" | "success" | "error">(
     "idle",
   );
@@ -236,6 +236,57 @@ export default function UserSubPage() {
                 </button>
               </div>
             ))}
+
+            <h3 className="text-xl font-heading text-white tracking-widest uppercase mb-4 mt-12 pt-8 border-t border-white/5">PT & Class Packages</h3>
+            <div className="space-y-12 pb-20">
+              {Array.from(new Set(packageOfferings.map(o => o.category))).map(category => (
+                <div key={category} className="space-y-8">
+                  <h4 className="text-sm font-black text-[#FFB800] uppercase tracking-[0.3em] pl-4 border-l-2 border-[#FFB800] py-1 bg-gradient-to-r from-[#FFB800]/5 to-transparent">
+                    {category}
+                  </h4>
+                  {Array.from(new Set(packageOfferings.filter(o => o.category === category).map(o => o.sub_category))).map(subCat => (
+                    <div key={subCat || 'Standard'} className="space-y-4">
+                      {subCat && subCat !== 'Standard' && (
+                        <p className="text-[10px] text-white/20 uppercase font-black tracking-widest ml-1 flex items-center gap-2">
+                          <span className="w-4 h-[1px] bg-white/10" /> {subCat}
+                        </p>
+                      )}
+                      <div className="grid grid-cols-1 gap-4">
+                        {packageOfferings
+                          .filter(o => o.category === category && o.sub_category === subCat)
+                          .map((pkg) => (
+                            <div key={pkg.id} className="p-6 bg-white/[0.03] border border-white/10 rounded-3xl group hover:border-[#FFB800]/30 transition-all">
+                              <div className="flex justify-between items-start mb-6">
+                                <div>
+                                  <h4 className="font-bold text-white text-lg tracking-tight uppercase tracking-widest leading-none mb-2">{pkg.name}</h4>
+                                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">
+                                    {pkg.total_sessions} Units • {pkg.session_type.replace('_', ' ')}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-2xl font-heading text-[#FFB800] leading-none mb-1">
+                                    {(currentUser?.membershipStatus === 'active' || !pkg.price_outsider)
+                                      ? pkg.price_member
+                                      : pkg.price_outsider}
+                                  </p>
+                                  <p className="text-[8px] text-gray-600 font-black tracking-widest uppercase">EGP</p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => checkoutPay("package", pkg.id)}
+                                className="w-full py-4 bg-white/5 hover:bg-[#FFB800] hover:text-black border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2"
+                              >
+                                <Ticket size={14} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+                                Purchase Units
+                              </button>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         );
 
@@ -280,6 +331,127 @@ export default function UserSubPage() {
           </div>
         );
 
+      case "invitations":
+        return (
+          <div className="flex flex-col gap-8">
+            <div className="bg-gradient-to-br from-[#FFB800] to-[#b38100] p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:scale-110 transition-transform">
+                <Ticket size={80} className="rotate-12" />
+              </div>
+              <p className="text-black font-black uppercase tracking-[0.3em] text-[10px] mb-4">
+                Invitation Balance
+              </p>
+              <div className="flex items-baseline gap-3">
+                <h3 className="text-6xl font-heading text-black tracking-tighter">
+                  {currentUser?.invitationsBalance || 0}
+                </h3>
+                <span className="text-black font-black uppercase tracking-widest text-xs italic">
+                  Remaining
+                </span>
+              </div>
+              <p className="mt-4 text-black/60 text-[10px] uppercase font-black tracking-widest leading-relaxed">
+                Yearly Allocation: 14 Units <br />
+                Status: {(currentUser?.invitationsBalance || 0) > 0 ? "Authorized" : "Depleted"}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 px-1">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <UserPlus size={16} className="text-[#FFB800]" />
+                </div>
+                <h3 className="text-sm font-black uppercase tracking-widest text-white">
+                  Register Invitee
+                </h3>
+              </div>
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  try {
+                    await createInvitation({
+                      guest_name: formData.get("name") as string,
+                      guest_email: formData.get("email") as string,
+                      guest_phone: formData.get("phone") as string,
+                      visit_date: formData.get("date") as string,
+                    });
+                    (e.target as HTMLFormElement).reset();
+                  } catch (err: any) {
+                    console.error(err);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[9px] text-gray-500 uppercase font-black tracking-widest ml-1">Guest Name</label>
+                    <input
+                      name="name"
+                      required
+                      placeholder="Enter guest's full name"
+                      className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-[#FFB800]/50 transition-all font-bold placeholder:text-white/10 uppercase"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] text-gray-500 uppercase font-black tracking-widest ml-1">Visit Date</label>
+                    <input
+                      name="date"
+                      type="date"
+                      required
+                      defaultValue={new Date().toISOString().split('T')[0]}
+                      className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-[#FFB800]/50 transition-all font-bold uppercase color-scheme-dark"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] text-gray-500 uppercase font-black tracking-widest ml-1">Guest Contact (Optional)</label>
+                    <input
+                      name="phone"
+                      placeholder="Phone Number"
+                      className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-[#FFB800]/50 transition-all font-bold placeholder:text-white/10 uppercase"
+                    />
+                  </div>
+                </div>
+                <button
+                  disabled={(currentUser?.invitationsBalance || 0) <= 0}
+                  className="w-full bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] py-5 rounded-2xl shadow-2xl hover:bg-[#FFB800] transition-all disabled:opacity-30 disabled:cursor-not-allowed group flex items-center justify-center gap-3"
+                >
+                  <Ticket size={16} className="group-hover:rotate-12 transition-transform" />
+                  Issue Access Token
+                </button>
+              </form>
+            </div>
+
+            {invitations.length > 0 && (
+              <div className="space-y-4 pt-8 border-t border-white/5">
+                <h3 className="text-[10px] text-gray-500 font-black uppercase tracking-widest px-1">
+                  Issuance Logs
+                </h3>
+                <div className="space-y-3">
+                  {invitations.map((inv) => (
+                    <div key={inv.id} className="p-4 bg-white/5 rounded-2xl border border-white/10 flex justify-between items-center group">
+                      <div className="flex gap-4 items-center">
+                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-[#FFB800]/60 group-hover:text-[#FFB800] transition-colors">
+                          <Ticket size={18} />
+                        </div>
+                        <div>
+                          <p className="text-white text-[11px] font-black uppercase tracking-widest">{inv.guest_name}</p>
+                          <p className="text-gray-500 text-[9px] uppercase font-bold italic tracking-wider mt-0.5">
+                            {inv.visit_date}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${inv.status === 'used' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-[#FFB800]/10 text-[#FFB800]'}`}>
+                        {inv.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return (
           <div className="flex flex-col items-center justify-center py-20 text-center gap-4 opacity-40">
@@ -306,12 +478,13 @@ export default function UserSubPage() {
       about: "Facility Origin",
       contact: "Direct Uplink",
       notifications: "Comms Feed",
+      invitations: "Guest Access",
     };
     return titles[pageId || ""] || "Unknown Protocol";
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans flex flex-col max-w-md mx-auto relative overflow-hidden">
+    <div className="h-[100dvh] bg-[#050505] text-white font-sans flex flex-col max-w-md mx-auto relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[#FFB800]/5 rounded-full blur-[120px] pointer-events-none" />
 
       <header className="flex items-center gap-4 p-6 pt-12 relative z-10 border-b border-white/5">
@@ -331,7 +504,7 @@ export default function UserSubPage() {
         </div>
       </header>
 
-      <main className="flex-1 p-6 relative z-10">
+      <main className="content-fit p-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

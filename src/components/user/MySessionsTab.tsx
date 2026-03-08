@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "motion/react";
 import {
   CalendarCheck,
   Package,
@@ -192,13 +193,12 @@ export default function MySessionsTab() {
                   {SESSION_TYPE_LABELS[pkg.package_type]}
                 </span>
                 <span
-                  className={`text-[9px] px-3 py-1 rounded-full font-bold tracking-widest uppercase border ${
-                    pkg.status === "active"
-                      ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
-                      : pkg.status === "expired"
-                        ? "text-red-400 bg-red-500/10 border-red-500/20"
-                        : "text-white/40 bg-white/5 border-white/10"
-                  }`}
+                  className={`text-[9px] px-3 py-1 rounded-full font-bold tracking-widest uppercase border ${pkg.status === "active"
+                    ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                    : pkg.status === "expired"
+                      ? "text-red-400 bg-red-500/10 border-red-500/20"
+                      : "text-white/40 bg-white/5 border-white/10"
+                    }`}
                 >
                   {pkg.status}
                 </span>
@@ -277,14 +277,22 @@ export default function MySessionsTab() {
 
       {/* Reschedule Modal */}
       {rescheduleId && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-          <div className="bg-[#111] border border-white/10 rounded-[2rem] p-8 max-w-md w-full">
-            <h3 className="text-lg font-bold text-white mb-6">
-              Reschedule Session
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-lg flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-6 lg:p-10 max-w-md w-full shadow-2xl relative"
+          >
+            <h3 className="text-xl font-heading tracking-tight text-white mb-1 uppercase">
+              Reschedule
             </h3>
-            <div className="flex flex-col gap-4">
+            <p className="text-[10px] text-white/40 uppercase tracking-widest mb-6">
+              Select your new training window
+            </p>
+
+            <div className="flex flex-col gap-5">
               <div>
-                <label className="text-[9px] text-white/40 uppercase tracking-widest mb-2 block">
+                <label className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-2 block ml-1">
                   New Date
                 </label>
                 <input
@@ -292,18 +300,18 @@ export default function MySessionsTab() {
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
                   min={today}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-sm"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#FFB800]/50 transition-all"
                 />
               </div>
               <div>
-                <label className="text-[9px] text-white/40 uppercase tracking-widest mb-2 block">
+                <label className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-2 block ml-1">
                   New Time
                 </label>
                 <input
                   type="time"
                   value={newTime}
                   onChange={(e) => setNewTime(e.target.value + ":00")}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-sm"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#FFB800]/50 transition-all font-bold"
                 />
               </div>
               <div className="flex gap-3 mt-4">
@@ -313,20 +321,20 @@ export default function MySessionsTab() {
                     setNewDate("");
                     setNewTime("");
                   }}
-                  className="flex-1 py-3 rounded-xl border border-white/10 text-white/60 text-[10px] font-bold tracking-widest uppercase hover:bg-white/5 transition-colors"
+                  className="flex-1 py-4 text-white/20 uppercase text-[10px] font-black tracking-[0.3em] hover:text-white transition-colors"
                 >
-                  Cancel
+                  Back
                 </button>
                 <button
                   onClick={handleReschedule}
                   disabled={!newDate || !newTime || processing === rescheduleId}
-                  className="flex-1 premium-button py-3 rounded-xl text-[10px] font-black tracking-widest uppercase text-black"
+                  className="flex-1 premium-button h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-[#FFB800]/20"
                 >
-                  {processing === rescheduleId ? "Rescheduling..." : "Confirm"}
+                  {processing === rescheduleId ? "..." : "Confirm"}
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

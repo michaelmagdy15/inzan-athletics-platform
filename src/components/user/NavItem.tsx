@@ -14,7 +14,7 @@ export default React.memo(function NavItem({
 }) {
   return (
     <li
-      className="flex flex-col items-center gap-1.5 cursor-pointer relative group w-14"
+      className="flex-1 flex flex-col items-center gap-1.5 cursor-pointer relative group min-w-0"
       onClick={onClick}
     >
       <div
@@ -23,14 +23,14 @@ export default React.memo(function NavItem({
         {icon}
       </div>
       <span
-        className={`text-[9px] font-medium tracking-wider transition-colors duration-300 ${isActive ? "text-[#FFB800]" : "text-gray-500 group-hover:text-gray-300"}`}
+        className={`text-[8px] sm:text-[9px] font-medium tracking-wide transition-colors duration-300 truncate w-full text-center px-0.5 ${isActive ? "text-[#FFB800]" : "text-gray-500 group-hover:text-gray-300"}`}
       >
         {label}
       </span>
       {isActive && (
         <motion.div
           layoutId="nav-indicator"
-          className="absolute -bottom-5 w-1 h-1 bg-[#FFB800] rounded-full shadow-[0_0_10px_#FFB800]"
+          className="absolute -bottom-4 w-1 h-1 bg-[#FFB800] rounded-full shadow-[0_0_10px_#FFB800]"
         />
       )}
     </li>

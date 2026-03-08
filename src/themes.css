@@ -1,0 +1,89 @@
+/* 
+  Theme Variables 
+  Values for Gold (Primary), Dark (Background), and Dark-Soft (Surfaces) 
+*/
+
+:root {
+    --gold: #ca8a04;
+    --gold-light: #facc15;
+    --gold-dark: #854d0e;
+    --bg-dark: #050505;
+    --bg-dark-soft: #141414;
+    --accent: #ca8a04;
+    --selection-bg: rgba(202, 138, 4, 0.4);
+}
+
+[data-theme='halloween'] {
+    --gold: #ff7518;
+    /* Pumpkin Orange */
+    --gold-light: #ffa344;
+    --gold-dark: #cc5d13;
+    --bg-dark: #0f0f0f;
+    --bg-dark-soft: #1a1a1a;
+    --accent: #7b00ff;
+    /* Purple accent */
+    --selection-bg: rgba(255, 117, 24, 0.4);
+}
+
+[data-theme='ramadan'] {
+    --gold: #fcc419;
+    /* Royal gold */
+    --gold-light: #ffec99;
+    --gold-dark: #f08c00;
+    --bg-dark: #050b1a;
+    /* Deep night blue */
+    --bg-dark-soft: #0a1429;
+    --accent: #e9ecef;
+    /* Crescent silver */
+    --selection-bg: rgba(252, 196, 25, 0.4);
+}
+
+[data-theme='christmas'] {
+    --gold: #eb2f2f;
+    /* Christmas red */
+    --gold-light: #ff7675;
+    --gold-dark: #c0392b;
+    --bg-dark: #051b11;
+    /* Dark evergreen */
+    --bg-dark-soft: #0a2d1d;
+    --accent: #f8b229;
+    /* Festive gold */
+    --selection-bg: rgba(235, 47, 47, 0.4);
+}
+
+[data-theme='easter'] {
+    --gold: #c3fae8;
+    /* Pastel mint */
+    --gold-light: #e6fcf5;
+    --gold-dark: #96f2d7;
+    --bg-dark: #212529;
+    /* Dark grey */
+    --bg-dark-soft: #343a40;
+    --accent: #faa2c1;
+    /* Pastel pink */
+    --selection-bg: rgba(195, 250, 232, 0.4);
+}
+
+[data-theme='lunar-new-year'] {
+    --gold: #dc143c;
+    /* Crimson red */
+    --gold-light: #ff4d4d;
+    --gold-dark: #b30000;
+    --bg-dark: #0a0a0a;
+    --bg-dark-soft: #141414;
+    --accent: #ffd700;
+    /* Imperial gold */
+    --selection-bg: rgba(220, 20, 60, 0.4);
+}
+
+[data-theme='st-patricks-day'] {
+    --gold: #2eb85c;
+    /* Irish green */
+    --gold-light: #44cc77;
+    --gold-dark: #1f8a44;
+    --bg-dark: #050505;
+    --bg-dark-soft: #141414;
+    --accent: #ca8a04;
+    /* Pot of gold accent */
+    --selection-bg: rgba(46, 184, 92, 0.4);
+}

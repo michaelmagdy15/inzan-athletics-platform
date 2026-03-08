@@ -218,14 +218,14 @@ export default function FinancialsView() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        <div className="lg:col-span-2 glass-card rounded-[2rem] border border-white/5 p-6 lg:p-8">
+        <div className="lg:col-span-2 glass-card rounded-[2rem] border border-white/5 p-5 sm:p-6 lg:p-8">
           <div className="flex items-center gap-3 mb-6">
             <BarChart3 size={16} className="text-gold/50" />
             <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
               Revenue Overview
             </h3>
           </div>
-          <div className="h-64 w-full">
+          <div className="h-48 sm:h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={dynamicRevenueData}>
                 <defs>
@@ -237,13 +237,13 @@ export default function FinancialsView() {
                 <XAxis
                   dataKey="name"
                   stroke="#ffffff40"
-                  fontSize={10}
+                  fontSize={8}
                   tickLine={false}
                   axisLine={false}
                 />
                 <YAxis
                   stroke="#ffffff40"
-                  fontSize={10}
+                  fontSize={8}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => `${v / 1000}k`}
@@ -254,13 +254,13 @@ export default function FinancialsView() {
                     border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: "12px",
                   }}
-                  itemStyle={{ color: "#FFB800", fontWeight: "bold" }}
+                  itemStyle={{ color: "#FFB800", fontWeight: "bold", fontSize: "10px" }}
                 />
                 <Area
                   type="monotone"
                   dataKey="revenue"
                   stroke="#FFB800"
-                  strokeWidth={3}
+                  strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#colorRev)"
                 />
@@ -269,31 +269,31 @@ export default function FinancialsView() {
           </div>
         </div>
 
-        <div className="glass-card rounded-[2rem] border border-white/5 p-6 lg:p-8 flex flex-col">
+        <div className="glass-card rounded-[2rem] border border-white/5 p-5 sm:p-6 lg:p-8 flex flex-col">
           <div className="flex items-center gap-3 mb-6">
             <Users size={16} className="text-gold/50" />
             <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
-              Top Members list
+              Elite Members
             </h3>
           </div>
-          <div className="flex flex-col gap-4 flex-1 justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 flex-1">
             {topMembers.map((member, i) => (
-              <div key={i} className="flex items-center justify-between">
+              <div key={i} className="flex items-center justify-between group">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white/50">
+                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/30 group-hover:text-gold group-hover:border-gold/30 transition-all shrink-0">
                     {i + 1}
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-white">
+                  <div className="min-w-0">
+                    <p className="text-[11px] sm:text-xs font-bold text-white truncate">
                       {member.name}
                     </p>
-                    <p className="text-[9px] text-white/40 uppercase tracking-widest">
+                    <p className="text-[8px] text-white/20 uppercase tracking-widest truncate">
                       {member.tier}
                     </p>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-gold">
-                  {member.spend.toLocaleString()} EGP
+                <span className="text-[11px] font-bold text-gold shrink-0">
+                  {member.spend.toLocaleString()}
                 </span>
               </div>
             ))}
@@ -302,9 +302,9 @@ export default function FinancialsView() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">
         <Scorecard
-          title="Monthly Revenue"
+          title="Revenue"
           value={monthlyRevenue.toLocaleString()}
           currency="EGP"
           trend={monthlyRevenue > 0 ? "Active" : "-"}
@@ -312,20 +312,21 @@ export default function FinancialsView() {
           icon={<TrendingUp size={16} />}
         />
         <Scorecard
-          title="Late Payments"
+          title="Late"
           value={latePayments.toString()}
-          subtitle={latePayments > 0 ? "Requires Attention" : "All clear"}
+          subtitle={latePayments > 0 ? "Urgent" : "Clear"}
           alert={latePayments > 0}
           icon={<AlertTriangle size={16} />}
         />
         <Scorecard
-          title="Total Cash Flow"
+          title="Flow"
           value={totalCashFlow.toLocaleString()}
           currency="EGP"
-          trend={totalCashFlow > 0 ? "+Flow" : "-"}
+          className="col-span-2 lg:col-span-1"
           icon={<ShieldCheck size={16} />}
         />
       </div>
+
 
       {/* Arrears Alert Banner */}
       <AnimatePresence>
@@ -508,13 +509,12 @@ function Scorecard({
 }: any) {
   return (
     <div
-      className={`p-6 lg:p-10 rounded-[2rem] lg:rounded-[2.5rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${
-        highlight
+      className={`p-6 lg:p-10 rounded-[2rem] lg:rounded-[2.5rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${highlight
           ? "bg-gold/10 border-gold/20 shadow-[0_0_50px_rgba(202,138,4,0.1)]"
           : alert
             ? "bg-red-500/5 border-red-500/10"
             : "bg-[#121212]/30 border-white/5 hover:border-gold/20"
-      }`}
+        }`}
     >
       <div className="flex justify-between items-start mb-6 lg:mb-8">
         <div

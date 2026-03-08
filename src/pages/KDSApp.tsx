@@ -4,6 +4,18 @@ import { Clock, CheckCircle2, AlertTriangle, LogOut } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * @feature {
+ *   "role": "kitchen",
+ *   "title": "Kitchen Display System (KDS)",
+ *   "description": "The real-time order management interface for Inzan Athletics kitchen staff.",
+ *   "steps": [
+ *     "1. Monitor incoming food and drink orders.",
+ *     "2. Mark orders as 'Ready' to notify students.",
+ *     "3. Track order history for the current shift."
+ *   ]
+ * }
+ */
 export default function KDSApp() {
     const { orders, updateOrderStatus } = useData();
     const navigate = useNavigate();
@@ -46,8 +58,8 @@ export default function KDSApp() {
                     <div
                         key={order.id}
                         className={`border rounded-2xl p-5 flex flex-col justify-between transition-colors ${order.status === "pending"
-                                ? "bg-amber-500/10 border-amber-500/30"
-                                : "bg-blue-500/10 border-blue-500/30"
+                            ? "bg-amber-500/10 border-amber-500/30"
+                            : "bg-blue-500/10 border-blue-500/30"
                             }`}
                     >
                         <div>

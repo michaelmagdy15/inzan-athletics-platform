@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   CheckCircle2,
   XCircle,
@@ -7,11 +8,16 @@ import {
   ChevronRight,
   Users,
   MessageSquarePlus,
+  Plus,
+  X,
+  Calendar,
+  User as UserIcon
 } from "lucide-react";
 import {
   useData,
   SessionStatus,
   SESSION_TYPE_LABELS,
+  SessionType,
 } from "../../context/DataContext";
 
 const STATUS_CONFIG: Record<
@@ -46,16 +52,34 @@ const STATUS_CONFIG: Record<
 };
 
 export default function CoachSessionsView() {
-  const { currentUser, ptSessions, updateSessionStatus } = useData();
+  const {
+    currentUser,
+    ptSessions,
+    updateSessionStatus,
+    members,
+    adminAddSession
+  } = useData();
   const [filter, setFilter] = useState<"today" | "upcoming" | "past">("today");
   const [processing, setProcessing] = useState<string | null>(null);
   const [reviewModalSession, setReviewModalSession] = useState<string | null>(null);
   const [sessionNotes, setSessionNotes] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // New session state
+  const [newSession, setNewSession] = useState({
+    member_id: "",
+    session_type: "pt_1on1" as SessionType,
+    scheduled_date: new Date().toISOString().split("T")[0],
+    scheduled_time: "10:00",
+    duration_minutes: 60,
+  });
 
   if (!currentUser) return null;
 
   const mySessions = ptSessions.filter((s) => s.coach_id === currentUser.id);
   const today = new Date().toISOString().split("T")[0];
+
+  const clients = members.filter(m => m.role === "member");
 
   const filtered = mySessions.filter((s) => {
     if (filter === "today") return s.scheduled_date === today;
@@ -91,6 +115,29 @@ export default function CoachSessionsView() {
     }
   };
 
+  const handleAddSession = async () => {
+    if (!newSession.member_id) return alert("Please select a client.");
+    setProcessing("adding");
+    try {
+      await adminAddSession({
+        ...newSession,
+        coach_id: currentUser.id,
+      });
+      setShowAddModal(false);
+      setNewSession({
+        member_id: "",
+        session_type: "pt_1on1",
+        scheduled_date: new Date().toISOString().split("T")[0],
+        scheduled_time: "10:00",
+        duration_minutes: 60,
+      });
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setProcessing(null);
+    }
+  };
+
   const formatTime = (t: string) => {
     const [h, m] = t.split(":");
     const hour = parseInt(h);
@@ -98,16 +145,25 @@ export default function CoachSessionsView() {
   };
 
   return (
-    <div className="flex flex-col gap-6 lg:gap-10">
+    <div className="flex flex-col gap-6 lg:gap-10 pb-10">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">
-          My Sessions
-        </h1>
-        <p className="text-[10px] tracking-[0.4em] text-white/30 uppercase font-medium">
-          View & update session statuses
-        </p>
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">
+            My Sessions
+          </h1>
+          <p className="text-[10px] tracking-[0.4em] text-white/30 uppercase font-medium">
+            View & update session statuses
+          </p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="premium-button p-3 rounded-full shadow-lg shadow-gold/20"
+        >
+          <Plus size={20} className="text-black" />
+        </button>
       </div>
+
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-2">
@@ -239,46 +295,183 @@ export default function CoachSessionsView() {
       </div>
 
       {/* Session Review Modal */}
-      {reviewModalSession && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-          <div className="bg-[#111] border border-white/10 rounded-[2rem] p-8 max-w-md w-full flex flex-col gap-6 shadow-2xl">
-            <div>
-              <h3 className="text-xl font-heading tracking-tight text-white mb-1">
-                Session Review
-              </h3>
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                Log progress, strain, and recovery notes.
-              </p>
-            </div>
+      <AnimatePresence>
+        {reviewModalSession && (
+          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#111] border border-white/10 rounded-[2rem] p-8 max-w-md w-full flex flex-col gap-6 shadow-2xl"
+            >
+              <div>
+                <h3 className="text-xl font-heading tracking-tight text-white mb-1">
+                  Session Review
+                </h3>
+                <p className="text-[10px] text-white/40 uppercase tracking-widest">
+                  Log progress, strain, and recovery notes.
+                </p>
+              </div>
 
-            <textarea
-              value={sessionNotes}
-              onChange={(e) => setSessionNotes(e.target.value)}
-              placeholder="e.g., Athlete performed 3x10 deadlifts at 100kg. Maintained good form. Needs to focus on breathing."
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white h-32 resize-none focus:outline-none focus:border-[#FFB800]/50"
-            />
+              <textarea
+                value={sessionNotes}
+                onChange={(e) => setSessionNotes(e.target.value)}
+                placeholder="e.g., Athlete performed 3x10 deadlifts at 100kg. Maintained good form. Needs to focus on breathing."
+                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white h-32 resize-none focus:outline-none focus:border-[#FFB800]/50"
+              />
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setReviewModalSession(null);
-                  setSessionNotes("");
-                }}
-                className="flex-1 py-3 rounded-xl border border-white/10 text-white/60 text-[10px] font-bold tracking-widest uppercase hover:bg-white/5 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleStatusUpdate(reviewModalSession, "completed", sessionNotes)}
-                disabled={processing === reviewModalSession}
-                className="flex-1 py-3 rounded-xl bg-[#FFB800] text-black text-[10px] font-black tracking-widest uppercase hover:bg-[#e6a600] transition-colors"
-              >
-                {processing === reviewModalSession ? "Saving..." : "Save Review"}
-              </button>
-            </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setReviewModalSession(null);
+                    setSessionNotes("");
+                  }}
+                  className="flex-1 py-3 rounded-xl border border-white/10 text-white/60 text-[10px] font-bold tracking-widest uppercase hover:bg-white/5 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleStatusUpdate(reviewModalSession!, "completed", sessionNotes)}
+                  disabled={processing === reviewModalSession}
+                  className="flex-1 py-3 rounded-xl bg-[#FFB800] text-black text-[10px] font-black tracking-widest uppercase hover:bg-[#e6a600] transition-colors"
+                >
+                  {processing === reviewModalSession ? "Saving..." : "Save Review"}
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* Add Session Modal */}
+      <AnimatePresence>
+        {showAddModal && (
+          <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-lg flex items-center justify-center p-6">
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 max-w-lg w-full flex flex-col gap-6 shadow-[0_0_100px_rgba(255,184,0,0.1)] relative"
+            >
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                <X size={20} className="text-white/40" />
+              </button>
+
+              <div className="text-center">
+                <h3 className="text-2xl font-heading tracking-tight text-white mb-1 uppercase">
+                  Schedule PT Session
+                </h3>
+                <p className="text-[10px] text-gold/60 font-black tracking-[0.4em] uppercase">
+                  Add to client schedule
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-5 mt-2">
+                {/* Client Selection */}
+                <div>
+                  <label className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-2.5 block ml-1">
+                    Select Athlete
+                  </label>
+                  <div className="relative group">
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold/50 transition-colors" size={16} />
+                    <select
+                      value={newSession.member_id}
+                      onChange={(e) => setNewSession({ ...newSession, member_id: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-gold/30 appearance-none transition-all"
+                    >
+                      <option value="" className="bg-[#0a0a0a]">Choose a client...</option>
+                      {clients.map(c => (
+                        <option key={c.id} value={c.id} className="bg-[#0a0a0a]">{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Session Type */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-2.5 block ml-1">
+                      Session Type
+                    </label>
+                    <select
+                      value={newSession.session_type}
+                      onChange={(e) => setNewSession({ ...newSession, session_type: e.target.value as SessionType })}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-sm text-white focus:outline-none focus:border-gold/30 appearance-none transition-all"
+                    >
+                      {Object.entries(SESSION_TYPE_LABELS).map(([val, label]) => (
+                        <option key={val} value={val} className="bg-[#0a0a0a]">{label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-2.5 block ml-1">
+                      Duration (Min)
+                    </label>
+                    <input
+                      type="number"
+                      value={newSession.duration_minutes}
+                      onChange={(e) => setNewSession({ ...newSession, duration_minutes: parseInt(e.target.value) || 60 })}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-sm text-white focus:outline-none focus:border-gold/30 transition-all font-bold"
+                    />
+                  </div>
+                </div>
+
+                {/* Date & Time */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-2.5 block ml-1">
+                      Date
+                    </label>
+                    <div className="relative group">
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold/50 transition-colors" size={16} />
+                      <input
+                        type="date"
+                        value={newSession.scheduled_date}
+                        onChange={(e) => setNewSession({ ...newSession, scheduled_date: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-gold/30 transition-all"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-white/40 uppercase font-black tracking-widest mb-2.5 block ml-1">
+                      Start Time
+                    </label>
+                    <div className="relative group">
+                      <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold/50 transition-colors" size={16} />
+                      <input
+                        type="time"
+                        value={newSession.scheduled_time}
+                        onChange={(e) => setNewSession({ ...newSession, scheduled_time: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-gold/30 transition-all font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-4">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-4 text-white/20 uppercase text-[10px] font-black tracking-[0.3em] hover:text-white transition-colors"
+                >
+                  Discard
+                </button>
+                <button
+                  onClick={handleAddSession}
+                  disabled={processing === "adding"}
+                  className="flex-1 premium-button h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20 flex items-center justify-center gap-2"
+                >
+                  {processing === "adding" ? "Booking..." : "Confirm Booking"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

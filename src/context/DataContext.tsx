@@ -8,7 +8,7 @@ export interface Member {
   id: string;
   name: string;
   email: string;
-  role: "member" | "admin" | "coach";
+  role: "member" | "admin" | "coach" | "nutritionist";
   avatar: string;
   strain: number;
   recovery: number;
@@ -19,6 +19,18 @@ export interface Member {
   membershipExpiry: string | null;
   membershipStatus: "active" | "suspended" | "expired" | "pending";
   lastAttendance: string | null;
+  invitationsBalance: number;
+}
+
+export interface Invitation {
+  id: string;
+  member_id: string;
+  guest_name: string;
+  guest_email: string | null;
+  guest_phone: string | null;
+  visit_date: string;
+  status: "pending" | "used" | "expired";
+  created_at: string;
 }
 
 export interface Badge {
@@ -80,6 +92,7 @@ export interface SystemSettings {
   notificationsEnabled: boolean;
   mfaRequired: boolean;
   encryptionLevel: string;
+  theme: string;
 }
 
 export interface FinancialTransaction {
@@ -160,7 +173,8 @@ export interface SessionPolicy {
 export interface CoachAvailability {
   id: string;
   coach_id: string;
-  day_of_week: number; // 0=Sun, 6=Sat
+  day_of_week: number | null; // 0=Sun, 6=Sat
+  specific_date: string | null; // YYYY-MM-DD
   start_time: string; // HH:MM:SS
   end_time: string;
   is_day_off: boolean;
@@ -235,6 +249,57 @@ export interface AppNotification {
   created_at: string;
 }
 
+export interface PackageOffering {
+  id: string;
+  category: string;
+  sub_category: string | null;
+  name: string;
+  session_type: SessionType;
+  total_sessions: number;
+  price_member: number;
+  price_outsider: number | null;
+  description: string | null;
+  is_active: boolean;
+}
+
+export interface Nutritionist {
+  id: string;
+  bio: string | null;
+  specialties: string[];
+  experience_years: number | null;
+  rating: number;
+}
+
+export interface NutritionAssessment {
+  id: string;
+  member_id: string;
+  nutritionist_id: string;
+  weight_kg: number | null;
+  height_cm: number | null;
+  body_fat_pct: number | null;
+  muscle_mass_kg: number | null;
+  daily_calories_target: number | null;
+  protein_grams: number | null;
+  carbs_grams: number | null;
+  fats_grams: number | null;
+  notes: string | null;
+  assessment_date: string;
+  created_at: string;
+}
+
+export interface MealPlan {
+  id: string;
+  member_id: string;
+  nutritionist_id: string;
+  title: string;
+  description: string | null;
+  meals: any[];
+  start_date: string;
+  end_date: string | null;
+  status: 'active' | 'archived';
+  created_at: string;
+}
+
 // --- Context Type ---
 
 interface DataContextType {
@@ -302,6 +367,8 @@ interface DataContextType {
       "id" | "created_at" | "member_name" | "coach_name" | "reschedules_used"
     >,
   ) => Promise<void>;
+  invitations: Invitation[];
+  createInvitation: (data: Omit<Invitation, "id" | "created_at" | "status" | "member_id">) => Promise<void>;
   bookPTSession: (data: {
     package_id: string;
     coach_id: string;
@@ -310,6 +377,12 @@ interface DataContextType {
     scheduled_date: string;
     scheduled_time: string;
     duration_minutes?: number;
+  }) => Promise<void>;
+  bookTrialSession: (data: {
+    coach_id: string;
+    member_id: string;
+    scheduled_date: string;
+    scheduled_time: string;
   }) => Promise<void>;
   adminAddSession: (data: {
     coach_id: string;
@@ -352,6 +425,14 @@ interface DataContextType {
   addTransaction: (
     data: Omit<FinancialTransaction, "id" | "created_at">,
   ) => Promise<void>;
+
+  // Nutritionists
+  nutritionists: Nutritionist[];
+  nutritionAssessments: NutritionAssessment[];
+  mealPlans: MealPlan[];
+
+  // Offerings
+  packageOfferings: PackageOffering[];
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -368,11 +449,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [operatingGoals, setOperatingGoals] = useState<OperatingGoal[]>([]);
   const [settings, setSettings] = useState<SystemSettings>({
     brandName: "INZAN Athletics",
-    timezone: "UTC+2 (Cairo)",
+    timezone: "UTC+2",
     currency: "EGP",
     notificationsEnabled: true,
     mfaRequired: true,
     encryptionLevel: "AES-256",
+    theme: localStorage.getItem("app-theme") || "default",
   });
 
   const [currentUser, setCurrentUser] = useState<Member | null>(null);
@@ -394,8 +476,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     [],
   );
   const [coachReviews, setCoachReviews] = useState<CoachReview[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
 
   const [membershipTiers, setMembershipTiers] = useState<MembershipTier[]>([]);
+
+  const [packageOfferings, setPackageOfferings] = useState<PackageOffering[]>([]);
+
+  // Nutritionist state
+  const [nutritionists, setNutritionists] = useState<Nutritionist[]>([]);
+  const [nutritionAssessments, setNutritionAssessments] = useState<NutritionAssessment[]>([]);
+  const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
 
   const broadcastAlert = (
     message: string,
@@ -406,8 +496,31 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateSettings = async (updates: Partial<SystemSettings>) => {
+    // Optimistic update
     setSettings((prev) => ({ ...prev, ...updates }));
-    broadcastAlert("System parameters adjusted.", "success");
+
+    try {
+      const dbUpdates: any = {};
+      if (updates.brandName !== undefined) dbUpdates.brand_name = updates.brandName;
+      if (updates.timezone !== undefined) dbUpdates.timezone = updates.timezone;
+      if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
+      if (updates.notificationsEnabled !== undefined) dbUpdates.notifications_enabled = updates.notificationsEnabled;
+      if (updates.mfaRequired !== undefined) dbUpdates.mfa_required = updates.mfaRequired;
+      if (updates.encryptionLevel !== undefined) dbUpdates.encryption_level = updates.encryptionLevel;
+      if (updates.theme !== undefined) dbUpdates.active_theme = updates.theme;
+
+      const { error } = await supabase
+        .from("system_settings")
+        .update(dbUpdates)
+        .neq("id", "00000000-0000-0000-0000-000000000000"); // Update all (should only be one)
+
+      if (error) throw error;
+      broadcastAlert("System parameters adjusted.", "success");
+    } catch (err: any) {
+      console.error("Error updating settings:", err);
+      broadcastAlert("Failed to save settings to database.", "error");
+      await fetchAllData(); // Revert on failure
+    }
   };
 
   const addMaintenanceLog = async (
@@ -444,6 +557,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         { data: equipmentData },
         { data: facilityZonesData },
         { data: operatingGoalsData },
+        { data: reviewsData },
+        { data: invitationsData },
+        { data: nutritionistsData },
+        { data: assessmentsData },
+        { data: mealPlansData },
+        { data: offeringsData },
+        { data: systemSettingsData },
       ] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase
@@ -489,6 +609,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         supabase.from("facility_zones").select("*"),
         supabase.from("operating_goals").select("*"),
         supabase.from("coach_reviews").select("*"),
+        supabase.from("invitations").select("*").order("created_at", { ascending: false }),
+        supabase.from("nutritionists").select("*"),
+        supabase.from("nutrition_assessments").select("*"),
+        supabase.from("meal_plans").select("*"),
+        supabase.from("package_offerings").select("*"),
+        supabase.from("system_settings").select("*").single(),
       ]);
 
       const mappedMembers: Member[] =
@@ -502,14 +628,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           recovery: p.current_recovery,
           badges: p.athletic_passport_badges || [],
           riskStatus: p.risk_status || "low",
-          code: p.member_code || p.id.substring(0, 8).toUpperCase(),
+          code: p.member_code || "0000",
           bookedClasses:
             bookingsData
               ?.filter((b) => b.member_id === p.id)
               .map((b) => b.class_id) || [],
           membershipExpiry: p.membership_expiry,
-          membershipStatus: p.membership_status || "active",
+          membershipStatus: p.membership_status || "pending",
           lastAttendance: p.last_attendance || null,
+          invitationsBalance: p.invitations_balance || 0,
         })) || [];
 
       setMembers(mappedMembers);
@@ -591,8 +718,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setAppNotifications(notificationsData || []);
       setMembershipTiers(membershipTiersData || []);
 
-      const reviewsResponse = await supabase.from("coach_reviews").select("*");
-      setCoachReviews(reviewsResponse.data || []);
+      setCoachReviews(reviewsData || []);
+      setInvitations(invitationsData || []);
+      setNutritionists(nutritionistsData || []);
+      setNutritionAssessments(assessmentsData || []);
+      setMealPlans(mealPlansData || []);
+      setPackageOfferings(offeringsData || []);
+
+      if (systemSettingsData) {
+        setSettings({
+          brandName: systemSettingsData.brand_name,
+          timezone: systemSettingsData.timezone,
+          currency: systemSettingsData.currency,
+          notificationsEnabled: systemSettingsData.notifications_enabled,
+          mfaRequired: systemSettingsData.mfa_required,
+          encryptionLevel: systemSettingsData.encryption_level,
+          theme: systemSettingsData.active_theme,
+        });
+      }
 
       // Auth
       const {
@@ -623,6 +766,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       authListener.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", settings.theme);
+    localStorage.setItem("app-theme", settings.theme);
+  }, [settings.theme]);
 
   // ============================================================
   // EXISTING CRUD
@@ -700,8 +848,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       full_name: data.name,
       email: data.email,
       role: "member",
-      member_code:
-        data.code || Math.random().toString(36).substring(2, 10).toUpperCase(),
+      member_code: data.code, // Let DB default handle if undefined
       current_strain: 0,
       current_recovery: 100,
       athletic_passport_badges: [],
@@ -755,6 +902,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    if (role === "nutritionist") {
+      const { data: existingNutri } = await supabase
+        .from("nutritionists")
+        .select("id")
+        .eq("id", memberId)
+        .single();
+      if (!existingNutri) {
+        await supabase
+          .from("nutritionists")
+          .insert({ id: memberId, specialties: ["General Nutrition"] });
+      }
+    }
+
     await fetchAllData();
     broadcastAlert(
       `Entity protocol upgraded to ${role.toUpperCase()}.`,
@@ -796,9 +956,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         full_name: data.name,
         email: data.email,
         role: "coach",
-        member_code:
-          data.code ||
-          `COACH-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+        member_code: data.code, // Let DB default handle if undefined
       })
       .select()
       .single();
@@ -939,16 +1097,30 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     // 2. Check coach capacity for that slot
     const dayOfWeek = new Date(data.scheduled_date).getDay();
-    const coachSlots = coachAvailabilities.filter(
-      (a) =>
-        a.coach_id === data.coach_id &&
-        a.day_of_week === dayOfWeek &&
-        !a.is_day_off,
+    const dateStr = data.scheduled_date;
+
+    // 1. Check for specific date override first
+    let coachSlots = coachAvailabilities.filter(
+      (a) => a.coach_id === data.coach_id && a.specific_date === dateStr,
     );
+
+    // 2. If no specific date entries, fall back to day of week
+    if (coachSlots.length === 0) {
+      coachSlots = coachAvailabilities.filter(
+        (a) =>
+          a.coach_id === data.coach_id &&
+          a.day_of_week === dayOfWeek &&
+          a.specific_date === null,
+      );
+    }
+
     const matchingSlot = coachSlots.find(
       (s) =>
-        s.start_time <= data.scheduled_time && s.end_time > data.scheduled_time,
+        !s.is_day_off &&
+        s.start_time <= data.scheduled_time &&
+        s.end_time > data.scheduled_time,
     );
+
     if (!matchingSlot) throw new Error("Coach is not available at this time.");
 
     const capacityKey = `max_${data.session_type}` as keyof CoachAvailability;
@@ -1007,6 +1179,42 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     await fetchAllData();
     broadcastAlert("Session booked successfully.", "success");
+  };
+
+  const bookTrialSession = async (data: {
+    coach_id: string;
+    member_id: string;
+    scheduled_date: string;
+    scheduled_time: string;
+  }) => {
+    // 1. Create a 1-session trial package
+    const { data: newPkg, error: pkgError } = await supabase
+      .from("pt_packages")
+      .insert({
+        member_id: data.member_id,
+        coach_id: data.coach_id,
+        package_type: "trial",
+        total_sessions: 1,
+        remaining_sessions: 1,
+        price_paid: 0,
+        payment_confirmed: true,
+        starts_at: new Date().toISOString(),
+        status: "active",
+      })
+      .select()
+      .single();
+
+    if (pkgError) throw pkgError;
+
+    // 2. Book the session using this package
+    await bookPTSession({
+      package_id: newPkg.id,
+      coach_id: data.coach_id,
+      member_id: data.member_id,
+      session_type: "trial",
+      scheduled_date: data.scheduled_date,
+      scheduled_time: data.scheduled_time,
+    });
   };
 
   const adminAddSession = async (data: {
@@ -1272,6 +1480,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       {
         coach_id: data.coach_id,
         day_of_week: data.day_of_week,
+        specific_date: data.specific_date,
         start_time: data.start_time,
         end_time: data.end_time,
         is_day_off: data.is_day_off,
@@ -1282,7 +1491,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         max_nutrition: data.max_nutrition,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "coach_id,day_of_week,start_time" },
+      { onConflict: "coach_id,day_of_week,specific_date,start_time" },
     );
     if (error) throw error;
     await fetchAllData();
@@ -1388,6 +1597,28 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     broadcastAlert("Transaction recorded successfully.", "success");
   };
 
+  const createInvitation = async (data: Omit<Invitation, "id" | "created_at" | "status" | "member_id">) => {
+    if (!currentUser) throw new Error("Auth required");
+
+    if (currentUser.invitationsBalance <= 0) {
+      throw new Error("No invitations remaining in account.");
+    }
+
+    const { error } = await supabase.from("invitations").insert({
+      member_id: currentUser.id,
+      guest_name: data.guest_name,
+      guest_email: data.guest_email,
+      guest_phone: data.guest_phone,
+      visit_date: data.visit_date,
+      status: "pending"
+    });
+
+    if (error) throw error;
+
+    await fetchAllData();
+    broadcastAlert(`Guest invitation issued for ${data.guest_name}. Balance updated.`, "success");
+  };
+
   const checkoutPay = async (itemType: "membership" | "package", itemId: string) => {
     if (!currentUser) throw new Error("Auth required");
 
@@ -1461,6 +1692,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         notifications: appNotifications,
         createPackage,
         bookPTSession,
+        bookTrialSession,
         adminAddSession,
         cancelPTSession,
         reschedulePTSession,
@@ -1477,6 +1709,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         deleteMembershipTier,
         assignMembership,
         addTransaction,
+        invitations,
+        createInvitation,
+        // Nutritionists
+        nutritionists,
+        nutritionAssessments,
+        mealPlans,
+        packageOfferings,
       }}
     >
       {children}

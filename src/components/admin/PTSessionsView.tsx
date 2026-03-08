@@ -160,34 +160,34 @@ export default function PTSessionsView() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
-            label: "Today Scheduled",
+            label: "Scheduled",
             value: todayScheduled,
             color: "text-blue-400",
           },
           {
-            label: "Today Completed",
+            label: "Completed",
             value: todayCompleted,
             color: "text-emerald-400",
           },
           {
-            label: "Today No-Shows",
+            label: "No-Shows",
             value: todayNoShows,
             color: "text-orange-400",
           },
           {
-            label: "Total Canceled",
+            label: "Canceled",
             value: totalCanceled,
             color: "text-red-400",
           },
         ].map((stat) => (
           <div
             key={stat.label}
-            className="glass-card rounded-2xl p-5 border border-white/5"
+            className="glass-card rounded-2xl p-4 sm:p-5 border border-white/5"
           >
-            <p className="text-[9px] text-white/30 tracking-widest uppercase mb-2">
+            <p className="text-[8px] sm:text-[9px] text-white/30 tracking-widest uppercase mb-1 sm:mb-2">
               {stat.label}
             </p>
-            <p className={`text-3xl font-heading ${stat.color}`}>
+            <p className={`text-2xl sm:text-3xl font-heading ${stat.color}`}>
               {stat.value}
             </p>
           </div>

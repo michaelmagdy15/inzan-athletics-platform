@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Package,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   useData,
   SessionType,
@@ -15,7 +16,7 @@ import {
   PTPackage,
 } from "../../context/DataContext";
 
-type Step = "packages" | "coach" | "date" | "time" | "confirm";
+type Step = "type" | "packages" | "coach" | "date" | "time" | "confirm";
 
 export default function PTBookingTab() {
   const {
@@ -25,8 +26,11 @@ export default function PTBookingTab() {
     coachAvailabilities,
     ptSessions,
     bookPTSession,
+    bookTrialSession,
   } = useData();
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>("packages");
+  const [bookingType, setBookingType] = useState<"package" | "trial">("package");
   const [selectedPackage, setSelectedPackage] = useState<PTPackage | null>(
     null,
   );
@@ -110,19 +114,28 @@ export default function PTBookingTab() {
   };
 
   const handleBook = async () => {
-    if (!selectedPackage || !selectedCoachId || !selectedDate || !selectedTime)
+    if ((bookingType === "package" && !selectedPackage) || !selectedCoachId || !selectedDate || !selectedTime)
       return;
     setBooking(true);
     setError("");
     try {
-      await bookPTSession({
-        package_id: selectedPackage.id,
-        coach_id: selectedCoachId,
-        member_id: currentUser.id,
-        session_type: selectedPackage.package_type,
-        scheduled_date: selectedDate,
-        scheduled_time: selectedTime,
-      });
+      if (bookingType === "trial") {
+        await bookTrialSession({
+          coach_id: selectedCoachId,
+          member_id: currentUser.id,
+          scheduled_date: selectedDate,
+          scheduled_time: selectedTime,
+        });
+      } else if (selectedPackage) {
+        await bookPTSession({
+          package_id: selectedPackage.id,
+          coach_id: selectedCoachId,
+          member_id: currentUser.id,
+          session_type: selectedPackage.package_type,
+          scheduled_date: selectedDate,
+          scheduled_time: selectedTime,
+        });
+      }
       setStep("packages");
       setSelectedPackage(null);
       setSelectedCoachId(null);
@@ -152,15 +165,14 @@ export default function PTBookingTab() {
           (s, i) => (
             <React.Fragment key={s}>
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  step === s
-                    ? "bg-[#FFB800] text-black"
-                    : ["packages", "coach", "date", "time", "confirm"].indexOf(
-                          step,
-                        ) > i
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
-                      : "bg-white/5 text-white/30 border border-white/10"
-                }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${step === s
+                  ? "bg-[#FFB800] text-black"
+                  : ["packages", "coach", "date", "time", "confirm"].indexOf(
+                    step,
+                  ) > i
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
+                    : "bg-white/5 text-white/30 border border-white/10"
+                  }`}
               >
                 {["packages", "coach", "date", "time", "confirm"].indexOf(
                   step,
@@ -184,64 +196,108 @@ export default function PTBookingTab() {
         </div>
       )}
 
-      {/* Step 1: Select Package */}
+      {/* Step 1: Select Package or Trial */}
       {step === "packages" && (
-        <div className="flex flex-col gap-4">
-          <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
-            Select Active Package
-          </p>
-          {activePackages.length === 0 && (
-            <div className="text-center py-12 text-white/20">
-              <Package size={48} className="mx-auto mb-4 opacity-30" />
-              <p className="text-sm">
-                No active packages. Please purchase a package first.
-              </p>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
+            <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
+              Choose Booking Method
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setBookingType("package")}
+                className={`p-4 rounded-2xl border transition-all text-center flex flex-col items-center gap-2 ${bookingType === "package" ? "bg-[#FFB800]/10 border-[#FFB800] text-[#FFB800]" : "bg-white/5 border-white/10 text-white/40"}`}
+              >
+                <Package size={20} />
+                <span className="text-[10px] uppercase font-bold tracking-widest">My Packages</span>
+              </button>
+              <button
+                onClick={() => {
+                  setBookingType("trial");
+                  setStep("coach");
+                }}
+                className={`p-4 rounded-2xl border transition-all text-center flex flex-col items-center gap-2 ${bookingType === "trial" ? "bg-[#FFB800]/10 border-[#FFB800] text-[#FFB800]" : "bg-white/5 border-white/10 text-white/40"}`}
+              >
+                <Dumbbell size={20} />
+                <span className="text-[10px] uppercase font-bold tracking-widest">Free Trial</span>
+              </button>
+            </div>
+          </div>
+
+          {bookingType === "package" && (
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-end">
+                <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
+                  Select Active Package
+                </p>
+                <button
+                  onClick={() => navigate("/p/packages")}
+                  className="text-[10px] text-[#FFB800] uppercase tracking-widest font-bold hover:underline"
+                >
+                  Buy More +
+                </button>
+              </div>
+              {activePackages.length === 0 && (
+                <div className="text-center py-10 bg-white/5 border border-dashed border-white/10 rounded-3xl">
+                  <Package size={40} className="mx-auto mb-3 opacity-20" />
+                  <p className="text-xs text-white/40 mb-4 px-6 leading-relaxed">
+                    You don't have any active PT packages yet.
+                  </p>
+                  <button
+                    onClick={() => navigate("/p/packages")}
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-[10px] uppercase font-bold tracking-widest transition-colors"
+                  >
+                    View Packages
+                  </button>
+                </div>
+              )}
+              {activePackages.map((pkg) => (
+                <button
+                  key={pkg.id}
+                  onClick={() => {
+                    setSelectedPackage(pkg);
+                    setBookingType("package");
+                    setStep("coach");
+                  }}
+                  className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-[#FFB800]/30 rounded-2xl p-5 text-left transition-all group"
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-[9px] bg-[#FFB800]/10 text-[#FFB800] px-3 py-1 rounded-full font-bold tracking-widest uppercase border border-[#FFB800]/20">
+                      {SESSION_TYPE_LABELS[pkg.package_type]}
+                    </span>
+                    <ChevronRight
+                      size={18}
+                      className="text-white/10 group-hover:text-[#FFB800] transition-colors"
+                    />
+                  </div>
+                  <div className="flex gap-6">
+                    <div>
+                      <p className="text-2xl font-bold text-white">
+                        {pkg.remaining_sessions}
+                        <span className="text-white/20 text-sm">
+                          /{pkg.total_sessions}
+                        </span>
+                      </p>
+                      <p className="text-[9px] text-white/30 uppercase tracking-widest">
+                        Sessions Left
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-white/60">
+                        {pkg.coach_name || "Any Coach"}
+                      </p>
+                      <p className="text-[9px] text-white/30 uppercase tracking-widest">
+                        Expires{" "}
+                        {pkg.expires_at
+                          ? new Date(pkg.expires_at).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
             </div>
           )}
-          {activePackages.map((pkg) => (
-            <button
-              key={pkg.id}
-              onClick={() => {
-                setSelectedPackage(pkg);
-                setStep("coach");
-              }}
-              className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-[#FFB800]/30 rounded-2xl p-5 text-left transition-all group"
-            >
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-[9px] bg-[#FFB800]/10 text-[#FFB800] px-3 py-1 rounded-full font-bold tracking-widest uppercase border border-[#FFB800]/20">
-                  {SESSION_TYPE_LABELS[pkg.package_type]}
-                </span>
-                <ChevronRight
-                  size={18}
-                  className="text-white/10 group-hover:text-[#FFB800] transition-colors"
-                />
-              </div>
-              <div className="flex gap-6">
-                <div>
-                  <p className="text-2xl font-bold text-white">
-                    {pkg.remaining_sessions}
-                    <span className="text-white/20 text-sm">
-                      /{pkg.total_sessions}
-                    </span>
-                  </p>
-                  <p className="text-[9px] text-white/30 uppercase tracking-widest">
-                    Sessions Left
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-white/60">
-                    {pkg.coach_name || "Any Coach"}
-                  </p>
-                  <p className="text-[9px] text-white/30 uppercase tracking-widest">
-                    Expires{" "}
-                    {pkg.expires_at
-                      ? new Date(pkg.expires_at).toLocaleDateString()
-                      : "N/A"}
-                  </p>
-                </div>
-              </div>
-            </button>
-          ))}
         </div>
       )}
 
@@ -271,13 +327,17 @@ export default function PTBookingTab() {
               <img
                 src={coach.avatar}
                 alt={coach.name}
-                className="w-12 h-12 rounded-full border-2 border-white/10"
+                className="w-12 h-12 rounded-full border-2 border-white/10 object-cover"
               />
               <div className="flex-1 text-left">
                 <p className="font-bold text-white">{coach.name}</p>
-                <p className="text-[10px] text-white/40 tracking-widest uppercase">
-                  Coach
-                </p>
+                <div className="flex gap-2 items-center">
+                  <p className="text-[10px] text-white/40 tracking-widest uppercase">
+                    Coach
+                  </p>
+                  <span className="w-1 h-1 rounded-full bg-white/20" />
+                  <p className="text-[9px] text-[#FFB800] font-bold uppercase tracking-tight">5.0 ★</p>
+                </div>
               </div>
               <ChevronRight
                 size={18}
@@ -288,7 +348,7 @@ export default function PTBookingTab() {
         </div>
       )}
 
-      {/* Step 3: Select Date */}
+      {/* ... rest of steps ... */}
       {step === "date" && (
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
@@ -329,14 +389,13 @@ export default function PTBookingTab() {
             })}
           </div>
           {availableDates.length === 0 && (
-            <p className="text-center text-white/20 text-sm py-8">
-              No available dates for this coach in the next 14 days.
+            <p className="text-center text-white/20 text-sm py-8 italic font-bold">
+              Coach has no available time slots in the next 14 days.
             </p>
           )}
         </div>
       )}
 
-      {/* Step 4: Select Time Slot */}
       {step === "time" && (
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
@@ -358,45 +417,51 @@ export default function PTBookingTab() {
             })}
           </p>
           <div className="flex flex-col gap-3">
-            {availableSlots.map((slot) => (
-              <button
-                key={slot.id}
-                onClick={() => {
-                  if (slot.available) {
-                    setSelectedTime(slot.start_time);
-                    setStep("confirm");
-                  }
-                }}
-                disabled={!slot.available}
-                className={`border rounded-2xl p-5 flex justify-between items-center transition-all ${
-                  slot.available
+            {availableSlots.map((slot) => {
+              const sessionType = bookingType === "trial" ? "trial" : (selectedPackage?.package_type || "pt_1on1");
+              const capKey = `max_${sessionType}` as keyof typeof slot;
+              const maxCap = (slot[capKey] as number) || 1;
+              const isAvailable = slot.booked < maxCap;
+
+              return (
+                <button
+                  key={slot.id}
+                  onClick={() => {
+                    if (isAvailable) {
+                      setSelectedTime(slot.start_time);
+                      setStep("confirm");
+                    }
+                  }}
+                  disabled={!isAvailable}
+                  className={`border rounded-2xl p-5 flex justify-between items-center transition-all ${isAvailable
                     ? "bg-white/[0.03] hover:bg-white/[0.06] border-white/10 hover:border-[#FFB800]/30 cursor-pointer"
                     : "bg-red-500/5 border-red-500/10 opacity-50 cursor-not-allowed"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Clock
-                    size={16}
-                    className={
-                      slot.available ? "text-[#FFB800]" : "text-red-400"
-                    }
-                  />
-                  <span className="font-bold text-white">
-                    {formatTime(slot.start_time)} — {formatTime(slot.end_time)}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span
-                    className={`text-sm font-bold ${slot.available ? "text-emerald-400" : "text-red-400"}`}
-                  >
-                    {slot.maxCapacity - slot.booked} left
-                  </span>
-                  <p className="text-[9px] text-white/30 uppercase tracking-widest">
-                    {slot.booked}/{slot.maxCapacity} booked
-                  </p>
-                </div>
-              </button>
-            ))}
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Clock
+                      size={16}
+                      className={
+                        isAvailable ? "text-[#FFB800]" : "text-red-400"
+                      }
+                    />
+                    <span className="font-bold text-white">
+                      {formatTime(slot.start_time)} — {formatTime(slot.end_time)}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`text-sm font-bold ${isAvailable ? "text-emerald-400" : "text-red-400"}`}
+                    >
+                      {maxCap - slot.booked} left
+                    </span>
+                    <p className="text-[9px] text-white/30 uppercase tracking-widest">
+                      {slot.booked}/{maxCap} booked
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
             {availableSlots.length === 0 && (
               <p className="text-center text-white/20 text-sm py-8">
                 No slots available on this date.
@@ -406,7 +471,6 @@ export default function PTBookingTab() {
         </div>
       )}
 
-      {/* Step 5: Confirm */}
       {step === "confirm" && (
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-2">
@@ -421,29 +485,34 @@ export default function PTBookingTab() {
             </p>
           </div>
 
-          <div className="glass-card rounded-[2rem] border border-[#FFB800]/20 p-6 flex flex-col gap-5">
+          <div className="bg-[#111] rounded-[2rem] border border-[#FFB800]/20 p-6 flex flex-col gap-5 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFB800]/5 rounded-full blur-2xl" />
+
             <div className="text-center">
-              <CheckCircle2 size={40} className="text-[#FFB800] mx-auto mb-3" />
-              <h3 className="text-xl font-bold text-white">Booking Summary</h3>
+              <div className="w-16 h-16 bg-[#FFB800]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#FFB800]/20">
+                <CheckCircle2 size={32} className="text-[#FFB800]" />
+              </div>
+              <h3 className="text-xl font-bold text-white uppercase tracking-tight">Booking Summary</h3>
+              <p className="text-[9px] text-[#FFB800] uppercase tracking-[0.3em] font-black mt-1">Status: Pending Transmission</p>
             </div>
 
             <div className="flex flex-col gap-3">
               {[
                 {
                   label: "Session Type",
-                  value: selectedPackage
-                    ? SESSION_TYPE_LABELS[selectedPackage.package_type]
-                    : "",
+                  value: bookingType === "trial"
+                    ? "Free Trial Session"
+                    : (selectedPackage ? SESSION_TYPE_LABELS[selectedPackage.package_type] : ""),
                 },
                 { label: "Coach", value: selectedCoach?.name || "" },
                 {
                   label: "Date",
                   value: selectedDate
                     ? new Date(selectedDate).toLocaleDateString("en-US", {
-                        weekday: "long",
-                        month: "long",
-                        day: "numeric",
-                      })
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                    })
                     : "",
                 },
                 {
@@ -452,19 +521,19 @@ export default function PTBookingTab() {
                 },
                 {
                   label: "Sessions After",
-                  value: selectedPackage
-                    ? `${selectedPackage.remaining_sessions - 1} remaining`
-                    : "",
+                  value: bookingType === "trial"
+                    ? "Trial Session"
+                    : (selectedPackage ? `${selectedPackage.remaining_sessions - 1} remaining` : ""),
                 },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex justify-between items-center py-2 border-b border-white/5 last:border-0"
+                  className="flex justify-between items-center py-3 border-b border-white/5 last:border-0"
                 >
-                  <span className="text-[10px] text-white/40 uppercase tracking-widest">
+                  <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-bold">
                     {item.label}
                   </span>
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-sm font-bold text-white uppercase tracking-tight">
                     {item.value}
                   </span>
                 </div>
@@ -474,9 +543,9 @@ export default function PTBookingTab() {
             <button
               onClick={handleBook}
               disabled={booking}
-              className="premium-button w-full py-4 rounded-2xl text-[11px] font-black tracking-widest uppercase text-black mt-2"
+              className="w-full py-5 bg-[#FFB800] hover:bg-white rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase text-black mt-2 shadow-2xl shadow-[#FFB800]/20 transition-all active:scale-[0.98]"
             >
-              {booking ? "Booking..." : "Confirm & Book Session"}
+              {booking ? "Transmitting..." : "Confirm & Book Session"}
             </button>
           </div>
         </div>

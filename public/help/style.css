@@ -1,0 +1,186 @@
+:root {
+    --gold: #FFD700;
+    --gold-glow: rgba(255, 215, 0, 0.4);
+    --white-glow: rgba(255, 255, 255, 0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.01em;
+    scroll-behavior: smooth;
+}
+
+.font-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+}
+
+.text-gold {
+    color: var(--gold);
+}
+
+.bg-gold {
+    background-color: var(--gold);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-up {
+    opacity: 0;
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glassmorphism */
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.4s ease;
+}
+
+.glass-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 215, 0, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+}
+
+/* Typography Enhancements */
+h1,
+h2,
+h3 {
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+}
+
+li {
+    list-style: none;
+}
+
+/* Step Card Styles */
+.step-card {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.step-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    opacity: 0.3;
+}
+
+/* Navigation Link Enhancement */
+nav a {
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+nav a:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+nav a.active {
+    color: var(--gold);
+    background: rgba(255, 215, 0, 0.05);
+    border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+/* Content Section Layout */
+section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+section h2::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(255, 215, 0, 0.2), transparent);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.feature-box {
+    padding: 2.5rem;
+    border-radius: 2rem;
+}
+
+.feature-box h4 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.feature-box p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.step-item {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.step-num {
+    color: var(--gold);
+    font-weight: 700;
+    opacity: 0.6;
+}
