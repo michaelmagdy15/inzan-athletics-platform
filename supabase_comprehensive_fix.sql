@@ -20,12 +20,13 @@ INSERT INTO public.membership_tiers (name, price, billing_cycle, features)
 SELECT 'BASIC ANNUAL', 37500, 'yearly', ARRAY['8 Weeks freezing period', '14 Invitations (1 three-day pass)']
 WHERE NOT EXISTS (SELECT 1 FROM public.membership_tiers LIMIT 1);
 
--- 2.5. Safe Enum Update
--- Attempt to add 'nutritionist' to the enum if it exists. 
--- Note: This is idempotent and should be run manually if the sequence below fails.
+-- 2.5. Optional Enum Updates
+-- Run these three lines. If you get "type does not exist", just ignore it and continue.
+-- This ensures 'nutritionist' and 'pending' roles/statuses are supported if your DB uses enums.
 ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'nutritionist';
-ALTER TYPE membership_status ADD VALUE IF NOT EXISTS 'pending';
-ALTER TYPE membership_status ADD VALUE IF NOT EXISTS 'canceled';
+-- Ignore errors for membership_status if it doesn't exist
+DO $$ BEGIN EXECUTE 'ALTER TYPE membership_status ADD VALUE IF NOT EXISTS ''pending'''; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN EXECUTE 'ALTER TYPE membership_status ADD VALUE IF NOT EXISTS ''canceled'''; EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
 -- 4. Create/Fix Profiles Table
 -- Using a DO block to handle complex schema updates safely
