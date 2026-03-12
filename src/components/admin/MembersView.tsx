@@ -10,6 +10,9 @@ import {
   QrCode,
   UserCheck,
   Activity,
+  Snowflake,
+  Check,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
@@ -27,7 +30,7 @@ export default function MembersView({
   setSelectedMember,
   onNewMember,
 }: MembersViewProps) {
-  const { registerAttendance, broadcastAlert } = useData();
+  const { registerAttendance, broadcastAlert, freezeRequests, reviewFreezeRequest, attendanceLogs } = useData();
   const [attendanceCode, setAttendanceCode] = useState("");
   const [isAttendanceTerminalOpen, setIsAttendanceTerminalOpen] =
     useState(false);
@@ -337,6 +340,58 @@ export default function MembersView({
           ))}
         </div>
       </div>
+
+      {/* Freeze Requests Panel */}
+      {freezeRequests.filter(fr => fr.status === 'pending').length > 0 && (
+        <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl">
+          <div className="px-5 lg:px-10 py-5 lg:py-8 border-b border-white/5 flex justify-between items-center bg-black/20 font-bold">
+            <div className="flex items-center gap-3">
+              <Snowflake size={16} className="text-blue-400/50" />
+              <h3 className="text-[9px] lg:text-[10px] font-black text-white/30 tracking-[0.3em] uppercase">
+                Pending Freeze Requests
+              </h3>
+            </div>
+            <span className="text-[8px] font-black bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md uppercase tracking-widest">
+              {freezeRequests.filter(fr => fr.status === 'pending').length} Pending
+            </span>
+          </div>
+          <div className="divide-y divide-white/5">
+            {freezeRequests
+              .filter(fr => fr.status === 'pending')
+              .map((fr) => (
+                <div key={fr.id} className="px-5 lg:px-10 py-5 lg:py-6 flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-white text-[11px] lg:text-xs font-bold uppercase tracking-widest">
+                      {fr.member_name}
+                    </p>
+                    <p className="text-[9px] text-white/30 mt-1 uppercase tracking-widest font-bold">
+                      {new Date(fr.start_date).toLocaleDateString()} → {new Date(fr.end_date).toLocaleDateString()}
+                      {fr.reason && ` • ${fr.reason}`}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        try { await reviewFreezeRequest(fr.id, 'approved'); } catch (e: any) { broadcastAlert(e.message, 'error'); }
+                      }}
+                      className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center hover:bg-emerald-500/20 transition-all"
+                    >
+                      <Check size={14} className="text-emerald-500" />
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try { await reviewFreezeRequest(fr.id, 'rejected'); } catch (e: any) { broadcastAlert(e.message, 'error'); }
+                      }}
+                      className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center hover:bg-red-500/20 transition-all"
+                    >
+                      <X size={14} className="text-red-500" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
 
 
       {/* Attendance Terminal Modal */}

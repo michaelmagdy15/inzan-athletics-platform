@@ -300,6 +300,55 @@ export interface MealPlan {
   created_at: string;
 }
 
+export interface AttendanceLog {
+  id: string;
+  member_id: string;
+  checked_in_at: string;
+  checked_in_by: 'self' | 'admin';
+}
+
+export interface FreezeRequest {
+  id: string;
+  member_id: string;
+  start_date: string;
+  end_date: string;
+  reason: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  admin_notes: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+  member_name?: string;
+}
+
+export interface WaitlistEntry {
+  id: string;
+  schedule_id: string;
+  member_id: string;
+  joined_at: string;
+  status: 'waiting' | 'promoted' | 'cancelled';
+}
+
+export interface WorkoutExercise {
+  id: string;
+  workout_id: string;
+  exercise_name: string;
+  sets: number;
+  reps: number;
+  weight: number;
+  completed: boolean;
+  created_at: string;
+}
+
+export interface Workout {
+  id: string;
+  member_id: string;
+  date: string;
+  notes?: string;
+  created_at: string;
+  exercises?: WorkoutExercise[];
+}
+
+
 // --- Context Type ---
 
 interface DataContextType {
@@ -433,6 +482,165 @@ interface DataContextType {
 
   // Offerings
   packageOfferings: PackageOffering[];
+
+  // Attendance
+  attendanceLogs: AttendanceLog[];
+
+  // Freeze Requests
+  freezeRequests: FreezeRequest[];
+  submitFreezeRequest: (startDate: string, endDate: string, reason: string) => Promise<void>;
+  reviewFreezeRequest: (requestId: string, status: 'approved' | 'rejected', adminNotes?: string) => Promise<void>;
+
+  // Waitlists
+  classWaitlists: WaitlistEntry[];
+  joinWaitlist: (classId: string) => Promise<void>;
+  leaveWaitlist: (classId: string) => Promise<void>;
+
+  // Workouts
+  workouts: Workout[];
+  logWorkout: (date: string, notes: string, exercises: Omit<WorkoutExercise, 'id' | 'workout_id' | 'created_at'>[]) => Promise<void>;
+  messages: Message[];
+  sendMessage: (receiverId: string, content: string) => Promise<void>;
+  markAsRead: (messageId: string) => Promise<void>;
+  legalAgreements: LegalAgreement[];
+  signWaiver: (documentType: string, signature?: string) => Promise<void>;
+  promoCodes: PromoCode[];
+  validatePromoCode: (code: string) => Promise<PromoCode | null>;
+  applyReferral: (referrerCode: string) => Promise<void>;
+
+  // Staff Management
+  staffShifts: StaffShift[];
+  staffAttendance: StaffAttendance[];
+  payrollRecords: PayrollRecord[];
+  addStaffShift: (data: Omit<StaffShift, 'id' | 'created_at' | 'staff_name'>) => Promise<void>;
+  deleteStaffShift: (id: string) => Promise<void>;
+  punchIn: () => Promise<void>;
+  punchOut: () => Promise<void>;
+
+  // Content Library
+  libraryContent: LibraryContent[];
+  addContent: (data: Omit<LibraryContent, 'id' | 'created_at' | 'author_name'>) => Promise<void>;
+  deleteContent: (id: string) => Promise<void>;
+
+  // Events
+  events: PlatformEvent[];
+  eventRegistrations: EventRegistration[];
+  registerForEvent: (eventId: string) => Promise<void>;
+  cancelEventRegistration: (registrationId: string) => Promise<void>;
+  createEvent: (event: Partial<PlatformEvent>) => Promise<void>;
+  deleteEvent: (id: string) => Promise<void>;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discount_amount: number;
+  discount_type: 'percentage' | 'fixed';
+  usage_limit: number | null;
+  times_used: number;
+  expires_at: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+export interface Referral {
+  id: string;
+  referrer_id: string;
+  referred_id: string;
+  reward_status: 'pending' | 'completed' | 'invalid';
+  created_at: string;
+}
+
+export interface LegalAgreement {
+  id: string;
+  member_id: string;
+  document_type: string;
+  agreed_at: string;
+  ip_address?: string;
+  signature_data?: string;
+}
+
+export interface Message {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  read_at: string | null;
+  created_at: string;
+  sender_name?: string;
+  receiver_name?: string;
+}
+
+export interface StaffShift {
+  id: string;
+  staff_id: string;
+  start_time: string;
+  end_time: string;
+  role: 'coach' | 'admin' | 'nutritionist';
+  created_at: string;
+  staff_name?: string;
+}
+
+export interface StaffAttendance {
+  id: string;
+  staff_id: string;
+  punch_in: string;
+  punch_out: string | null;
+  status: 'present' | 'late' | 'absent';
+  created_at: string;
+  staff_name?: string;
+}
+
+export interface PayrollRecord {
+  id: string;
+  staff_id: string;
+  period_start: string;
+  period_end: string;
+  base_pay: number;
+  commissions: number;
+  bonuses: number;
+  total_pay: number;
+  status: 'draft' | 'paid';
+  created_at: string;
+  staff_name?: string;
+}
+
+export interface LibraryContent {
+  id: string;
+  title: string;
+  description: string;
+  content_type: 'video' | 'article' | 'recipe' | 'document';
+  url: string;
+  thumbnail_url?: string;
+  tags: string[];
+  is_premium: boolean;
+  created_at: string;
+  author_id?: string;
+  author_name?: string;
+}
+
+export interface PlatformEvent {
+  id: string;
+  title: string;
+  description: string;
+  event_type: 'workshop' | 'seminar' | 'competition' | 'social';
+  start_time: string;
+  end_time: string;
+  location: string;
+  max_participants: number;
+  price: number;
+  image_url?: string;
+  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+  created_at: string;
+}
+
+export interface EventRegistration {
+  id: string;
+  event_id: string;
+  member_id: string;
+  status: 'registered' | 'attended' | 'cancelled';
+  payment_status: 'pending' | 'completed' | 'refunded' | 'free';
+  registered_at: string;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -486,6 +694,27 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [nutritionists, setNutritionists] = useState<Nutritionist[]>([]);
   const [nutritionAssessments, setNutritionAssessments] = useState<NutritionAssessment[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+
+  // Attendance & Freeze state
+  const [attendanceLogs, setAttendanceLogs] = useState<AttendanceLog[]>([]);
+  const [freezeRequests, setFreezeRequests] = useState<FreezeRequest[]>([]);
+  const [classWaitlists, setClassWaitlists] = useState<WaitlistEntry[]>([]);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [legalAgreements, setLegalAgreements] = useState<LegalAgreement[]>([]);
+  const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
+
+  // Staff Management
+  const [staffShifts, setStaffShifts] = useState<StaffShift[]>([]);
+  const [staffAttendance, setStaffAttendance] = useState<StaffAttendance[]>([]);
+  const [payrollRecords, setPayrollRecords] = useState<PayrollRecord[]>([]);
+
+  // Content Library
+  const [libraryContent, setLibraryContent] = useState<LibraryContent[]>([]);
+
+  // Events
+  const [events, setEvents] = useState<PlatformEvent[]>([]);
+  const [eventRegistrations, setEventRegistrations] = useState<EventRegistration[]>([]);
 
   const broadcastAlert = (
     message: string,
@@ -563,7 +792,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         { data: assessmentsData },
         { data: mealPlansData },
         { data: offeringsData },
+        { data: attendanceData },
+        { data: freezeData },
         { data: systemSettingsData },
+        { data: waitlistsData },
+        { data: workoutsData },
+        { data: messagesData },
+        { data: legalAgreementsData },
+        { data: promoCodesData },
+        { data: shiftsData },
+        { data: staffAttendanceData },
+        { data: payrollData },
+        { data: libraryContentData },
+        { data: eventsData },
+        { data: eventRegistrationsData },
       ] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase
@@ -614,7 +856,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         supabase.from("nutrition_assessments").select("*"),
         supabase.from("meal_plans").select("*"),
         supabase.from("package_offerings").select("*"),
+        supabase.from("attendance_logs").select("*").order("checked_in_at", { ascending: false }).limit(500),
+        supabase.from("freeze_requests").select("*").order("created_at", { ascending: false }),
         supabase.from("system_settings").select("*").single(),
+        supabase.from("class_waitlists").select("*").order("joined_at", { ascending: true }),
+        supabase.from("workouts").select(`*, exercises:workout_exercises(*)`).order("date", { ascending: false }),
+        supabase.from("messages").select("*, sender:profiles!messages_sender_id_fkey(full_name), receiver:profiles!messages_receiver_id_fkey(full_name)").order("created_at", { ascending: true }),
+        supabase.from("legal_agreements").select("*"),
+        supabase.from("promo_codes").select("*").order("created_at", { ascending: false }),
+        supabase.from("staff_shifts").select("*").order("start_time", { ascending: true }),
+        supabase.from("staff_attendance").select("*").order("punch_in", { ascending: false }),
+        supabase.from("payroll_records").select("*").order("period_start", { ascending: false }),
+        supabase.from("library_content").select("*, author:profiles!library_content_author_id_fkey(full_name)").order("created_at", { ascending: false }),
+        supabase.from("events").select("*").order("start_time", { ascending: true }),
+        supabase.from("event_registrations").select("*"),
       ]);
 
       const mappedMembers: Member[] =
@@ -724,6 +979,39 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setNutritionAssessments(assessmentsData || []);
       setMealPlans(mealPlansData || []);
       setPackageOfferings(offeringsData || []);
+      setAttendanceLogs(attendanceData || []);
+      setFreezeRequests(
+        (freezeData || []).map((fr: any) => ({
+          ...fr,
+          member_name: (profilesData || []).find((p: any) => p.id === fr.member_id)?.full_name || 'Unknown',
+        }))
+      );
+      setClassWaitlists(waitlistsData || []);
+      setWorkouts(workoutsData || []);
+      setMessages((messagesData || []).map((m: any) => ({
+        ...m,
+        sender_name: m.sender?.full_name || 'Unknown',
+        receiver_name: m.receiver?.full_name || 'Unknown'
+      })));
+      setLegalAgreements(legalAgreementsData || []);
+      setPromoCodes(promoCodesData || []);
+      
+      setStaffShifts((shiftsData || []).map((s: any) => ({
+        ...s,
+        staff_name: (profilesData || []).find((p: any) => p.id === s.staff_id)?.full_name || 'Unknown'
+      })));
+      setStaffAttendance((staffAttendanceData || []).map((a: any) => ({
+        ...a,
+        staff_name: (profilesData || []).find((p: any) => p.id === a.staff_id)?.full_name || 'Unknown'
+      })));
+      setPayrollRecords((payrollData || []).map((pr: any) => ({
+        ...pr,
+        staff_name: (profilesData || []).find((p: any) => p.id === pr.staff_id)?.full_name || 'Unknown'
+      })));
+      setLibraryContent((libraryContentData || []).map((lc: any) => ({
+        ...lc,
+        author_name: (profilesData || []).find((p: any) => p.id === lc.author_id)?.full_name || 'Unknown'
+      })));
 
       if (systemSettingsData) {
         setSettings({
@@ -777,6 +1065,33 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // ============================================================
   const bookClass = async (classId: string) => {
     if (!currentUser) throw new Error("Auth required");
+    
+    // Conflict Detection Logic
+    const targetClass = classes.find(c => c.id === classId);
+    if (!targetClass) throw new Error("Class not found");
+    
+    const targetStart = new Date(`${targetClass.date}T${targetClass.time}`).getTime();
+    const targetDuration = parseInt(targetClass.duration) || 60;
+    const targetEnd = targetStart + targetDuration * 60000;
+
+    const hasConflict = currentUser.bookedClasses?.some(bookedId => {
+      const bookedClass = classes.find(c => c.id === bookedId);
+      if (!bookedClass) return false;
+      const bookedStart = new Date(`${bookedClass.date}T${bookedClass.time}`).getTime();
+      const bookedDuration = parseInt(bookedClass.duration) || 60;
+      const bookedEnd = bookedStart + bookedDuration * 60000;
+
+      return (
+        (targetStart >= bookedStart && targetStart < bookedEnd) ||
+        (targetEnd > bookedStart && targetEnd <= bookedEnd) ||
+        (targetStart <= bookedStart && targetEnd >= bookedEnd)
+      );
+    });
+
+    if (hasConflict) {
+      throw new Error("Schedule Conflict: You already have a class booked at this time.");
+    }
+
     const { error } = await supabase.from("bookings").insert({
       member_id: currentUser.id,
       class_id: classId,
@@ -792,7 +1107,81 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       class_id: classId,
     });
     if (error) throw error;
+
+    // Waitlist auto-promotion logic
+    // Sort so oldest waiting entry gets promoted
+    const waitingList = classWaitlists
+      .filter(w => w.schedule_id === classId && w.status === 'waiting')
+      .sort((a, b) => new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime());
+      
+    if (waitingList.length > 0) {
+      const nextMember = waitingList[0];
+      // Insert booking for the waitlisted member
+      await supabase.from("bookings").insert({
+        member_id: nextMember.member_id,
+        class_id: classId,
+      });
+      // Mark waitlist entry as promoted
+      await supabase.from("class_waitlists").update({ status: 'promoted' }).eq('id', nextMember.id);
+    }
+
     await fetchAllData();
+  };
+
+  const joinWaitlist = async (classId: string) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from("class_waitlists").insert({
+      member_id: currentUser.id,
+      schedule_id: classId,
+      status: 'waiting'
+    });
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Joined waitlist for this class.", "success");
+  };
+
+  const leaveWaitlist = async (classId: string) => {
+    if (!currentUser) throw new Error("Auth required");
+    // Only update 'waiting' entries to 'cancelled' or just delete them. Let's delete for simplicity or update? DB policy allows delete/update. We'll delete.
+    const { error } = await supabase.from("class_waitlists").delete().match({
+      member_id: currentUser.id,
+      schedule_id: classId,
+      status: 'waiting' // Only remove if still waiting
+    });
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Left waitlist.", "info");
+  };
+
+  const logWorkout = async (date: string, notes: string, exercises: Omit<WorkoutExercise, 'id' | 'workout_id' | 'created_at'>[]) => {
+    if (!currentUser) throw new Error("Auth required");
+    
+    // Create workout record
+    const { data: currentWorkout, error: workoutError } = await supabase.from("workouts").insert({
+      member_id: currentUser.id,
+      date: date || new Date().toISOString().split('T')[0],
+      notes: notes || null
+    }).select().single();
+
+    if (workoutError) throw workoutError;
+
+    // Add exercises if any
+    if (exercises.length > 0) {
+      const exerciseRecords = exercises.map(ex => ({
+        workout_id: currentWorkout.id,
+        exercise_name: ex.exercise_name,
+        sets: ex.sets,
+        reps: ex.reps,
+        weight: ex.weight,
+        completed: ex.completed
+      }));
+      
+      const { error: exercisesError } = await supabase.from("workout_exercises").insert(exerciseRecords);
+      if (exercisesError) throw exercisesError;
+    }
+
+    await fetchAllData();
+    broadcastAlert("Workout logged successfully.", "success");
   };
 
   const placeOrder = async (items: any[], totalPrice: number) => {
@@ -991,14 +1380,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const member = members.find((m) => m.code === memberCode);
     if (!member) throw new Error("Member not found in system.");
 
+    const now = new Date().toISOString();
+    const isAdmin = currentUser?.role === 'admin';
+
+    // Update last_attendance on profile
     const { error } = await supabase
       .from("profiles")
-      .update({
-        last_attendance: new Date().toISOString(),
-      })
+      .update({ last_attendance: now })
       .eq("id", member.id);
-
     if (error) throw error;
+
+    // Insert attendance log
+    const { error: logError } = await supabase
+      .from("attendance_logs")
+      .insert({
+        member_id: member.id,
+        checked_in_at: now,
+        checked_in_by: isAdmin ? 'admin' : 'self',
+      });
+    if (logError) console.error('Attendance log error:', logError);
+
     await fetchAllData();
     broadcastAlert(`Attendance registered for ${member.name}.`, "success");
   };
@@ -1597,6 +1998,76 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     broadcastAlert("Transaction recorded successfully.", "success");
   };
 
+  // ============================================================
+  // FREEZE REQUESTS
+  // ============================================================
+
+  const submitFreezeRequest = async (startDate: string, endDate: string, reason: string) => {
+    if (!currentUser) throw new Error("Auth required");
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) throw new Error("End date must be after start date.");
+    if (diffDays > 30) throw new Error("Maximum freeze duration is 30 days.");
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minStart = new Date(today);
+    minStart.setDate(minStart.getDate() + 7);
+    if (start < minStart) throw new Error("Freeze requests require at least 7 days notice.");
+
+    // Check for overlapping pending/approved requests
+    const overlapping = freezeRequests.filter(
+      (fr) => fr.member_id === currentUser.id &&
+        fr.status !== 'rejected' &&
+        new Date(fr.start_date) <= end &&
+        new Date(fr.end_date) >= start
+    );
+    if (overlapping.length > 0) throw new Error("You already have a freeze request for this period.");
+
+    const { error } = await supabase.from("freeze_requests").insert({
+      member_id: currentUser.id,
+      start_date: startDate,
+      end_date: endDate,
+      reason: reason || null,
+      status: 'pending',
+    });
+
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Freeze request submitted. Awaiting admin approval.", "success");
+  };
+
+  const reviewFreezeRequest = async (requestId: string, status: 'approved' | 'rejected', adminNotes?: string) => {
+    if (!currentUser || currentUser.role !== 'admin') throw new Error("Admin access required");
+
+    const { error } = await supabase
+      .from("freeze_requests")
+      .update({
+        status,
+        admin_notes: adminNotes || null,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", requestId);
+
+    if (error) throw error;
+
+    // If approved, suspend the member's membership
+    if (status === 'approved') {
+      const request = freezeRequests.find(fr => fr.id === requestId);
+      if (request) {
+        await supabase.from("profiles")
+          .update({ membership_status: 'suspended' })
+          .eq("id", request.member_id);
+      }
+    }
+
+    await fetchAllData();
+    broadcastAlert(`Freeze request ${status}.`, status === 'approved' ? 'success' : 'info');
+  };
+
   const createInvitation = async (data: Omit<Invitation, "id" | "created_at" | "status" | "member_id">) => {
     if (!currentUser) throw new Error("Auth required");
 
@@ -1619,29 +2090,235 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     broadcastAlert(`Guest invitation issued for ${data.guest_name}. Balance updated.`, "success");
   };
 
-  const checkoutPay = async (itemType: "membership" | "package", itemId: string) => {
+  const checkoutPay = async (itemType: "membership" | "package", itemId: string, promoCode?: string) => {
     if (!currentUser) throw new Error("Auth required");
 
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-        body: {
-          itemType,
-          itemId,
-          customerId: currentUser.id,
-          customerName: currentUser.name,
-          customerEmail: currentUser.email || `${currentUser.code}@inzan.app`,
-        }
-      });
+      broadcastAlert("Processing mock secure payment...", "info");
+      
+      // Simulate network wait for payment processing
+      await new Promise(resolve => setTimeout(resolve, 1500)); 
 
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url; // Redirect to Stripe
+      if (itemType === "membership") {
+        await assignMembership(currentUser.id, itemId);
+        
+        const tier = membershipTiers.find(t => t.id === itemId);
+        if (tier) {
+          await addTransaction({
+            amount: tier.price,
+            transaction_type: "membership",
+            status: "completed",
+            description: `Mock Payment - ${tier.name} Membership${promoCode ? ` (Promo: ${promoCode})` : ''}`,
+            member_id: currentUser.id
+          });
+        }
+        broadcastAlert("Membership successfully purchased! (Mock Payment)", "success");
+        
+      } else if (itemType === "package") {
+        const pkg = packageOfferings.find(p => p.id === itemId);
+        if (!pkg) throw new Error("Package not found");
+        
+        const price = (currentUser?.membershipStatus === 'active' || !pkg.price_outsider)
+          ? pkg.price_member
+          : pkg.price_outsider;
+
+        await createPackage({
+          member_id: currentUser.id,
+          coach_id: null,
+          package_type: pkg.session_type,
+          total_sessions: pkg.total_sessions,
+          remaining_sessions: pkg.total_sessions,
+          price_paid: price,
+          payment_confirmed: true,
+          starts_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "active"
+        });
+
+        await addTransaction({
+          amount: price,
+          transaction_type: "package",
+          status: "completed",
+          description: `Mock Payment - ${pkg.name} Package${promoCode ? ` (Promo: ${promoCode})` : ''}`,
+          member_id: currentUser.id
+        });
+
+        broadcastAlert("Package successfully purchased! (Mock Payment)", "success");
       }
+      
+      await fetchAllData();
+      
     } catch (err: any) {
       console.error(err);
       broadcastAlert(`Checkout error: ${err.message}`, "error");
     }
   };
+
+  const sendMessage = async (receiverId: string, content: string) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from("messages").insert({
+      sender_id: currentUser.id,
+      receiver_id: receiverId,
+      content,
+    });
+    if (error) throw error;
+    await fetchAllData();
+  };
+
+  const markAsRead = async (messageId: string) => {
+    const { error } = await supabase.from("messages").update({ read_at: new Date().toISOString() }).eq("id", messageId);
+    if (error) throw error;
+    await fetchAllData();
+  };
+
+  const signWaiver = async (documentType: string, signature?: string) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from("legal_agreements").insert({
+      member_id: currentUser.id,
+      document_type: documentType,
+      signature_data: signature || null,
+    });
+    if (error) throw error;
+    await fetchAllData();
+  };
+
+  const validatePromoCode = async (code: string): Promise<PromoCode | null> => {
+    const { data, error } = await supabase
+      .from("promo_codes")
+      .select("*")
+      .eq("code", code.toUpperCase())
+      .eq("active", true)
+      .single();
+    if (error || !data) return null;
+    if (data.expires_at && new Date(data.expires_at) < new Date()) return null;
+    if (data.usage_limit !== null && data.times_used >= data.usage_limit) return null;
+    return data;
+  };
+
+  const applyReferral = async (referrerCode: string) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { data: referrer, error: referrerError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("member_code", referrerCode.toUpperCase())
+      .single();
+    
+    if (referrerError || !referrer) throw new Error("Invalid referral code");
+    if (referrer.id === currentUser.id) throw new Error("Cannot refer yourself");
+
+    const { error } = await supabase.from("referrals").insert({
+      referrer_id: referrer.id,
+      referred_id: currentUser.id,
+      reward_status: 'pending'
+    });
+    if (error) {
+      if (error.code === '23505') throw new Error("You have already used a referral code");
+      throw error;
+    }
+    broadcastAlert("Referral applied successfully!", "success");
+  };
+
+  const addStaffShift = async (data: Omit<StaffShift, 'id' | 'created_at' | 'staff_name'>) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from("staff_shifts").insert(data);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Staff shift added successfully.", "success");
+  };
+
+  const deleteStaffShift = async (id: string) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from("staff_shifts").delete().eq("id", id);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Staff shift deleted.", "info");
+  };
+
+  const punchIn = async () => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from("staff_attendance").insert({
+      staff_id: currentUser.id,
+      punch_in: new Date().toISOString(),
+      status: 'present'
+    });
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("You have successfully punched in.", "success");
+  };
+
+  const punchOut = async () => {
+    if (!currentUser) throw new Error("Auth required");
+    
+    // Find active punch in
+    const activePunch = staffAttendance.find(a => a.staff_id === currentUser.id && !a.punch_out);
+    if (!activePunch) {
+      broadcastAlert("No active punch-in found.", "warning");
+      return;
+    }
+
+    const { error } = await supabase.from("staff_attendance")
+      .update({ punch_out: new Date().toISOString() })
+      .eq("id", activePunch.id);
+
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("You have successfully punched out.", "success");
+  };
+
+  const addContent = async (data: Omit<LibraryContent, 'id' | 'created_at' | 'author_name'>) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from("library_content").insert({
+      ...data,
+      author_id: currentUser.id
+    });
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Content added to library.", "success");
+  };
+
+  const deleteContent = async (id: string) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from("library_content").delete().eq("id", id);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Content deleted.", "info");
+  };
+
+  // Event Functions
+  const registerForEvent = async (eventId: string) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from('event_registrations').insert([
+      { event_id: eventId, member_id: currentUser.id }
+    ]);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Registered for event.", "success");
+  };
+
+  const cancelEventRegistration = async (registrationId: string) => {
+    const { error } = await supabase.from('event_registrations').delete().eq('id', registrationId);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Cancelled event registration.", "info");
+  };
+
+  const createEvent = async (event: Partial<PlatformEvent>) => {
+    if (!currentUser) throw new Error("Auth required");
+    const { error } = await supabase.from('events').insert([
+      { ...event, created_by: currentUser.id }
+    ]);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Event created successfully.", "success");
+  };
+
+  const deleteEvent = async (id: string) => {
+    const { error } = await supabase.from('events').delete().eq('id', id);
+    if (error) throw error;
+    await fetchAllData();
+    broadcastAlert("Event deleted.", "info");
+  };
+
 
   // ============================================================
   // PROVIDER
@@ -1716,6 +2393,46 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         nutritionAssessments,
         mealPlans,
         packageOfferings,
+        // Attendance
+        attendanceLogs,
+        // Freeze Requests
+        freezeRequests,
+        submitFreezeRequest,
+        reviewFreezeRequest,
+        // Waitlists
+        classWaitlists,
+        joinWaitlist,
+        leaveWaitlist,
+        // Workouts
+        workouts,
+        logWorkout,
+        // Messages
+        messages,
+        sendMessage,
+        markAsRead,
+        // Waivers
+        legalAgreements,
+        signWaiver,
+        // Promos & Referrals
+        promoCodes,
+        validatePromoCode,
+        applyReferral,
+        staffShifts,
+        staffAttendance,
+        payrollRecords,
+        addStaffShift,
+        deleteStaffShift,
+        punchIn,
+        punchOut,
+        libraryContent,
+        addContent,
+        deleteContent,
+        events,
+        eventRegistrations,
+        registerForEvent,
+        cancelEventRegistration,
+        createEvent,
+        deleteEvent
       }}
     >
       {children}

@@ -39,6 +39,11 @@ export default function MoreTab() {
           onClick={() => navigate("/p/blogs")}
         />
         <MoreItem
+          icon={<FileText size={20} />}
+          label="Library"
+          onClick={() => navigate("/p/library")}
+        />
+        <MoreItem
           icon={<MoreHorizontal size={20} />}
           label="Gallery"
           onClick={() => navigate("/p/gallery")}

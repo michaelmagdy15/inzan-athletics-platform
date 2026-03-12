@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import NavItem from "../components/user/NavItem";
+import { useData } from "../context/DataContext";
+import { useLanguage } from "../utils/i18n";
 
 // Lazy load tabs for better bundle sizing and performance
 const HomeTab = lazy(() => import("../components/user/HomeTab"));
@@ -19,6 +21,7 @@ const ProfileTab = lazy(() => import("../components/user/ProfileTab"));
 const MoreTab = lazy(() => import("../components/user/MoreTab"));
 const PTBookingTab = lazy(() => import("../components/user/PTBookingTab"));
 const MySessionsTab = lazy(() => import("../components/user/MySessionsTab"));
+const CommunityTab = lazy(() => import("../components/user/CommunityTab"));
 
 const LoadingFallback = () => (
   <div className="flex-1 flex items-center justify-center p-12 min-h-screen">
@@ -28,11 +31,91 @@ const LoadingFallback = () => (
 
 export default function UserApp() {
   const [activeTab, setActiveTab] = useState("home");
+  const { currentUser, legalAgreements, signWaiver } = useData();
+  const { t } = useLanguage();
+  const [signature, setSignature] = useState("");
+  const [isSigning, setIsSigning] = useState(false);
+
+  const hasSignedWaiver = legalAgreements?.some(a => a.document_type === 'liability_waiver');
+
+  const handleSignWaiver = async () => {
+    if (!signature.trim()) return;
+    setIsSigning(true);
+    try {
+      await signWaiver('liability_waiver', signature);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSigning(false);
+    }
+  };
 
   return (
     <div className="h-[100dvh] bg-[#050505] text-white font-sans flex flex-col w-full sm:max-w-2xl lg:max-w-3xl mx-auto relative overflow-hidden border-x border-white/5 lg:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
       {/* Ambient Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[150%] bg-[#FFB800]/5 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Mandatory Waiver Modal */}
+      <AnimatePresence>
+        {!hasSignedWaiver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              className="bg-[#0a0a0a] border border-red-500/20 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl overflow-hidden relative"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
+              
+              <div className="flex flex-col items-center text-center mb-8">
+                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4 border border-red-500/20">
+                  <User size={32} className="text-red-500" />
+                </div>
+                <h2 className="text-2xl font-heading uppercase italic text-white mb-2">Liability Waiver</h2>
+                <p className="text-[11px] text-white/40 uppercase tracking-widest leading-relaxed">
+                  Action required before accessing the INZAN Athletics platform.
+                </p>
+              </div>
+
+              <div className="bg-black/50 border border-white/5 rounded-2xl p-6 mb-8 h-48 overflow-y-auto custom-scrollbar text-[11px] text-white/50 leading-loose">
+                <p className="mb-4 text-white/70 font-bold uppercase tracking-widest text-[#FFB800] text-[10px]">Assumption of Risk</p>
+                <p className="mb-4">
+                  I acknowledge that participating in physical activities involves inherent risks of injury. I hereby assume all risks associated with my participation at INZAN Athletics.
+                </p>
+                <p className="mb-4">
+                  I agree to follow all safety instructions provided by the coaching staff. I certify that I am in good physical health and able to undertake these activities.
+                </p>
+                <p>
+                  By typing my name below, I legally bind myself to this liability waiver and release INZAN Athletics from any claims.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="relative group">
+                  <input
+                    type="text"
+                    placeholder="ENTER FULL LEGAL NAME"
+                    value={signature}
+                    onChange={(e) => setSignature(e.target.value)}
+                    className="w-full bg-black border border-white/10 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#FFB800]/50 transition-all font-mono uppercase tracking-widest text-center"
+                  />
+                </div>
+                
+                <button
+                  onClick={handleSignWaiver}
+                  disabled={!signature.trim() || isSigning}
+                  className="w-full bg-[#FFB800] text-black font-black uppercase tracking-[0.2em] text-[11px] py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors"
+                >
+                  {isSigning ? "Processing..." : "Sign & Accept"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content Area */}
       <main className="content-fit pb-28 relative z-10 w-full px-4 sm:px-6 lg:px-8">
@@ -104,6 +187,17 @@ export default function UserApp() {
                 <ProfileTab />
               </motion.div>
             )}
+            {activeTab === "community" && (
+              <motion.div
+                key="community"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <CommunityTab />
+              </motion.div>
+            )}
             {activeTab === "more" && (
               <motion.div
                 key="more"
@@ -125,43 +219,49 @@ export default function UserApp() {
           <ul className="flex items-center justify-around gap-1">
             <NavItem
               icon={<Home size={20} />}
-              label="Home"
+              label={t('dashboard')}
               isActive={activeTab === "home"}
               onClick={() => setActiveTab("home")}
             />
             <NavItem
               icon={<Users size={20} />}
-              label="Classes"
+              label={t('classes')}
               isActive={activeTab === "classes"}
               onClick={() => setActiveTab("classes")}
             />
             <NavItem
               icon={<Dumbbell size={20} />}
-              label="PT"
+              label={t('coaches')}
               isActive={activeTab === "pt"}
               onClick={() => setActiveTab("pt")}
             />
             <NavItem
               icon={<CalendarCheck size={20} />}
-              label="Sessions"
+              label={t('my_sessions')}
               isActive={activeTab === "sessions"}
               onClick={() => setActiveTab("sessions")}
             />
             <NavItem
               icon={<Coffee size={20} />}
-              label="Kitchen"
+              label={t('kitchen')}
               isActive={activeTab === "kitchen"}
               onClick={() => setActiveTab("kitchen")}
             />
             <NavItem
               icon={<User size={20} />}
-              label="Profile"
+              label={t('profile')}
               isActive={activeTab === "profile"}
               onClick={() => setActiveTab("profile")}
             />
             <NavItem
+              icon={<Users size={20} />}
+              label={t('community')}
+              isActive={activeTab === "community"}
+              onClick={() => setActiveTab("community")}
+            />
+            <NavItem
               icon={<MoreHorizontal size={20} />}
-              label="More"
+              label={t('More')}
               isActive={activeTab === "more"}
               onClick={() => setActiveTab("more")}
             />

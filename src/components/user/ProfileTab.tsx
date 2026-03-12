@@ -14,15 +14,18 @@ import {
   LogOut,
   ScanLine,
   Ticket,
+  MessageSquare,
 } from "lucide-react";
 import { useData, SESSION_TYPE_LABELS } from "../../context/DataContext";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../utils/i18n";
 
 export default function ProfileTab() {
-  const { currentUser, ptPackages } = useData();
+  const { currentUser, ptPackages, broadcastAlert } = useData();
   const navigate = useNavigate();
+  const { lang, setLanguage, t } = useLanguage();
 
   const activePackages = ptPackages.filter(
     (p) =>
@@ -53,6 +56,13 @@ export default function ProfileTab() {
             Command Center
           </h2>
           <div className="flex gap-2">
+            <button
+              onClick={() => setLanguage(lang === 'en' ? 'ar' : 'en')}
+              className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg"
+              title={lang === 'en' ? 'Switch to Arabic' : 'Switch to English'}
+            >
+              <span className="text-xs font-bold text-white uppercase">{lang === 'en' ? 'ع' : 'EN'}</span>
+            </button>
             <button
               onClick={() => navigate("/p/notifications")}
               className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg"
@@ -147,6 +157,28 @@ export default function ProfileTab() {
             </div>
           </div>
         </div>
+
+        {/* --- REFERRAL SECTION START --- */}
+        <div className="bg-white/5 border border-white/10 p-6 lg:p-8 rounded-[2rem] relative overflow-hidden group hover:border-[#FFB800]/30 transition-all shadow-2xl mt-4">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFB800]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <h3 className="font-heading text-lg lg:text-xl text-white mb-2 uppercase tracking-widest relative z-10">Your Referral Code</h3>
+          <p className="text-[10px] lg:text-[11px] text-white/50 mb-6 uppercase tracking-widest leading-relaxed relative z-10 max-w-sm">Share this code with friends. When they purchase their first membership, both of you will receive rewards.</p>
+          <div className="flex items-center gap-4 bg-black/40 p-4 rounded-2xl border border-white/5 relative z-10 shadow-inner">
+            <div className="flex-1">
+              <p className="text-[#FFB800] font-heading text-2xl lg:text-3xl tracking-[0.2em]">{currentUser?.code}</p>
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(currentUser?.code || "");
+                broadcastAlert("Referral code copied to clipboard!", "success");
+              }}
+              className="w-12 h-12 rounded-xl bg-white/10 hover:bg-[#FFB800] hover:text-black flex items-center justify-center transition-all text-white border border-white/10 group-hover:scale-105 active:scale-95"
+            >
+              <Ticket size={20} />
+            </button>
+          </div>
+        </div>
+        {/* --- REFERRAL SECTION END --- */}
 
         {activePackages.length > 0 && (
           <div className="flex flex-col gap-4">
@@ -249,6 +281,11 @@ export default function ProfileTab() {
             icon={<FileText size={22} />}
             label="Financials"
             onClick={() => navigate("/p/billing")}
+          />
+          <OptionItem
+            icon={<MessageSquare size={22} />}
+            label="Messages"
+            onClick={() => navigate("/p/messages")}
           />
           <div className="col-span-2 lg:col-span-4">
             <OptionItem

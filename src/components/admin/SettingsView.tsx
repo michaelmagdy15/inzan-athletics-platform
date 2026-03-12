@@ -13,10 +13,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData } from "../../context/DataContext";
+import { useLanguage } from "../../utils/i18n";
 
 export default function SettingsView() {
   const { settings, updateSettings, broadcastAlert } = useData();
   const [activeSubPanel, setActiveSubPanel] = useState<string | null>(null);
+  const { lang, setLanguage, t } = useLanguage();
 
   const settingsCategories = [
     {
@@ -84,6 +86,26 @@ export default function SettingsView() {
         <div className="glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-12 border border-white/5 shadow-2xl relative overflow-hidden font-bold">
           {activeSubPanel === "core" && (
             <div className="flex flex-col gap-8 max-w-xl">
+              <div className="flex flex-col gap-3 group font-bold">
+                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] group-hover:text-gold/60 transition-colors">
+                  System Language
+                </label>
+                <div className="flex bg-white/5 border border-white/10 rounded-2xl p-1 w-full">
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold uppercase transition-all ${lang === 'en' ? 'bg-gold text-black shadow-lg' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => setLanguage('ar')}
+                    className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold uppercase transition-all ${lang === 'ar' ? 'bg-gold text-black shadow-lg' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                  >
+                    العربية
+                  </button>
+                </div>
+              </div>
+
               <SettingField
                 label="Gym Platform Name"
                 value={settings.brandName}

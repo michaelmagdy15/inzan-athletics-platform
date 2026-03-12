@@ -8,6 +8,7 @@ import { supabase } from "../lib/supabase";
 const CoachScheduleView = lazy(() => import("../components/coach/CoachScheduleView"));
 const CoachSessionsView = lazy(() => import("../components/coach/CoachSessionsView"));
 const CoachEarningsView = lazy(() => import("../components/coach/CoachEarningsView"));
+const CoachStaffView = lazy(() => import("../components/coach/CoachStaffView"));
 const ProfileTab = lazy(() => import("../components/user/ProfileTab"));
 
 const LoadingFallback = () => (
@@ -43,6 +44,8 @@ export default function CoachApp() {
         return <CoachSessionsView />;
       case "earnings":
         return <CoachEarningsView />;
+      case "staff":
+        return <CoachStaffView />;
       case "profile":
         return <ProfileTab />;
       default:
@@ -118,6 +121,12 @@ export default function CoachApp() {
             label="Earnings"
             isActive={activeTab === "earnings"}
             onClick={() => setActiveTab("earnings")}
+          />
+          <NavItem
+            icon={<User size={20} />}
+            label="Staff"
+            isActive={activeTab === "staff"}
+            onClick={() => setActiveTab("staff")}
           />
           <NavItem
             icon={<User size={20} />}

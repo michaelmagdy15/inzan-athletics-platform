@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useData } from "../../context/DataContext";
 import { motion } from "framer-motion";
-import { Activity, Zap, Wallet, Users } from "lucide-react";
+import { Activity, Zap, Wallet, Users, UserCheck, Calendar, Download } from "lucide-react";
 
 export default function DashboardView() {
   const {
@@ -11,17 +11,45 @@ export default function DashboardView() {
     transactions,
     operatingGoals,
     broadcastAlert,
+    attendanceLogs,
   } = useData();
 
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
+
+  const now = new Date();
+  const filterDate = (dateString: string) => {
+    if (!dateString) return false;
+    if (dateFilter === "all") return true;
+    const d = new Date(dateString);
+    if (dateFilter === "today") {
+      return d.toDateString() === now.toDateString();
+    }
+    if (dateFilter === "week") {
+      const weekAgo = new Date(now);
+      weekAgo.setDate(now.getDate() - 7);
+      return d >= weekAgo;
+    }
+    if (dateFilter === "month") {
+      const monthAgo = new Date(now);
+      monthAgo.setMonth(now.getMonth() - 1);
+      return d >= monthAgo;
+    }
+    return true;
+  };
+
+  const filteredOrders = orders.filter(o => filterDate(o.created_at));
+  const filteredTransactions = transactions.filter(t => filterDate(t.created_at));
+  const filteredAttendance = attendanceLogs.filter(a => filterDate(a.checked_in_at));
+
   // Dynamic Stats Calculation
-  const kitchenSales = orders
+  const kitchenSales = filteredOrders
     .filter((o) => o.status === "completed" || o.status === "picked_up")
     .reduce((acc, order) => acc + (Number(order.total_price) || 0), 0);
-  const membershipSales = transactions
+  const membershipSales = filteredTransactions
     .filter((t) => t.transaction_type === "membership")
     .reduce((acc, t) => acc + Number(t.amount), 0);
-  // Since this is a new table, if it's empty, we'll gracefully fallback or just show 0 (which is accurate for a fresh DB)
-  const otherTransactions = transactions
+  
+  const otherTransactions = filteredTransactions
     .filter(
       (t) =>
         t.transaction_type !== "membership" && t.transaction_type !== "kitchen",
@@ -89,16 +117,42 @@ export default function DashboardView() {
 
   const classEngagementWidth = Math.min(100, scheduleLoad);
 
+  // Today's check-ins from attendance logs
+  const todayStr = new Date().toDateString();
+  const todayCheckIns = attendanceLogs.filter(
+    (log) => new Date(log.checked_in_at).toDateString() === todayStr
+  ).length;
+
+  const exportCSV = (filename: string, rows: any[]) => {
+    if (rows.length === 0) {
+      broadcastAlert("No data available to export for the selected date range.", "warning");
+      return;
+    }
+    const headers = Object.keys(rows[0]).join(",");
+    const csvData = rows.map(row => Object.values(row).map(value => `"${value}"`).join(",")).join("\n");
+    const blob = new Blob([`${headers}\n${csvData}`], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${filename}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleAction = (label: string) => {
     switch (label) {
       case "Send Member Announcement":
         broadcastAlert("Announcement sent to all active members.", "info");
         break;
-      case "Export Daily Report":
-        broadcastAlert(
-          "Preparing daily operations report... Ready for download.",
-          "success",
-        );
+      case "Export Attendance Logs":
+        exportCSV("attendance_logs", filteredAttendance);
+        broadcastAlert("Exporting attendance logs...", "success");
+        break;
+      case "Export Revenue Records":
+        exportCSV("revenue_transactions", filteredTransactions);
+        broadcastAlert("Exporting revenue records...", "success");
         break;
       case "Sync System Time":
         broadcastAlert(
@@ -128,11 +182,24 @@ export default function DashboardView() {
             Real-time Systems Status
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-4 lg:px-5 py-2 rounded-xl lg:rounded-2xl backdrop-blur-xl transition-all hover:border-gold/30 group cursor-pointer shadow-xl">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-          <span className="text-[9px] lg:text-[10px] font-black text-white/40 tracking-widest uppercase group-hover:text-white transition-colors">
-            System Online
-          </span>
+        <div className="flex items-center gap-4">
+          <select 
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value as any)}
+            className="bg-black/40 border border-white/10 text-white/80 text-[10px] font-bold uppercase tracking-widest rounded-xl px-4 py-2.5 outline-none focus:border-gold/50 cursor-pointer appearance-none text-center"
+          >
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">Past 7 Days</option>
+            <option value="month">Past 30 Days</option>
+          </select>
+
+          <div className="hidden sm:flex items-center gap-3 bg-white/5 border border-white/5 px-4 lg:px-5 py-2 rounded-xl lg:rounded-2xl backdrop-blur-xl transition-all hover:border-gold/30 group cursor-pointer shadow-xl">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <span className="text-[9px] lg:text-[10px] font-black text-white/40 tracking-widest uppercase group-hover:text-white transition-colors">
+              System Online
+            </span>
+          </div>
         </div>
       </div>
 
@@ -163,6 +230,12 @@ export default function DashboardView() {
           value={`${scheduleLoad}%`}
           highlight
           icon={<Activity size={16} />}
+        />
+        <StatCard
+          title="Today"
+          value={todayCheckIns.toString()}
+          trend="CHECK-INS"
+          icon={<UserCheck size={16} />}
         />
       </div>
 
@@ -268,8 +341,14 @@ export default function DashboardView() {
                 onClick={() => handleAction("Send Member Announcement")}
               />
               <ActionButton
-                label="Registry Export"
-                onClick={() => handleAction("Export Daily Report")}
+                label="Export Attendance Logs"
+                onClick={() => handleAction("Export Attendance Logs")}
+                icon={<Download size={14} />}
+              />
+              <ActionButton
+                label="Export Revenue Records"
+                onClick={() => handleAction("Export Revenue Records")}
+                icon={<Download size={14} />}
               />
               <ActionButton
                 label="System Sync"
@@ -353,10 +432,12 @@ function ActionButton({
   label,
   variant,
   onClick,
+  icon,
 }: {
   label: string;
   variant?: string;
   onClick?: () => void;
+  icon?: React.ReactNode;
 }) {
   return (
     <button
@@ -374,7 +455,7 @@ function ActionButton({
           whileHover={{ x: 2 }}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
         >
-          <Activity size={14} className="text-white/10 group-hover:text-gold" />
+          {icon ? <span className="text-white/10 group-hover:text-gold transition-colors">{icon}</span> : <Activity size={14} className="text-white/10 group-hover:text-gold transition-colors" />}
         </motion.div>
       </div>
     </button>

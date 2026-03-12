@@ -1,24 +1,29 @@
 import React, { useState } from "react";
-import { Bell, ChevronDown } from "lucide-react";
+import { Bell, ChevronDown, Calendar as CalendarIcon } from "lucide-react";
 import { useData } from "../../context/DataContext";
+import { downloadIcsFile } from "../../utils/CalendarSyncApi";
 
 export default function ClassesTab() {
-  const { classes, currentUser, bookClass, cancelClass, loading } = useData();
+  const { classes, currentUser, bookClass, cancelClass, loading, classWaitlists, joinWaitlist, leaveWaitlist } = useData();
   const [subTab, setSubTab] = useState("date");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [filterValue, setFilterValue] = useState("");
 
-  const handleAction = async (classId: string, isBooked: boolean) => {
+  const handleAction = async (classId: string, isBooked: boolean, isWaitlisted: boolean, isFull: boolean) => {
     setProcessingId(classId);
     try {
       if (isBooked) {
         await cancelClass(classId);
+      } else if (isWaitlisted) {
+        await leaveWaitlist(classId);
+      } else if (isFull) {
+        await joinWaitlist(classId);
       } else {
         await bookClass(classId);
       }
     } catch (err: any) {
-      alert(`Booking failed: ${err.message}`);
+      alert(`Action failed: ${err.message}`);
     } finally {
       setProcessingId(null);
     }
@@ -130,13 +135,26 @@ export default function ClassesTab() {
           .map((c) => {
             const isBooked =
               currentUser?.bookedClasses?.includes(c.id) || false;
+            
+            // Waitlist calculations
+            const waitlistForClass = classWaitlists
+              .filter(w => w.schedule_id === c.id && w.status === 'waiting')
+              .sort((a, b) => new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime());
+            
+            const isWaitlisted = waitlistForClass.some(w => w.member_id === currentUser?.id);
+            const waitlistPosition = waitlistForClass.findIndex(w => w.member_id === currentUser?.id) + 1;
+            const isFull = c.spots_left <= 0;
+
             return (
               <ClassCard
                 key={c.id}
                 session={c}
                 isBooked={isBooked}
+                isWaitlisted={isWaitlisted}
+                isFull={isFull}
+                waitlistPosition={waitlistPosition}
                 isProcessing={processingId === c.id}
-                onAction={() => handleAction(c.id, isBooked)}
+                onAction={() => handleAction(c.id, isBooked, isWaitlisted, isFull)}
               />
             );
           })}
@@ -145,7 +163,7 @@ export default function ClassesTab() {
   );
 }
 
-function ClassCard({ session, isBooked, onAction, isProcessing }: any) {
+function ClassCard({ session, isBooked, isWaitlisted, isFull, waitlistPosition, onAction, isProcessing }: any) {
   return (
     <div className="relative rounded-[2.5rem] overflow-hidden border border-white/10 group shadow-2xl transition-all hover:border-gold/30 hover:scale-[1.02] bg-black/40 backdrop-blur-md">
       <img
@@ -192,17 +210,56 @@ function ClassCard({ session, isBooked, onAction, isProcessing }: any) {
 
         <div className="flex justify-between items-center pt-6 border-t border-white/10 mt-auto">
           <div className="flex flex-col">
-            <p className="text-[9px] text-gold font-black tracking-[0.2em] uppercase italic animate-pulse">
-              {session.spots_left} UNITS REMAINING
-            </p>
+            {isWaitlisted ? (
+              <p className="text-[9px] text-orange-400 font-black tracking-[0.2em] uppercase italic">
+                STANDBY POS: {waitlistPosition}
+              </p>
+            ) : isFull ? (
+              <p className="text-[9px] text-red-500 font-black tracking-[0.2em] uppercase italic">
+                CAPACITY REACHED
+              </p>
+            ) : (
+              <p className="text-[9px] text-gold font-black tracking-[0.2em] uppercase italic animate-pulse">
+                {session.spots_left} UNITS REMAINING
+              </p>
+            )}
           </div>
-          <button
-            onClick={onAction}
-            disabled={isProcessing}
-            className={`px-8 py-3 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all shadow-2xl active:scale-95 ${isProcessing ? "opacity-50 cursor-not-allowed" : ""} ${isBooked ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-gold text-black hover:bg-white"}`}
-          >
-            {isProcessing ? "SYNC..." : isBooked ? "ABORT" : "ENGAGE"}
-          </button>
+          <div className="flex items-center gap-2">
+            {isBooked && (
+              <button
+                onClick={() => {
+                    const start = new Date(`${session.date}T${session.time}`);
+                    const durationMins = parseInt(session.duration) || 60;
+                    const end = new Date(start.getTime() + durationMins * 60000);
+                    downloadIcsFile({
+                      id: session.id,
+                      title: session.title,
+                      description: `Training session with ${session.trainer}`,
+                      location: 'Inzan Athletics',
+                      startTime: start,
+                      endTime: end
+                    }, `class-${session.id}`);
+                }}
+                className="p-3 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors"
+                title="Add to Calendar"
+              >
+                <CalendarIcon size={14} />
+              </button>
+            )}
+            <button
+              onClick={onAction}
+              disabled={isProcessing}
+              className={`px-8 py-3 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all shadow-2xl active:scale-95 ${isProcessing ? "opacity-50 cursor-not-allowed" : ""} ${
+                isBooked || isWaitlisted
+                  ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                  : isFull
+                    ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
+                    : "bg-gold text-black hover:bg-white"
+              }`}
+            >
+              {isProcessing ? "SYNC..." : isBooked ? "ABORT" : isWaitlisted ? "ABORT STANDBY" : isFull ? "JOIN STANDBY" : "ENGAGE"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, QrCode, ShieldX, CheckCircle2, Info, UserPlus, Ticket, Clock, Calendar as CalIcon } from "lucide-react";
+import { ChevronLeft, QrCode, ShieldX, CheckCircle2, Info, UserPlus, Ticket, Clock, Calendar as CalIcon, Dumbbell, Plus, X, Save, TrendingUp, MessageSquare, Send } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useData } from "../context/DataContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+
+const ContentLibraryView = React.lazy(() => import('../components/user/ContentLibraryView'));
+const EventsOffersView = React.lazy(() => import('../components/user/EventsOffersView'));
 
 export default function UserSubPage() {
   const { pageId } = useParams();
   const navigate = useNavigate();
-  const { currentUser, registerAttendance, membershipTiers, checkoutPay, invitations, createInvitation, packageOfferings } = useData();
+  const { currentUser, registerAttendance, membershipTiers, checkoutPay, invitations, createInvitation, packageOfferings, attendanceLogs, submitFreezeRequest, freezeRequests, workouts, logWorkout, nutritionAssessments, messages, sendMessage, markAsRead, members } = useData();
+  const [promoCodeInput, setPromoCodeInput] = useState("");
   const [scanStatus, setScanStatus] = useState<"idle" | "success" | "error">(
     "idle",
   );
@@ -128,13 +133,31 @@ export default function UserSubPage() {
                 is 30 days per cycle.
               </p>
             </div>
-            <div className="space-y-4 font-bold">
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                try {
+                  await submitFreezeRequest(
+                    formData.get("startDate") as string,
+                    formData.get("endDate") as string,
+                    formData.get("reason") as string
+                  );
+                  (e.target as HTMLFormElement).reset();
+                } catch (err: any) {
+                  alert(err.message);
+                }
+              }}
+              className="space-y-4 font-bold"
+            >
               <div className="space-y-2">
                 <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">
                   START DATE
                 </label>
                 <input
+                  name="startDate"
                   type="date"
+                  required
                   className="bg-white/5 border border-white/10 rounded-xl p-4 w-full text-white outline-none focus:border-[#FFB800]/50 transition-colors"
                 />
               </div>
@@ -143,7 +166,9 @@ export default function UserSubPage() {
                   END DATE
                 </label>
                 <input
+                  name="endDate"
                   type="date"
+                  required
                   className="bg-white/5 border border-white/10 rounded-xl p-4 w-full text-white outline-none focus:border-[#FFB800]/50 transition-colors"
                 />
               </div>
@@ -152,14 +177,53 @@ export default function UserSubPage() {
                   RATIONALE
                 </label>
                 <textarea
+                  name="reason"
                   placeholder="Specify reason for membership suspension..."
                   className="bg-white/5 border border-white/10 rounded-xl p-4 w-full text-white outline-none h-32 focus:border-[#FFB800]/50 transition-colors resize-none"
                 ></textarea>
               </div>
-            </div>
-            <button className="w-full bg-[#FFB800] text-black font-black uppercase tracking-[0.3em] text-[10px] py-5 rounded-2xl hover:bg-white transition-all shadow-2xl shadow-[#FFB800]/20">
-              Transmit Request
-            </button>
+              <button
+                type="submit"
+                className="w-full bg-[#FFB800] text-black font-black uppercase tracking-[0.3em] text-[10px] py-5 rounded-2xl hover:bg-white transition-all shadow-2xl shadow-[#FFB800]/20"
+              >
+                Transmit Request
+              </button>
+            </form>
+
+            {/* Freeze Request History */}
+            {freezeRequests.filter(fr => fr.member_id === currentUser?.id).length > 0 && (
+              <div className="space-y-4 pt-6 border-t border-white/5">
+                <h3 className="text-[10px] text-gray-500 font-black uppercase tracking-widest px-1">
+                  Request History
+                </h3>
+                <div className="space-y-3">
+                  {freezeRequests
+                    .filter(fr => fr.member_id === currentUser?.id)
+                    .map((fr) => (
+                      <div key={fr.id} className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-white text-[11px] font-black uppercase tracking-widest">
+                            {new Date(fr.start_date).toLocaleDateString()} — {new Date(fr.end_date).toLocaleDateString()}
+                          </span>
+                          <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${
+                            fr.status === 'approved' ? 'bg-emerald-500/20 text-emerald-500' :
+                            fr.status === 'rejected' ? 'bg-red-500/20 text-red-500' :
+                            'bg-[#FFB800]/10 text-[#FFB800]'
+                          }`}>
+                            {fr.status}
+                          </span>
+                        </div>
+                        {fr.reason && (
+                          <p className="text-[10px] text-gray-500 italic">{fr.reason}</p>
+                        )}
+                        {fr.admin_notes && (
+                          <p className="text-[10px] text-[#FFB800]/60 italic mt-1">Admin: {fr.admin_notes}</p>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         );
 
@@ -207,6 +271,24 @@ export default function UserSubPage() {
       case "packages":
         return (
           <div className="space-y-6">
+            <div className="bg-white/5 border border-white/10 p-6 rounded-[2.5rem] mb-8 relative overflow-hidden group hover:border-[#FFB800]/30 transition-all shadow-2xl">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFB800]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <h3 className="text-sm font-black text-white uppercase tracking-widest mb-2 flex items-center gap-2 relative z-10">
+                <Ticket size={16} className="text-[#FFB800]" />
+                Have a Promo or Referral Code?
+              </h3>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-4 relative z-10">Enter it before selecting a package to apply your discount.</p>
+              <div className="flex gap-2 relative z-10">
+                <input
+                  type="text"
+                  placeholder="ENTER CODE"
+                  value={promoCodeInput}
+                  onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                  className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-xs font-black uppercase tracking-widest focus:outline-none focus:border-[#FFB800]/50 transition-colors"
+                />
+              </div>
+            </div>
+
             <h3 className="text-xl font-heading text-white tracking-widest uppercase mb-4">Membership Tiers</h3>
             {membershipTiers.map((tier) => (
               <div key={tier.id} className={`p-6 bg-gradient-to-br from-white/5 via-black to-black rounded-[2.5rem] border ${tier.name.includes("Premium") ? "border-[#FFB800]/50 shadow-[#FFB800]/20" : "border-white/10"} relative overflow-hidden group shadow-2xl`}>
@@ -230,7 +312,7 @@ export default function UserSubPage() {
                   </span>
                 </div>
                 <button
-                  onClick={() => checkoutPay("membership", tier.id)}
+                  onClick={() => checkoutPay("membership", tier.id, promoCodeInput)}
                   className={`w-full text-black font-black uppercase tracking-[0.2em] text-[10px] py-4 rounded-xl shadow-2xl hover:scale-[1.02] transition-transform ${tier.name.includes("Premium") ? "bg-[#FFB800] shadow-[#FFB800]/20" : "bg-white"}`}>
                   Authorize Enrollment
                 </button>
@@ -273,7 +355,7 @@ export default function UserSubPage() {
                                 </div>
                               </div>
                               <button
-                                onClick={() => checkoutPay("package", pkg.id)}
+                                onClick={() => checkoutPay("package", pkg.id, promoCodeInput)}
                                 className="w-full py-4 bg-white/5 hover:bg-[#FFB800] hover:text-black border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2"
                               >
                                 <Ticket size={14} className="opacity-40 group-hover:opacity-100 transition-opacity" />
@@ -290,7 +372,17 @@ export default function UserSubPage() {
           </div>
         );
 
-      case "nutrition":
+      case "nutrition": {
+        const assessments = nutritionAssessments
+          .filter(a => a.member_id === currentUser?.id)
+          .sort((a, b) => new Date(a.assessment_date).getTime() - new Date(b.assessment_date).getTime())
+          .map(a => ({
+            ...a,
+            formattedDate: new Date(a.assessment_date).toLocaleDateString([], { month: 'short', day: 'numeric' })
+          }));
+
+        const latestAssessment = assessments[assessments.length - 1];
+
         return (
           <div className="space-y-8">
             <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-[2rem] relative overflow-hidden shadow-2xl">
@@ -300,36 +392,76 @@ export default function UserSubPage() {
               </h4>
               <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-4xl font-heading text-white tracking-widest">
-                  2,400
+                  {latestAssessment?.daily_calories_target || 2400}
                 </span>
                 <span className="text-xs text-emerald-500/60 font-black tracking-widest uppercase italic">
                   KCAL
                 </span>
               </div>
               <p className="text-[10px] text-white/40 font-black tracking-[0.2em] uppercase underline decoration-emerald-500/20">
-                180G PROTEIN • 220G CARBS
+                {latestAssessment?.protein_grams || 180}G PROTEIN • {latestAssessment?.carbs_grams || 220}G CARBS • {latestAssessment?.fats_grams || 80}G FATS
               </p>
             </div>
-            <div className="space-y-5">
-              <h3 className="text-[10px] text-gray-500 font-black uppercase tracking-widest px-1 font-bold">
-                Prescribed Protocols
-              </h3>
-              <div className="p-5 bg-white/5 rounded-2xl border border-white/5 flex gap-4 items-center">
-                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-emerald-500 border border-emerald-500/10 shadow-inner font-heading italic text-lg">
-                  AM
+
+            {assessments.length > 0 ? (
+              <div className="space-y-4">
+                <h3 className="text-[10px] text-gray-500 font-black uppercase tracking-widest px-1 font-bold flex items-center gap-2">
+                  <TrendingUp size={12} className="text-[#FFB800]" /> Body Composition History
+                </h3>
+                <div className="p-4 bg-white/5 rounded-[2rem] border border-white/10 h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={assessments}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                      <XAxis 
+                        dataKey="formattedDate" 
+                        stroke="rgba(255,255,255,0.2)" 
+                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 'bold' }} 
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        stroke="rgba(255,255,255,0.2)" 
+                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 'bold' }}
+                        tickLine={false}
+                        axisLine={false}
+                        width={30}
+                      />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold' }}
+                        itemStyle={{ color: '#fff' }}
+                      />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', paddingTop: '10px' }} />
+                      <Line type="monotone" dataKey="weight_kg" name="Weight (kg)" stroke="#FFB800" strokeWidth={3} dot={{ r: 4, fill: '#111', stroke: '#FFB800', strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="body_fat_pct" name="Body Fat %" stroke="#ef4444" strokeWidth={3} dot={{ r: 4, fill: '#111', stroke: '#ef4444', strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="muscle_mass_kg" name="Muscle (kg)" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#111', stroke: '#10b981', strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
-                <div>
-                  <h4 className="text-sm font-black uppercase tracking-widest text-white">
-                    Initial Loading
-                  </h4>
-                  <p className="text-[10px] text-gray-500 italic uppercase font-bold tracking-widest">
-                    Pre-workout amino sync
-                  </p>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                    <span className="text-xl font-heading text-[#FFB800]">{latestAssessment?.weight_kg || '-'}</span>
+                    <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest mt-1">Weight kg</span>
+                  </div>
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                    <span className="text-xl font-heading text-emerald-500">{latestAssessment?.muscle_mass_kg || '-'}</span>
+                    <span className="text-[8px] text-emerald-500/60 uppercase font-black tracking-widest mt-1">Muscle kg</span>
+                  </div>
+                  <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                    <span className="text-xl font-heading text-red-500">{latestAssessment?.body_fat_pct || '-'}</span>
+                    <span className="text-[8px] text-red-500/60 uppercase font-black tracking-widest mt-1">Fat %</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+                <div className="p-10 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-3xl opacity-50">
+                  <Info size={40} className="text-white/20 mb-4" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-center">No assessments found.<br/>Book a session with a nutritionist.</p>
+                </div>
+            )}
           </div>
         );
+      }
 
       case "invitations":
         return (
@@ -452,6 +584,111 @@ export default function UserSubPage() {
           </div>
         );
 
+      case "attendance": {
+        const myLogs = attendanceLogs.filter(log => log.member_id === currentUser?.id);
+        const today = new Date().toDateString();
+        const todayCount = myLogs.filter(log => new Date(log.checked_in_at).toDateString() === today).length;
+        
+        // Calculate streak
+        let streak = 0;
+        const uniqueDays = [...new Set<string>(myLogs.map(log => new Date(log.checked_in_at).toDateString()))];
+        const sortedDays = uniqueDays.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+        for (let i = 0; i < sortedDays.length; i++) {
+          const expected = new Date();
+          expected.setDate(expected.getDate() - i);
+          if (sortedDays[i] === expected.toDateString()) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+
+        // Group logs by date
+        const grouped: Record<string, typeof myLogs> = {};
+        myLogs.forEach(log => {
+          const dateKey = new Date(log.checked_in_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+          if (!grouped[dateKey]) grouped[dateKey] = [];
+          grouped[dateKey].push(log);
+        });
+
+        return (
+          <div className="space-y-6">
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                <p className="text-3xl font-heading text-white italic">{myLogs.length}</p>
+                <p className="text-[8px] text-white/30 font-black uppercase tracking-widest mt-1">Total</p>
+              </div>
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 text-center">
+                <p className="text-3xl font-heading text-emerald-500 italic">{streak}</p>
+                <p className="text-[8px] text-emerald-500/60 font-black uppercase tracking-widest mt-1">Streak</p>
+              </div>
+              <div className="bg-[#FFB800]/10 border border-[#FFB800]/20 rounded-2xl p-4 text-center">
+                <p className="text-3xl font-heading text-[#FFB800] italic">{todayCount}</p>
+                <p className="text-[8px] text-[#FFB800]/60 font-black uppercase tracking-widest mt-1">Today</p>
+              </div>
+            </div>
+
+            {/* Log History */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] text-gray-500 font-black uppercase tracking-widest px-1">
+                Check-In History
+              </h3>
+              {Object.keys(grouped).length === 0 ? (
+                <div className="p-8 text-center text-white/20">
+                  <Clock size={32} className="mx-auto mb-3 opacity-30" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">No check-ins yet</p>
+                </div>
+              ) : (
+                Object.entries(grouped).map(([date, logs]) => (
+                  <div key={date} className="space-y-2">
+                    <p className="text-[9px] text-[#FFB800] font-black uppercase tracking-[0.3em] px-1">{date}</p>
+                    {logs.map(log => (
+                      <div key={log.id} className="p-4 bg-white/5 rounded-2xl border border-white/10 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                            <CheckCircle2 size={14} className="text-emerald-500" />
+                          </div>
+                          <span className="text-white text-[11px] font-bold uppercase tracking-widest">
+                            {new Date(log.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <span className="text-[8px] text-white/20 font-black uppercase tracking-widest">
+                          {log.checked_in_by === 'admin' ? 'ADMIN' : 'SELF'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      case "messages":
+        return <MessagesPanel currentUser={currentUser} messages={messages} sendMessage={sendMessage} markAsRead={markAsRead} staff={members.filter(m => m.role === 'admin' || m.role === 'coach' || m.role === 'nutritionist')} />;
+
+      case "workouts":
+        return <WorkoutsPanel workouts={workouts.filter(w => w.member_id === currentUser?.id)} logWorkout={logWorkout} />;
+
+      case "workouts":
+        return <WorkoutsPanel workouts={workouts.filter((w: any) => w.member_id === currentUser?.id)} logWorkout={logWorkout} />;
+
+      case "library":
+        return (
+          <React.Suspense fallback={<div className="p-10 text-center"><div className="animate-spin w-8 h-8 border-2 border-[#FFB800] border-t-transparent mx-auto rounded-full"/></div>}>
+            <ContentLibraryView />
+          </React.Suspense>
+        );
+
+      case "events-offers":
+        return (
+          <React.Suspense fallback={<div className="p-10 text-center"><div className="animate-spin w-8 h-8 border-2 border-[#FFB800] border-t-transparent mx-auto rounded-full"/></div>}>
+            <EventsOffersView />
+          </React.Suspense>
+        );
+
       default:
         return (
           <div className="flex flex-col items-center justify-center py-20 text-center gap-4 opacity-40">
@@ -479,6 +716,9 @@ export default function UserSubPage() {
       contact: "Direct Uplink",
       notifications: "Comms Feed",
       invitations: "Guest Access",
+      workouts: "Physical Logs",
+      messages: "Direct Comms",
+      library: "Content Library",
     };
     return titles[pageId || ""] || "Unknown Protocol";
   };
@@ -518,6 +758,162 @@ export default function UserSubPage() {
   );
 }
 
+function WorkoutsPanel({ workouts, logWorkout }: { workouts: any[], logWorkout: any }) {
+  const [isLogging, setIsLogging] = React.useState(false);
+  const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
+  const [notes, setNotes] = React.useState("");
+  const [exercises, setExercises] = React.useState([{ id: Date.now(), exercise_name: "", sets: 0, reps: 0, weight: 0, completed: true }]);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleAddExercise = () => {
+    setExercises([...exercises, { id: Date.now(), exercise_name: "", sets: 0, reps: 0, weight: 0, completed: true }]);
+  };
+
+  const handleRemoveExercise = (id: number) => {
+    setExercises(exercises.filter(ex => ex.id !== id));
+  };
+
+  const handleUpdateExercise = (id: number, field: string, value: any) => {
+    setExercises(exercises.map(ex => ex.id === id ? { ...ex, [field]: value } : ex));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const cleanExercises = exercises.filter(ex => ex.exercise_name.trim() !== "").map(ex => ({
+        exercise_name: ex.exercise_name,
+        sets: Number(ex.sets),
+        reps: Number(ex.reps),
+        weight: Number(ex.weight),
+        completed: ex.completed
+      }));
+      await logWorkout(date, notes, cleanExercises);
+      setIsLogging(false);
+      setNotes("");
+      setExercises([{ id: Date.now(), exercise_name: "", sets: 0, reps: 0, weight: 0, completed: true }]);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLogging) {
+    return (
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-heading text-white uppercase italic">Log Workout</h3>
+          <button type="button" onClick={() => setIsLogging(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">Date</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-[#FFB800]/50 transition-all font-bold uppercase color-scheme-dark" />
+          </div>
+          
+          <div className="space-y-4">
+            <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1 flex justify-between items-center">
+              <span>Exercises</span>
+              <button type="button" onClick={handleAddExercise} className="text-[#FFB800] flex items-center gap-1 hover:text-white transition-colors">
+                <Plus size={12} /> Add
+              </button>
+            </label>
+            
+            {exercises.map((ex, idx) => (
+              <div key={ex.id} className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3 relative group">
+                <button type="button" onClick={() => handleRemoveExercise(ex.id)} className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                  <X size={10} />
+                </button>
+                <input type="text" placeholder="Exercise Name (e.g. Bench Press)" value={ex.exercise_name} onChange={(e) => handleUpdateExercise(ex.id, "exercise_name", e.target.value)} required className="w-full bg-black/20 border border-white/5 p-3 rounded-xl text-xs outline-none focus:border-[#FFB800]/50 transition-all font-bold placeholder:text-white/20 uppercase" />
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[8px] text-gray-500 uppercase font-black tracking-widest pl-1">Sets</label>
+                    <input type="number" min="0" value={ex.sets} onChange={(e) => handleUpdateExercise(ex.id, "sets", e.target.value)} className="w-full bg-black/20 border border-white/5 p-3 rounded-xl text-xs text-center outline-none focus:border-[#FFB800]/50 transition-all font-bold" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[8px] text-gray-500 uppercase font-black tracking-widest pl-1">Reps</label>
+                    <input type="number" min="0" value={ex.reps} onChange={(e) => handleUpdateExercise(ex.id, "reps", e.target.value)} className="w-full bg-black/20 border border-white/5 p-3 rounded-xl text-xs text-center outline-none focus:border-[#FFB800]/50 transition-all font-bold" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[8px] text-gray-500 uppercase font-black tracking-widest pl-1">Weight</label>
+                    <input type="number" min="0" step="0.5" value={ex.weight} onChange={(e) => handleUpdateExercise(ex.id, "weight", e.target.value)} className="w-full bg-black/20 border border-white/5 p-3 rounded-xl text-xs text-center outline-none focus:border-[#FFB800]/50 transition-all font-bold" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">Notes (Optional)</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="How did it feel?" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-[#FFB800]/50 h-24 resize-none transition-all font-bold placeholder:text-white/10" />
+          </div>
+        </div>
+
+        <button type="submit" disabled={isSubmitting} className="w-full py-5 bg-[#FFB800] text-black font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl shadow-2xl hover:bg-white transition-all flex items-center justify-center gap-2">
+          {isSubmitting ? "Saving..." : <><Save size={16} /> Save Session</>}
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <button onClick={() => setIsLogging(true)} className="w-full py-5 bg-white/5 border border-white/10 text-[#FFB800] font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl shadow-xl hover:bg-[#FFB800] hover:text-black transition-all flex items-center justify-center gap-3 group border-dashed">
+        <Plus size={16} className="group-hover:rotate-90 transition-transform" /> Start New Workout
+      </button>
+
+      {workouts.length === 0 ? (
+        <div className="p-10 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-3xl opacity-50">
+          <Dumbbell size={48} className="text-white/20 mb-4" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-center">No workouts logged yet. Time to lift!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <h3 className="text-[10px] text-gray-500 font-black uppercase tracking-widest px-1">Training History</h3>
+          <div className="space-y-4">
+            {workouts.map((w: any) => (
+              <div key={w.id} className="p-5 bg-white/5 rounded-3xl border border-white/10 space-y-4">
+                <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#FFB800]/10 flex items-center justify-center">
+                      <Dumbbell size={18} className="text-[#FFB800]" />
+                    </div>
+                    <div>
+                      <p className="text-white font-bold text-sm tracking-widest uppercase">{new Date(w.date).toLocaleDateString()}</p>
+                      <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest">{w.exercises?.length || 0} Exercises</p>
+                    </div>
+                  </div>
+                </div>
+                {w.exercises && w.exercises.length > 0 && (
+                  <div className="space-y-2">
+                    {w.exercises.map((ex: any) => (
+                      <div key={ex.id} className="flex justify-between items-center bg-black/20 p-3 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                        <span className="text-white/80">{ex.exercise_name}</span>
+                        <span className="text-[#FFB800]">
+                          {ex.sets}x{ex.reps} @ {ex.weight}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {w.notes && (
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest italic pt-2 border-t border-white/5">
+                    "{w.notes}"
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProtocolItem({ number, label, desc }: any) {
   return (
     <div className="flex gap-6 group">
@@ -535,6 +931,92 @@ function ProtocolItem({ number, label, desc }: any) {
           {desc}
         </p>
       </div>
+    </div>
+  );
+}
+
+function MessagesPanel({ currentUser, messages, sendMessage, markAsRead, staff }: any) {
+  const [selectedStaffId, setSelectedStaffId] = React.useState(staff[0]?.id || "");
+  const [content, setContent] = React.useState("");
+
+  React.useEffect(() => {
+    if (staff.length > 0 && !selectedStaffId) {
+      setSelectedStaffId(staff[0].id);
+    }
+  }, [staff, selectedStaffId]);
+
+  const conversation = messages.filter((m: any) => 
+    (m.sender_id === currentUser?.id && m.receiver_id === selectedStaffId) ||
+    (m.receiver_id === currentUser?.id && m.sender_id === selectedStaffId)
+  ).sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim() || !selectedStaffId) return;
+    await sendMessage(selectedStaffId, content.trim());
+    setContent("");
+  };
+
+  React.useEffect(() => {
+    // Mark incoming messages as read
+    conversation.forEach((m: any) => {
+      if (m.receiver_id === currentUser?.id && !m.read_at) {
+        markAsRead(m.id);
+      }
+    });
+  }, [conversation, currentUser, markAsRead]);
+
+  return (
+    <div className="flex flex-col h-[600px] border border-white/10 rounded-3xl overflow-hidden bg-black/40">
+      <div className="p-4 border-b border-white/10 bg-white/5">
+        <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest pl-1">Select Staff Member</label>
+        <select 
+          value={selectedStaffId} 
+          onChange={(e) => setSelectedStaffId(e.target.value)}
+          className="w-full mt-2 bg-black border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#FFB800]/50 transition-colors uppercase tracking-widest text-xs font-bold"
+        >
+          {staff.map((s: any) => (
+            <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {conversation.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center opacity-40">
+            <MessageSquare size={48} className="mb-4" />
+            <p className="text-[10px] uppercase font-black tracking-widest text-center">No messages yet.<br/>Start the transmission.</p>
+          </div>
+        ) : (
+          conversation.map((msg: any) => {
+            const isMe = msg.sender_id === currentUser?.id;
+            return (
+              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] p-4 rounded-2xl ${isMe ? 'bg-[#FFB800] text-black rounded-br-none' : 'bg-white/10 text-white rounded-bl-none border border-white/10'}`}>
+                  <p className={`text-sm font-bold ${isMe ? '' : 'text-white'}`}>{msg.content}</p>
+                  <p className={`text-[8px] uppercase tracking-widest mt-2 font-black opacity-60 ${isMe ? 'text-black' : 'text-white/50'}`}>
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {isMe && msg.read_at && ' • READ'}
+                  </p>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <form onSubmit={handleSend} className="p-4 border-t border-white/10 bg-white/5 flex gap-2">
+        <input 
+          type="text" 
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Enter message..." 
+          className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#FFB800]/50 transition-colors"
+        />
+        <button type="submit" disabled={!content.trim()} className="w-12 h-12 bg-[#FFB800] text-black rounded-xl flex items-center justify-center disabled:opacity-50 transition-all hover:bg-white active:scale-95">
+          <Send size={18} />
+        </button>
+      </form>
     </div>
   );
 }

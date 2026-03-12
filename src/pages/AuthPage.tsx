@@ -213,6 +213,21 @@ export default function AuthPage() {
                       required
                     />
                   </div>
+                  {!isLogin && (
+                    <div className="flex items-start gap-3 pt-2">
+                      <div className="flex items-center h-5">
+                        <input
+                          type="checkbox"
+                          id="terms"
+                          className="w-4 h-4 rounded border-white/20 bg-black/40 text-gold focus:ring-gold focus:ring-offset-black accent-gold cursor-pointer"
+                          required
+                        />
+                      </div>
+                      <label htmlFor="terms" className="text-[10px] text-white/50 leading-relaxed cursor-pointer pr-4">
+                        By initializing your core identity, you agree to our <span className="text-gold font-bold">Terms of Service</span>, <span className="text-gold font-bold">Privacy Policy</span>, and consent to performance data processing.
+                      </label>
+                    </div>
+                  )}
                   {isLogin && (
                     <div className="flex justify-end pt-2">
                       <Link

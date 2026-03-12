@@ -20,12 +20,14 @@ import {
   Dumbbell,
   BarChart3,
   Shield,
-  Radio, // Added Radio icon
+  Radio,
+  BookOpen,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData, Member } from "../context/DataContext";
 import { supabase } from "../lib/supabase";
 import NotificationBell from "../components/shared/NotificationBell";
+import { useLanguage } from "../utils/i18n";
 
 // Lazy load views for optimization
 const DashboardView = lazy(() => import("../components/admin/DashboardView"));
@@ -41,7 +43,10 @@ const PTReportsView = lazy(() => import("../components/admin/PTReportsView"));
 const SessionPoliciesView = lazy(
   () => import("../components/admin/SessionPoliciesView"),
 );
-const GlobalAnnouncementsView = lazy(() => import("../components/admin/GlobalAnnouncementsView")); // Added lazy load
+const GlobalAnnouncementsView = lazy(() => import("../components/admin/GlobalAnnouncementsView"));
+const StaffManagementView = lazy(() => import("../components/admin/StaffManagementView"));
+const LibraryManagementView = lazy(() => import("../components/admin/LibraryManagementView"));
+const EventsManagementView = lazy(() => import("../components/admin/EventsManagementView"));
 
 const ViewLoading = () => (
   <div className="flex-1 flex items-center justify-center p-12">
@@ -89,6 +94,7 @@ export default function AdminHub() {
   const [searchQuery, setSearchQuery] = useState("");
   const [creationMode, setCreationMode] = useState<CreationMode>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useLanguage();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -198,7 +204,7 @@ export default function AdminHub() {
             <nav className="flex-1 px-4 xl:px-6 flex flex-col gap-1 xl:gap-2 overflow-y-auto scrollbar-hide py-4 pb-20">
               <NavItem
                 icon={<LayoutDashboard size={18} />}
-                label="Dashboard"
+                label={t('dashboard')}
                 isActive={activeTab === "dashboard"}
                 onClick={() => {
                   setActiveTab("dashboard");
@@ -207,7 +213,7 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<Users size={18} />}
-                label="Members"
+                label={t('members')}
                 isActive={activeTab === "members"}
                 onClick={() => {
                   setActiveTab("members");
@@ -216,7 +222,7 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<Calendar size={18} />}
-                label="Classes"
+                label={t('classes')}
                 isActive={activeTab === "classes"}
                 onClick={() => {
                   setActiveTab("classes");
@@ -225,17 +231,44 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<UserCheck size={18} />}
-                label="Coaches"
+                label={t('coaches')}
                 isActive={activeTab === "coaches"}
                 onClick={() => {
                   setActiveTab("coaches");
                   closeMobileMenu();
                 }}
               />
+              <NavItem
+                icon={<UserCheck size={18} />}
+                label={t('staff')}
+                isActive={activeTab === "staff_mgmt"}
+                onClick={() => {
+                  setActiveTab("staff_mgmt");
+                  closeMobileMenu();
+                }}
+              />
+              <NavItem
+                icon={<BookOpen size={18} />}
+                label={t('library')}
+                isActive={activeTab === "library"}
+                onClick={() => {
+                  setActiveTab("library");
+                  closeMobileMenu();
+                }}
+              />
+              <NavItem
+                icon={<Calendar size={18} />}
+                label={t('events')}
+                isActive={activeTab === "events"}
+                onClick={() => {
+                  setActiveTab("events");
+                  closeMobileMenu();
+                }}
+              />
               <div className="h-px bg-white/5 my-3 xl:my-4 mx-4 shrink-0" />
               <NavItem
                 icon={<Dumbbell size={18} />}
-                label="PT Sessions"
+                label={t('pt_sessions')}
                 isActive={activeTab === "pt_sessions"}
                 onClick={() => {
                   setActiveTab("pt_sessions");
@@ -244,7 +277,7 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<BarChart3 size={18} />}
-                label="PT Reports"
+                label={t('pt_reports')}
                 isActive={activeTab === "pt_reports"}
                 onClick={() => {
                   setActiveTab("pt_reports");
@@ -253,7 +286,7 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<Shield size={18} />}
-                label="Session Policies"
+                label={t('session_policies')}
                 isActive={activeTab === "session_policies"}
                 onClick={() => {
                   setActiveTab("session_policies");
@@ -262,7 +295,7 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<Radio size={18} />}
-                label="Broadcast"
+                label={t('broadcast')}
                 isActive={activeTab === "broadcast"}
                 onClick={() => {
                   setActiveTab("broadcast");
@@ -272,7 +305,7 @@ export default function AdminHub() {
               <div className="h-px bg-white/5 my-3 xl:my-4 mx-4 shrink-0" />
               <NavItem
                 icon={<DollarSign size={18} />}
-                label="Financials"
+                label={t('financials')}
                 isActive={activeTab === "financials"}
                 onClick={() => {
                   setActiveTab("financials");
@@ -281,7 +314,7 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<Coffee size={18} />}
-                label="EK Kitchen"
+                label={t('kitchen')}
                 isActive={activeTab === "ek_kitchen"}
                 onClick={() => {
                   setActiveTab("ek_kitchen");
@@ -290,7 +323,7 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<Package size={18} />}
-                label="Inventory"
+                label={t('inventory')}
                 isActive={activeTab === "inventory"}
                 onClick={() => {
                   setActiveTab("inventory");
@@ -299,7 +332,7 @@ export default function AdminHub() {
               />
               <NavItem
                 icon={<Settings size={18} />}
-                label="Settings"
+                label={t('settings')}
                 isActive={activeTab === "settings"}
                 onClick={() => {
                   setActiveTab("settings");
@@ -435,6 +468,9 @@ export default function AdminHub() {
                   {activeTab === "pt_reports" && <PTReportsView />}
                   {activeTab === "session_policies" && <SessionPoliciesView />}
                   {activeTab === "broadcast" && <GlobalAnnouncementsView />}
+                  {activeTab === "staff_mgmt" && <StaffManagementView />}
+                  {activeTab === "library" && <LibraryManagementView />}
+                  {activeTab === "events" && <EventsManagementView />}
                 </motion.div>
               </AnimatePresence>
             </Suspense>

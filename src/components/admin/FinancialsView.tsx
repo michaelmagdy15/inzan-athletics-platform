@@ -16,9 +16,12 @@ import {
   Download,
   BarChart3,
   Users,
+  ArrowDownRight,
+  FileOutput,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData } from "../../context/DataContext";
+import { ExportManager } from "../../utils/ExportManager";
 import {
   AreaChart,
   Area,
@@ -36,6 +39,19 @@ export default function FinancialsView() {
   const { members, transactions, broadcastAlert, addTransaction } = useData();
   const [selectedMethod, setSelectedMethod] = useState("ALL");
   const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [activeTab, setActiveTab] = useState<"revenue" | "expenses" | "refunds">("revenue");
+
+  // Mock data for new advanced financials
+  const MOCK_EXPENSES = [
+    { id: '1', category: 'Equipment', amount: 45000, description: 'New Concept2 Rowers', date: '2024-03-01' },
+    { id: '2', category: 'Maintenance', amount: 3200, description: 'AC Repair', date: '2024-03-05' },
+    { id: '3', category: 'Marketing', amount: 15000, description: 'Social Media Ads', date: '2024-03-10' },
+  ];
+
+  const MOCK_REFUNDS = [
+    { id: '1', member: 'Sarah K.', amount: 1500, reason: 'Duplicate charge', status: 'approved', date: '2024-03-08' },
+    { id: '2', member: 'Alex R.', amount: 5000, reason: 'Medical cancellation', status: 'pending', date: '2024-03-11' },
+  ];
 
   // Format transactions for display
   const displayTransactions = transactions
@@ -92,33 +108,12 @@ export default function FinancialsView() {
   };
 
   const handleDownloadReport = () => {
-    const headers = [
-      "ID",
-      "Name",
-      "Type",
-      "Amount (EGP)",
-      "Method",
-      "Date",
-      "Status",
-    ];
-    const csvContent = [
-      headers.join(","),
-      ...displayTransactions.map(
-        (t) =>
-          `${t.id},"${t.name}","${t.type}",${t.amount},${t.method},"${t.date}","${t.status}"`,
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute(
-      "download",
-      `financial_report_${new Date().toISOString().split("T")[0]}.csv`,
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    let dataToExport: any[] = [];
+    if (activeTab === 'revenue') dataToExport = displayTransactions;
+    if (activeTab === 'expenses') dataToExport = MOCK_EXPENSES;
+    if (activeTab === 'refunds') dataToExport = MOCK_REFUNDS;
+    
+    ExportManager.exportDataToCSV(dataToExport, `financial_report_${activeTab}`);
   };
 
   const last3Months = Array.from({ length: 3 }, (_, i) => {
@@ -180,29 +175,31 @@ export default function FinancialsView() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 font-bold w-full lg:w-auto">
-          <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 w-full sm:w-auto font-bold">
-            {["ALL", "ONLINE", "POS"].map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setSelectedMethod(filter)}
-                className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[8px] font-black tracking-widest uppercase transition-all ${selectedMethod === filter ? "bg-gold text-black" : "text-white/20 hover:text-white"}`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
+          {activeTab === "revenue" && (
+            <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 w-full sm:w-auto font-bold">
+              {["ALL", "ONLINE", "POS"].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setSelectedMethod(filter)}
+                  className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[8px] font-black tracking-widest uppercase transition-all ${selectedMethod === filter ? "bg-gold text-black" : "text-white/20 hover:text-white"}`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={handleDownloadReport}
               className="flex-1 sm:flex-none px-4 lg:px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black text-white/40 tracking-widest uppercase hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
             >
-              <Download size={14} /> Report
+              <FileOutput size={14} /> Export CSV
             </button>
             <button
               onClick={() => setShowAddTransaction(true)}
               className="flex-1 sm:flex-none px-4 lg:px-6 py-3 bg-gold/10 border border-gold/20 rounded-xl text-[9px] font-black text-gold tracking-widest uppercase hover:bg-gold hover:text-black transition-all flex items-center gap-2"
             >
-              <Plus size={14} /> Add Payment
+              <Plus size={14} /> Add Entry
             </button>
             <button
               onClick={() =>
@@ -216,7 +213,43 @@ export default function FinancialsView() {
         </div>
       </div>
 
-      {/* Charts Row */}
+      {/* Tabs */}
+      <div className="flex bg-[#121212] p-1.5 rounded-2xl border border-white/5 shadow-inner">
+        <button
+          onClick={() => setActiveTab("revenue")}
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
+            activeTab === "revenue"
+              ? "bg-white/10 text-white shadow-lg"
+              : "text-white/40 hover:text-white"
+          }`}
+        >
+          Revenue
+        </button>
+        <button
+          onClick={() => setActiveTab("expenses")}
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
+            activeTab === "expenses"
+              ? "bg-white/10 text-emerald-400 shadow-lg"
+              : "text-white/40 hover:text-white"
+          }`}
+        >
+          Expenses
+        </button>
+        <button
+          onClick={() => setActiveTab("refunds")}
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
+            activeTab === "refunds"
+              ? "bg-white/10 text-amber-500 shadow-lg"
+              : "text-white/40 hover:text-white"
+          }`}
+        >
+          Refunds
+        </button>
+      </div>
+
+      {activeTab === "revenue" && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 lg:gap-10">
+          {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <div className="lg:col-span-2 glass-card rounded-[2rem] border border-white/5 p-5 sm:p-6 lg:p-8">
           <div className="flex items-center gap-3 mb-6">
@@ -402,6 +435,91 @@ export default function FinancialsView() {
           )}
         </div>
       </div>
+      </motion.div>
+      )}
+
+      {activeTab === "expenses" && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
+          <div className="glass-card rounded-[2rem] border border-white/5 p-6 shadow-2xl overflow-hidden">
+            <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase mb-6 flex items-center gap-2">
+              <ArrowDownRight size={16} className="text-red-500" /> Organization Expenses
+            </h3>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest">Date</th>
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest">Category</th>
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest">Description</th>
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widesttext-right">Amount (EGP)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MOCK_EXPENSES.map((exp) => (
+                    <tr key={exp.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-4 text-xs font-bold text-white/70">{exp.date}</td>
+                      <td className="p-4 text-xs font-bold text-white"><span className="bg-white/10 px-2 py-1 rounded-md">{exp.category}</span></td>
+                      <td className="p-4 text-xs text-white/70 font-medium">{exp.description}</td>
+                      <td className="p-4 text-sm font-black text-red-400 text-right">- {exp.amount.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {activeTab === "refunds" && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
+          <div className="glass-card rounded-[2rem] border border-white/5 p-6 shadow-2xl overflow-hidden">
+            <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase mb-6 flex items-center gap-2">
+              <Wallet size={16} className="text-amber-500" /> Pending & Approved Refunds
+            </h3>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest">Date</th>
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest">Member</th>
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest">Reason</th>
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest">Status</th>
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest text-right">Amount (EGP)</th>
+                    <th className="p-4 text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MOCK_REFUNDS.map((rf) => (
+                    <tr key={rf.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-4 text-xs font-bold text-white/70">{rf.date}</td>
+                      <td className="p-4 text-xs font-bold text-white">{rf.member}</td>
+                      <td className="p-4 text-xs text-white/70 font-medium">{rf.reason}</td>
+                      <td className="p-4 text-xs font-bold">
+                        <span className={`px-2 py-1 rounded-md ${rf.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                          {rf.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="p-4 text-sm font-black text-amber-400 text-right">{rf.amount.toLocaleString()}</td>
+                      <td className="p-4 text-center">
+                        {rf.status === 'pending' ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <button className="text-[10px] bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-emerald-500 hover:text-white uppercase font-black tracking-widest transition-all">Approve</button>
+                            <button className="text-[10px] bg-red-500/20 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white uppercase font-black tracking-widest transition-all">Deny</button>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-white/30 uppercase tracking-widest font-black italic">Processed</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Add Transaction Modal */}
       <AnimatePresence>
