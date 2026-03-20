@@ -6,6 +6,7 @@ import {
 import { motion } from "framer-motion";
 import { useData } from "../../context/DataContext";
 import { WearableIntegrationManager, WearableData } from "../../utils/WearableIntegrationManager";
+import { supabase } from "../../lib/supabase";
 
 interface Post {
   id: string;
@@ -52,6 +53,35 @@ export default function CommunityTab() {
   const [wearableData, setWearableData] = useState<WearableData | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isWhoopConnected, setIsWhoopConnected] = useState(false);
+  const [feed, setFeed] = useState<Post[]>([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSocial = async () => {
+      // Fetch Feed
+      let { data: feedData } = await supabase.from('social_posts').select('*');
+      if (!feedData || feedData.length === 0) {
+        // Seed mock
+        for (const p of FEED_MOCK) {
+          await supabase.from('social_posts').insert(p);
+        }
+        feedData = FEED_MOCK;
+      }
+      setFeed(feedData || []);
+
+      // Fetch Leaderboard
+      let { data: lbData } = await supabase.from('gamification_leaderboard').select('*').order('points', { ascending: false });
+      if (!lbData || lbData.length === 0) {
+        // Seed mock
+        for (const user of LEADERBOARD_MOCK) {
+          await supabase.from('gamification_leaderboard').insert(user);
+        }
+        lbData = LEADERBOARD_MOCK;
+      }
+      setLeaderboard(lbData || []);
+    };
+    fetchSocial();
+  }, []);
 
   const handleSyncWearable = async () => {
     setIsSyncing(true);
@@ -130,7 +160,7 @@ export default function CommunityTab() {
           </div>
 
           <div className="flex flex-col gap-6">
-            {FEED_MOCK.map(post => (
+            {feed.map((post: Post) => (
               <div key={post.id} className="bg-white/5 border border-white/5 rounded-3xl p-6">
                 <div className="flex items-center gap-4 mb-4">
                   <img src={post.avatar} className="w-12 h-12 rounded-full" alt={post.author} />
@@ -166,7 +196,7 @@ export default function CommunityTab() {
           </div>
 
           <div className="bg-[#121212] border border-white/5 rounded-3xl overflow-hidden">
-            {LEADERBOARD_MOCK.map((user, idx) => (
+            {leaderboard.map((user, idx) => (
               <div key={idx} className={`flex items-center justify-between p-5 border-b border-white/5 last:border-0 ${idx === 0 ? 'bg-white/5' : ''}`}>
                 <div className="flex items-center gap-4">
                   <span className={`w-8 font-black text-center ${idx === 0 ? 'text-[#FFB800] text-xl' : 'text-white/40 text-sm'}`}>

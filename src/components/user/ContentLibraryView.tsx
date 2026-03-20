@@ -212,13 +212,23 @@ export default function ContentLibraryView() {
                 <div className="prose prose-invert max-w-none mb-8 text-sm text-white/70 font-medium leading-relaxed">
                   <p>{selectedItem.description}</p>
                   
-                  {/* Mock content rendering */}
-                  <div className="mt-8 p-6 bg-white/5 rounded-2xl border border-white/5">
-                    <p className="text-white/40 mb-4 font-bold text-center">Content Viewer Placeholder</p>
-                    <div className="w-full h-12 bg-black/40 rounded-xl flex items-center justify-between px-6 border border-white/5 group hover:border-gold/30 cursor-pointer transition-colors">
-                      <span className="text-xs font-bold text-white group-hover:text-gold transition-colors break-all line-clamp-1">{selectedItem.url}</span>
-                      <ChevronRight size={16} className="text-white/30" />
-                    </div>
+                  {/* Active Content Renderer */}
+                  <div className="mt-8 p-1 bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
+                    {selectedItem.content_type === "video" ? (
+                      <video controls className="w-full rounded-xl bg-black aspect-video object-contain">
+                        <source src={selectedItem.url} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : selectedItem.content_type === "document" ? (
+                      <a href={selectedItem.url} target="_blank" rel="noreferrer" className="w-full h-16 bg-gold/10 hover:bg-gold/20 text-gold flex items-center justify-center rounded-xl font-black uppercase tracking-widest gap-2 transition-colors">
+                        <FileText size={16} /> Open Document
+                      </a>
+                    ) : (
+                      <a href={selectedItem.url} target="_blank" rel="noreferrer" className="w-full h-14 bg-black/40 hover:bg-white/10 text-white flex items-center justify-between px-6 rounded-xl font-bold uppercase tracking-widest transition-colors">
+                        <span className="truncate">{selectedItem.url}</span>
+                        <ChevronRight size={16} className="text-white/50" />
+                      </a>
+                    )}
                   </div>
                 </div>
 
