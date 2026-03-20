@@ -24,12 +24,8 @@ export default function HomeTab() {
       <header className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <h1 className="text-xl tracking-[0.3em] font-light text-white">
-            I N Z A N
+            I N
           </h1>
-          <span className="text-white/20 text-sm">|</span>
-          <span className="text-[10px] tracking-[0.2em] font-medium text-[#FFB800] mt-1">
-            A T H L E T I C S
-          </span>
         </div>
         <button
           onClick={() => navigate("/p/notifications")}

@@ -149,8 +149,7 @@ export default function AuthPage() {
             <Crown className="w-10 h-10 text-gold relative z-10 drop-shadow-[0_0_10px_rgba(202,138,4,0.5)]" />
           </motion.div>
           <h1 className="text-5xl font-heading font-light tracking-tight text-white mb-3 leading-tight">
-            {config.shortName}{" "}
-            <span className="text-gold italic font-medium">Athletics</span>
+            I N
           </h1>
           <div className="flex items-center justify-center gap-3">
             <div className="h-px w-8 bg-gold/30" />
