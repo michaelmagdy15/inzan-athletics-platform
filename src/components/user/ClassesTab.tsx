@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { Bell, ChevronDown, Calendar as CalendarIcon } from "lucide-react";
 import { useData } from "../../context/DataContext";
 import { downloadIcsFile } from "../../utils/CalendarSyncApi";
+import { useBranding } from "../../context/BrandingContext";
 
 export default function ClassesTab() {
   const { classes, currentUser, bookClass, cancelClass, loading, classWaitlists, joinWaitlist, leaveWaitlist } = useData();
+  const { config } = useBranding();
   const [subTab, setSubTab] = useState("date");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -135,12 +137,12 @@ export default function ClassesTab() {
           .map((c) => {
             const isBooked =
               currentUser?.bookedClasses?.includes(c.id) || false;
-            
+
             // Waitlist calculations
             const waitlistForClass = classWaitlists
               .filter(w => w.schedule_id === c.id && w.status === 'waiting')
               .sort((a, b) => new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime());
-            
+
             const isWaitlisted = waitlistForClass.some(w => w.member_id === currentUser?.id);
             const waitlistPosition = waitlistForClass.findIndex(w => w.member_id === currentUser?.id) + 1;
             const isFull = c.spots_left <= 0;
@@ -164,6 +166,7 @@ export default function ClassesTab() {
 }
 
 function ClassCard({ session, isBooked, isWaitlisted, isFull, waitlistPosition, onAction, isProcessing }: any) {
+  const { config } = useBranding();
   return (
     <div className="relative rounded-[2.5rem] overflow-hidden border border-white/10 group shadow-2xl transition-all hover:border-gold/30 hover:scale-[1.02] bg-black/40 backdrop-blur-md">
       <img
@@ -228,17 +231,17 @@ function ClassCard({ session, isBooked, isWaitlisted, isFull, waitlistPosition, 
             {isBooked && (
               <button
                 onClick={() => {
-                    const start = new Date(`${session.date}T${session.time}`);
-                    const durationMins = parseInt(session.duration) || 60;
-                    const end = new Date(start.getTime() + durationMins * 60000);
-                    downloadIcsFile({
-                      id: session.id,
-                      title: session.title,
-                      description: `Training session with ${session.trainer}`,
-                      location: 'Inzan Athletics',
-                      startTime: start,
-                      endTime: end
-                    }, `class-${session.id}`);
+                  const start = new Date(`${session.date}T${session.time}`);
+                  const durationMins = parseInt(session.duration) || 60;
+                  const end = new Date(start.getTime() + durationMins * 60000);
+                  downloadIcsFile({
+                    id: session.id,
+                    title: session.title,
+                    description: `Training session with ${session.trainer}`,
+                    location: config.name,
+                    startTime: start,
+                    endTime: end
+                  }, `class-${session.id}`, config.name, config.contact.email.split('@')[1]);
                 }}
                 className="p-3 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors"
                 title="Add to Calendar"
@@ -249,13 +252,12 @@ function ClassCard({ session, isBooked, isWaitlisted, isFull, waitlistPosition, 
             <button
               onClick={onAction}
               disabled={isProcessing}
-              className={`px-8 py-3 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all shadow-2xl active:scale-95 ${isProcessing ? "opacity-50 cursor-not-allowed" : ""} ${
-                isBooked || isWaitlisted
-                  ? "bg-red-500/10 text-red-500 border border-red-500/20"
-                  : isFull
-                    ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
-                    : "bg-gold text-black hover:bg-white"
-              }`}
+              className={`px-8 py-3 rounded-2xl text-[10px] font-black tracking-widest uppercase transition-all shadow-2xl active:scale-95 ${isProcessing ? "opacity-50 cursor-not-allowed" : ""} ${isBooked || isWaitlisted
+                ? "bg-red-500/10 text-red-500 border border-red-500/20"
+                : isFull
+                  ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
+                  : "bg-gold text-black hover:bg-white"
+                }`}
             >
               {isProcessing ? "SYNC..." : isBooked ? "ABORT" : isWaitlisted ? "ABORT STANDBY" : isFull ? "JOIN STANDBY" : "ENGAGE"}
             </button>

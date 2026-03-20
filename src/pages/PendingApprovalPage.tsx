@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { ShieldAlert, Clock, LogOut, ArrowRight } from "lucide-react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/firebase";
 
 export default function PendingApprovalPage() {
     const handleSignOut = async () => {

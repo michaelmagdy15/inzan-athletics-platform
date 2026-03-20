@@ -18,12 +18,14 @@ import {
 } from "lucide-react";
 import { useData, SESSION_TYPE_LABELS } from "../../context/DataContext";
 import { QRCodeSVG } from "qrcode.react";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../utils/i18n";
+import { useBranding } from "../../context/BrandingContext";
 
 export default function ProfileTab() {
   const { currentUser, ptPackages, broadcastAlert } = useData();
+  const { config } = useBranding();
   const navigate = useNavigate();
   const { lang, setLanguage, t } = useLanguage();
 
@@ -111,7 +113,7 @@ export default function ProfileTab() {
             </div>
             <div className="w-20 h-20 lg:w-24 lg:h-24 bg-white p-2.5 rounded-2xl shrink-0 shadow-2xl rotate-3 flex items-center justify-center border-4 border-black group-hover:rotate-0 transition-transform duration-700">
               <QRCodeSVG
-                value={currentUser?.code || "INZAN"}
+                value={currentUser?.code || config.shortName}
                 size={80}
                 level="H"
                 includeMargin={false}

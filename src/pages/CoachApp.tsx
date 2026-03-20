@@ -2,7 +2,8 @@ import React, { useState, lazy, Suspense } from "react";
 import { CalendarDays, CalendarCheck, User, LogOut, DollarSign } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import NavItem from "../components/user/NavItem";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/firebase";
+import { useBranding } from "../context/BrandingContext";
 
 // Lazy load views
 const CoachScheduleView = lazy(() => import("../components/coach/CoachScheduleView"));
@@ -30,6 +31,7 @@ const LoadingFallback = () => (
  * }
  */
 export default function CoachApp() {
+  const { config } = useBranding();
   const [activeTab, setActiveTab] = useState("schedule");
 
   const handleSignOut = async () => {
@@ -63,7 +65,7 @@ export default function CoachApp() {
       <header className="px-6 py-5 flex items-center justify-between border-b border-white/5 backdrop-blur-md bg-black/20 z-20 shrink-0">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gold flex items-center justify-center rounded-2xl shadow-[0_0_20px_rgba(255,184,0,0.3)]">
-            <span className="text-black font-black text-xl lg:text-2xl font-heading">IN</span>
+            <span className="text-black font-black text-xl lg:text-2xl font-heading">{config.shortName.slice(0, 2)}</span>
           </div>
           <div>
             <h1 className="text-lg lg:text-xl font-heading tracking-tight text-white uppercase italic">Coach Terminal</h1>

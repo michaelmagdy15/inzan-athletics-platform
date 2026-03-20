@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { Play, FileText, Lock, Search, RefreshCw, X, Tag, UserCheck, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData } from "../../context/DataContext";
+import { useBranding } from "../../context/BrandingContext";
 
 export default function ContentLibraryView() {
   const { libraryContent, currentUser } = useData();
+  const { config } = useBranding();
   const [activeTab, setActiveTab] = useState<"all" | "video" | "article" | "document">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
@@ -13,8 +15,8 @@ export default function ContentLibraryView() {
 
   const filteredContent = libraryContent.filter((item) => {
     const typeMatch = activeTab === "all" || item.content_type === activeTab;
-    const searchMatch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const searchMatch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchQuery.toLowerCase());
     return typeMatch && searchMatch;
   });
 
@@ -32,13 +34,13 @@ export default function ContentLibraryView() {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div>
           <h2 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">
-            Inzan Library
+            {config.shortName} Library
           </h2>
           <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">
             Exclusive Content & Resources
           </p>
         </div>
-        
+
         <div className="flex-1 max-w-sm relative group overflow-hidden w-full">
           <Search
             className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold transition-colors"
@@ -59,9 +61,8 @@ export default function ContentLibraryView() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
-            className={`pb-4 text-[10px] tracking-[0.2em] uppercase whitespace-nowrap transition-all duration-300 relative ${
-              activeTab === tab ? "text-gold" : "text-white/30 hover:text-white"
-            }`}
+            className={`pb-4 text-[10px] tracking-[0.2em] uppercase whitespace-nowrap transition-all duration-300 relative ${activeTab === tab ? "text-gold" : "text-white/30 hover:text-white"
+              }`}
           >
             {tab === "document" ? "Guides" : tab}
             {activeTab === tab && (
@@ -77,7 +78,7 @@ export default function ContentLibraryView() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredContent.map((item) => {
           const isLocked = item.is_premium && !isPremiumUser;
-          
+
           return (
             <motion.div
               key={item.id}
@@ -93,7 +94,7 @@ export default function ContentLibraryView() {
                     {getIcon(item.content_type)}
                   </div>
                 )}
-                
+
                 <div className="absolute top-4 left-4 p-2 bg-black/60 backdrop-blur-md rounded-xl border border-white/10 text-white">
                   {getIcon(item.content_type)}
                 </div>
@@ -137,7 +138,7 @@ export default function ContentLibraryView() {
           )
         })}
       </div>
-      
+
       {filteredContent.length === 0 && (
         <div className="py-20 flex flex-col items-center justify-center text-center">
           <RefreshCw className="text-white/10 mb-4" size={48} />
@@ -175,9 +176,9 @@ export default function ContentLibraryView() {
                 )}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   {selectedItem.content_type === "video" && (
-                     <div className="w-16 h-16 rounded-full bg-gold/90 text-black flex items-center justify-center shadow-2xl backdrop-blur-md">
-                        <Play size={24} className="ml-1" />
-                     </div>
+                    <div className="w-16 h-16 rounded-full bg-gold/90 text-black flex items-center justify-center shadow-2xl backdrop-blur-md">
+                      <Play size={24} className="ml-1" />
+                    </div>
                   )}
                 </div>
               </div>
@@ -196,13 +197,13 @@ export default function ContentLibraryView() {
                 </div>
 
                 <h2 className="text-3xl md:text-4xl font-heading text-white mb-4 uppercase">{selectedItem.title}</h2>
-                
+
                 <div className="flex items-center gap-4 border-y border-white/5 py-4 mb-8">
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/50">
                     <UserCheck size={16} />
                   </div>
                   <div>
-                    <p className="text-xs text-white font-bold">{selectedItem.author_name || "Inzan Coach"}</p>
+                    <p className="text-xs text-white font-bold">{selectedItem.author_name || `${config.shortName} Coach`}</p>
                     <p className="text-[9px] text-white/40 uppercase tracking-widest font-black">
                       {new Date(selectedItem.created_at).toLocaleDateString()}
                     </p>
@@ -211,7 +212,7 @@ export default function ContentLibraryView() {
 
                 <div className="prose prose-invert max-w-none mb-8 text-sm text-white/70 font-medium leading-relaxed">
                   <p>{selectedItem.description}</p>
-                  
+
                   {/* Active Content Renderer */}
                   <div className="mt-8 p-1 bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
                     {selectedItem.content_type === "video" ? (

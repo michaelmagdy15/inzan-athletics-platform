@@ -2,19 +2,21 @@ import React from "react";
 import { Bell, Activity, ArrowRight, Calendar } from "lucide-react";
 import { useData } from "../../context/DataContext";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../utils/i18n";
 
 export default function HomeTab() {
   const { currentUser, classes } = useData();
   const navigate = useNavigate();
   const nextClass = classes.length > 0 ? classes[0] : null;
 
+  const { t } = useLanguage();
   const getRecoveryAdvice = () => {
-    if (!currentUser) return "Ready to start?";
+    if (!currentUser) return t("recovery_ready");
     if (currentUser.recovery < 50)
-      return "High strain detected. Focus on active recovery.";
+      return t("recovery_low");
     if (currentUser.recovery < 80)
-      return "Moderate strain detected. Good day for mobility.";
-    return "Fully recovered. Push your limits today!";
+      return t("recovery_mid");
+    return t("recovery_high");
   };
 
   return (
@@ -42,7 +44,7 @@ export default function HomeTab() {
 
       <div className="flex flex-col gap-1">
         <p className="text-gray-400 text-sm tracking-widest uppercase">
-          Welcome Back
+          {t("welcome_back")}
         </p>
         <h2 className="text-3xl font-light tracking-tight">
           {currentUser?.name || "Guest"}
@@ -57,7 +59,7 @@ export default function HomeTab() {
             <Activity size={14} className="text-red-500" />
           </div>
           <h3 className="text-[10px] text-red-500 tracking-widest uppercase font-bold">
-            Recovery Coach
+            {t("recovery_coach")}
           </h3>
         </div>
         <p className="text-sm text-gray-300 leading-relaxed relative z-10 mb-5">
@@ -75,10 +77,10 @@ export default function HomeTab() {
         >
           <div>
             <p className="text-[9px] text-gray-400 uppercase tracking-widest mb-1">
-              Recommended Action
+              {t("recommended_action")}
             </p>
             <p className="text-sm font-medium text-white">
-              {nextClass?.title || "Personal Training"}
+              {nextClass?.title || t("pt_sessions")}
             </p>
           </div>
           <button className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
@@ -100,12 +102,10 @@ export default function HomeTab() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         <div className="absolute inset-0 p-6 flex flex-col justify-end items-center text-center">
           <h3 className="text-2xl font-light tracking-[0.2em] uppercase mb-4 text-white drop-shadow-lg text-center">
-            Back Freeze
-            <br />
-            Request
+            {t("back_freeze")}
           </h3>
           <button className="px-6 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 text-[10px] uppercase tracking-widest rounded-full hover:bg-white hover:text-black transition-all duration-300 flex items-center gap-2">
-            Click Here <ArrowRight size={12} />
+            {t("click_here")} <ArrowRight size={12} />
           </button>
         </div>
       </div>
@@ -122,10 +122,10 @@ export default function HomeTab() {
           </div>
           <div>
             <h4 className="font-medium text-lg mb-0.5 tracking-tight text-white">
-              Daily Schedule
+              {t("daily_schedule")}
             </h4>
             <p className="text-[10px] text-[#FFB800]/60 tracking-widest uppercase font-bold">
-              View Active Sessions
+              {t("view_active_sessions")}
             </p>
           </div>
         </div>

@@ -1,23 +1,7 @@
 // @ts-nocheck
-import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { firebase } from './src/lib/firebase';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-dotenv.config({ path: join(__dirname, '.env') });
-
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Supabase credentials missing in .env');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
+// Mocking some initial meals for the kitchen...
 const newMeals = [
     {
         name: "Grilled Chicken & Quinoa",
@@ -62,13 +46,17 @@ const newMeals = [
 ];
 
 async function addMeals() {
-    console.log("Inserting new meals into kitchen_inventory...");
-    const { data, error } = await supabase.from('kitchen_inventory').insert(newMeals);
-    if (error) {
-        console.error("Error inserting meals:", error);
-    } else {
-        console.log("Meals inserted successfully!");
+    console.log("🚀 Initializing Kitchen Inventory Seeding...");
+
+    for (const meal of newMeals) {
+        console.log(`Adding ${meal.name}...`);
+        const { error } = await firebase.from('kitchen_inventory').insert(meal);
+        if (error) {
+            console.error(`❌ Failed to add ${meal.name}:`, error);
+        }
     }
+
+    console.log("✅ Kitchen Inventory Seeded Successfully!");
 }
 
 addMeals();

@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData } from "../../context/DataContext";
+import { useBranding } from "../../context/BrandingContext";
 
 export default function CoachesView() {
   const {
@@ -31,6 +32,7 @@ export default function CoachesView() {
     addCoach,
     setSystemAlert,
   } = useData();
+  const { config } = useBranding();
   const coaches = members.filter((m) => m.role === "coach");
   const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -326,7 +328,7 @@ export default function CoachesView() {
           <CoachCard
             key={coach.id}
             name={coach.name}
-            tier="Inzan Coach"
+            tier={`${config.shortName} Coach`}
             clients={coach.clients}
             rating={coach.rating.toFixed(1)}
             avatar={coach.avatar}
@@ -441,7 +443,7 @@ export default function CoachesView() {
                       {selectedCoach.name}
                     </h3>
                     <span className="px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-[9px] text-gold font-bold uppercase tracking-widest">
-                      Inzan Coach
+                      {config.shortName} Coach
                     </span>
                   </div>
                 </div>

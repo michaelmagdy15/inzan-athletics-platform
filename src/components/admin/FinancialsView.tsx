@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData } from "../../context/DataContext";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../lib/firebase";
 import { ExportManager } from "../../utils/ExportManager";
 import {
   AreaChart,
@@ -134,7 +134,7 @@ export default function FinancialsView() {
     if (activeTab === 'revenue') dataToExport = displayTransactions;
     if (activeTab === 'expenses') dataToExport = expenses;
     if (activeTab === 'refunds') dataToExport = refunds;
-    
+
     ExportManager.exportDataToCSV(dataToExport, `financial_report_${activeTab}`);
   };
 
@@ -239,31 +239,28 @@ export default function FinancialsView() {
       <div className="flex bg-[#121212] p-1.5 rounded-2xl border border-white/5 shadow-inner">
         <button
           onClick={() => setActiveTab("revenue")}
-          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
-            activeTab === "revenue"
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === "revenue"
               ? "bg-white/10 text-white shadow-lg"
               : "text-white/40 hover:text-white"
-          }`}
+            }`}
         >
           Revenue
         </button>
         <button
           onClick={() => setActiveTab("expenses")}
-          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
-            activeTab === "expenses"
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === "expenses"
               ? "bg-white/10 text-emerald-400 shadow-lg"
               : "text-white/40 hover:text-white"
-          }`}
+            }`}
         >
           Expenses
         </button>
         <button
           onClick={() => setActiveTab("refunds")}
-          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
-            activeTab === "refunds"
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeTab === "refunds"
               ? "bg-white/10 text-amber-500 shadow-lg"
               : "text-white/40 hover:text-white"
-          }`}
+            }`}
         >
           Refunds
         </button>
@@ -272,192 +269,192 @@ export default function FinancialsView() {
       {activeTab === "revenue" && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 lg:gap-10">
           {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        <div className="lg:col-span-2 glass-card rounded-[2rem] border border-white/5 p-5 sm:p-6 lg:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <BarChart3 size={16} className="text-gold/50" />
-            <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
-              Revenue Overview
-            </h3>
-          </div>
-          <div className="h-48 sm:h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={dynamicRevenueData}>
-                <defs>
-                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FFB800" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#FFB800" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis
-                  dataKey="name"
-                  stroke="#ffffff40"
-                  fontSize={8}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#ffffff40"
-                  fontSize={8}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(v) => `${v / 1000}k`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#0a0a0a",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "12px",
-                  }}
-                  itemStyle={{ color: "#FFB800", fontWeight: "bold", fontSize: "10px" }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#FFB800"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorRev)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="lg:col-span-2 glass-card rounded-[2rem] border border-white/5 p-5 sm:p-6 lg:p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <BarChart3 size={16} className="text-gold/50" />
+                <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
+                  Revenue Overview
+                </h3>
+              </div>
+              <div className="h-48 sm:h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={dynamicRevenueData}>
+                    <defs>
+                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#FFB800" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#FFB800" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="name"
+                      stroke="#ffffff40"
+                      fontSize={8}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="#ffffff40"
+                      fontSize={8}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(v) => `${v / 1000}k`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#0a0a0a",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "12px",
+                      }}
+                      itemStyle={{ color: "#FFB800", fontWeight: "bold", fontSize: "10px" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#FFB800"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorRev)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
 
-        <div className="glass-card rounded-[2rem] border border-white/5 p-5 sm:p-6 lg:p-8 flex flex-col">
-          <div className="flex items-center gap-3 mb-6">
-            <Users size={16} className="text-gold/50" />
-            <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
-              Elite Members
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 flex-1">
-            {topMembers.map((member, i) => (
-              <div key={i} className="flex items-center justify-between group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/30 group-hover:text-gold group-hover:border-gold/30 transition-all shrink-0">
-                    {i + 1}
+            <div className="glass-card rounded-[2rem] border border-white/5 p-5 sm:p-6 lg:p-8 flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <Users size={16} className="text-gold/50" />
+                <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
+                  Elite Members
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 flex-1">
+                {topMembers.map((member, i) => (
+                  <div key={i} className="flex items-center justify-between group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/30 group-hover:text-gold group-hover:border-gold/30 transition-all shrink-0">
+                        {i + 1}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] sm:text-xs font-bold text-white truncate">
+                          {member.name}
+                        </p>
+                        <p className="text-[8px] text-white/20 uppercase tracking-widest truncate">
+                          {member.tier}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-gold shrink-0">
+                      {member.spend.toLocaleString()}
+                    </span>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[11px] sm:text-xs font-bold text-white truncate">
-                      {member.name}
-                    </p>
-                    <p className="text-[8px] text-white/20 uppercase tracking-widest truncate">
-                      {member.tier}
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">
+            <Scorecard
+              title="Revenue"
+              value={monthlyRevenue.toLocaleString()}
+              currency="EGP"
+              trend={monthlyRevenue > 0 ? "Active" : "-"}
+              highlight
+              icon={<TrendingUp size={16} />}
+            />
+            <Scorecard
+              title="Late"
+              value={latePayments.toString()}
+              subtitle={latePayments > 0 ? "Urgent" : "Clear"}
+              alert={latePayments > 0}
+              icon={<AlertTriangle size={16} />}
+            />
+            <Scorecard
+              title="Flow"
+              value={totalCashFlow.toLocaleString()}
+              currency="EGP"
+              className="col-span-2 lg:col-span-1"
+              icon={<ShieldCheck size={16} />}
+            />
+          </div>
+
+
+          {/* Arrears Alert Banner */}
+          <AnimatePresence>
+            {latePayments > 0 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                className="bg-red-500/5 border border-red-500/10 rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between group overflow-hidden relative font-bold gap-6"
+              >
+                <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-red-500/5 to-transparent pointer-events-none" />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 lg:gap-8 relative z-10 w-full lg:w-auto">
+                  <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)] group-hover:scale-110 transition-transform duration-700 shrink-0">
+                    <Activity size={24} className="text-red-500 animate-pulse" />
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black text-red-500 tracking-[0.3em] uppercase mb-1">
+                      Overdue Payments
+                    </h4>
+                    <p className="text-sm text-white/50 font-light max-w-lg">
+                      <span className="text-white font-medium">
+                        {latePayments} Members
+                      </span>{" "}
+                      haven't settled their membership renewals. System sending{" "}
+                      <span className="text-red-400 font-bold underline decoration-red-500/30">
+                        Payment Reminders
+                      </span>
+                      .
                     </p>
                   </div>
                 </div>
-                <span className="text-[11px] font-bold text-gold shrink-0">
-                  {member.spend.toLocaleString()}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+                <button
+                  onClick={() =>
+                    broadcastAlert("Reminders sent to overdue accounts.", "error")
+                  }
+                  className="w-full lg:w-auto px-8 lg:px-10 py-4 lg:py-5 bg-red-500/10 border border-red-500/20 hover:border-red-500 hover:bg-red-500 hover:text-black rounded-2xl text-[9px] font-black text-red-500 tracking-[0.4em] uppercase transition-all"
+                >
+                  Send Reminders
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">
-        <Scorecard
-          title="Revenue"
-          value={monthlyRevenue.toLocaleString()}
-          currency="EGP"
-          trend={monthlyRevenue > 0 ? "Active" : "-"}
-          highlight
-          icon={<TrendingUp size={16} />}
-        />
-        <Scorecard
-          title="Late"
-          value={latePayments.toString()}
-          subtitle={latePayments > 0 ? "Urgent" : "Clear"}
-          alert={latePayments > 0}
-          icon={<AlertTriangle size={16} />}
-        />
-        <Scorecard
-          title="Flow"
-          value={totalCashFlow.toLocaleString()}
-          currency="EGP"
-          className="col-span-2 lg:col-span-1"
-          icon={<ShieldCheck size={16} />}
-        />
-      </div>
+          {/* Transaction Stream */}
+          <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 p-6 lg:p-10 shadow-2xl relative overflow-hidden group flex flex-col gap-6 lg:gap-8">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-
-      {/* Arrears Alert Banner */}
-      <AnimatePresence>
-        {latePayments > 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            className="bg-red-500/5 border border-red-500/10 rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between group overflow-hidden relative font-bold gap-6"
-          >
-            <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-red-500/5 to-transparent pointer-events-none" />
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 lg:gap-8 relative z-10 w-full lg:w-auto">
-              <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)] group-hover:scale-110 transition-transform duration-700 shrink-0">
-                <Activity size={24} className="text-red-500 animate-pulse" />
-              </div>
-              <div>
-                <h4 className="text-[10px] font-black text-red-500 tracking-[0.3em] uppercase mb-1">
-                  Overdue Payments
-                </h4>
-                <p className="text-sm text-white/50 font-light max-w-lg">
-                  <span className="text-white font-medium">
-                    {latePayments} Members
-                  </span>{" "}
-                  haven't settled their membership renewals. System sending{" "}
-                  <span className="text-red-400 font-bold underline decoration-red-500/30">
-                    Payment Reminders
-                  </span>
-                  .
-                </p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 lg:mb-10 relative z-10 font-bold gap-6">
+              <div className="flex items-center gap-3">
+                <Wallet size={16} className="text-gold/50" />
+                <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
+                  Recent Transactions
+                </h3>
               </div>
             </div>
-            <button
-              onClick={() =>
-                broadcastAlert("Reminders sent to overdue accounts.", "error")
-              }
-              className="w-full lg:w-auto px-8 lg:px-10 py-4 lg:py-5 bg-red-500/10 border border-red-500/20 hover:border-red-500 hover:bg-red-500 hover:text-black rounded-2xl text-[9px] font-black text-red-500 tracking-[0.4em] uppercase transition-all"
-            >
-              Send Reminders
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Transaction Stream */}
-      <div className="glass-card rounded-[2rem] lg:rounded-[3rem] border border-white/5 p-6 lg:p-10 shadow-2xl relative overflow-hidden group flex flex-col gap-6 lg:gap-8">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gold/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 lg:mb-10 relative z-10 font-bold gap-6">
-          <div className="flex items-center gap-3">
-            <Wallet size={16} className="text-gold/50" />
-            <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase">
-              Recent Transactions
-            </h3>
+            <div className="flex flex-col gap-4 lg:gap-6 relative z-10">
+              {displayTransactions.map((tx) => (
+                <TransactionItem
+                  key={tx.id}
+                  name={tx.name}
+                  type={`${tx.type} • ${tx.date}`}
+                  amount={Number(tx.amount).toLocaleString()}
+                  method={tx.method}
+                  initial={tx.name.substring(0, 2).toUpperCase()}
+                  status={tx.status}
+                />
+              ))}
+              {displayTransactions.length === 0 && (
+                <p className="text-[10px] text-white/20 uppercase tracking-widest italic my-4 text-center">
+                  No matching transactions
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-4 lg:gap-6 relative z-10">
-          {displayTransactions.map((tx) => (
-            <TransactionItem
-              key={tx.id}
-              name={tx.name}
-              type={`${tx.type} • ${tx.date}`}
-              amount={Number(tx.amount).toLocaleString()}
-              method={tx.method}
-              initial={tx.name.substring(0, 2).toUpperCase()}
-              status={tx.status}
-            />
-          ))}
-          {displayTransactions.length === 0 && (
-            <p className="text-[10px] text-white/20 uppercase tracking-widest italic my-4 text-center">
-              No matching transactions
-            </p>
-          )}
-        </div>
-      </div>
-      </motion.div>
+        </motion.div>
       )}
 
       {activeTab === "expenses" && (
@@ -466,7 +463,7 @@ export default function FinancialsView() {
             <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase mb-6 flex items-center gap-2">
               <ArrowDownRight size={16} className="text-red-500" /> Organization Expenses
             </h3>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[600px]">
                 <thead>
@@ -499,7 +496,7 @@ export default function FinancialsView() {
             <h3 className="text-[10px] font-black text-white/40 tracking-[0.4em] uppercase mb-6 flex items-center gap-2">
               <Wallet size={16} className="text-amber-500" /> Pending & Approved Refunds
             </h3>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[600px]">
                 <thead>
@@ -650,10 +647,10 @@ function Scorecard({
   return (
     <div
       className={`p-6 lg:p-10 rounded-[2rem] lg:rounded-[2.5rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${highlight
-          ? "bg-gold/10 border-gold/20 shadow-[0_0_50px_rgba(202,138,4,0.1)]"
-          : alert
-            ? "bg-red-500/5 border-red-500/10"
-            : "bg-[#121212]/30 border-white/5 hover:border-gold/20"
+        ? "bg-gold/10 border-gold/20 shadow-[0_0_50px_rgba(202,138,4,0.1)]"
+        : alert
+          ? "bg-red-500/5 border-red-500/10"
+          : "bg-[#121212]/30 border-white/5 hover:border-gold/20"
         }`}
     >
       <div className="flex justify-between items-start mb-6 lg:mb-8">

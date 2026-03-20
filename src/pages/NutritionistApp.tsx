@@ -2,7 +2,8 @@ import React, { useState, lazy, Suspense } from "react";
 import { Users, Utensils, CalendarDays, User, LogOut, LayoutDashboard } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import NavItem from "../components/user/NavItem";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/firebase";
+import { useBranding } from "../context/BrandingContext";
 
 // Lazy load views
 const NutritionistDashboard = lazy(() => import("../components/nutritionist/NutritionistDashboard"));
@@ -18,6 +19,7 @@ const LoadingFallback = () => (
 );
 
 export default function NutritionistApp() {
+    const { config } = useBranding();
     const [activeTab, setActiveTab] = useState("dashboard");
 
     const handleSignOut = async () => {
@@ -33,7 +35,7 @@ export default function NutritionistApp() {
             <header className="px-6 py-4 flex justify-between items-center relative z-10 border-b border-white/5">
                 <div className="flex flex-col">
                     <span className="text-lg font-heading tracking-widest text-white">
-                        INZAN
+                        {config.shortName}
                     </span>
                     <span className="text-[8px] tracking-[0.4em] uppercase text-[#FFB800]/60 font-bold -mt-0.5">
                         Nutritionist Portal

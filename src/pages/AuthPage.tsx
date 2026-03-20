@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Hammer,
@@ -12,8 +12,10 @@ import {
   ArrowRight,
   ShieldCheck,
 } from "lucide-react";
+import { useBranding } from "../context/BrandingContext";
 
 export default function AuthPage() {
+  const { config } = useBranding();
   const [isLogin, setIsLogin] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
   const [email, setEmail] = useState("");
@@ -146,14 +148,14 @@ export default function AuthPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <Crown className="w-10 h-10 text-gold relative z-10 drop-shadow-[0_0_10px_rgba(202,138,4,0.5)]" />
           </motion.div>
-          <h1 className="text-5xl font-heading font-light tracking-tight text-white mb-3">
-            INZAN{" "}
+          <h1 className="text-5xl font-heading font-light tracking-tight text-white mb-3 leading-tight">
+            {config.shortName}{" "}
             <span className="text-gold italic font-medium">Athletics</span>
           </h1>
           <div className="flex items-center justify-center gap-3">
             <div className="h-px w-8 bg-gold/30" />
             <p className="text-[10px] tracking-[0.4em] font-medium uppercase text-white/40">
-              Elite Performance Protocol
+              {config.tagline}
             </p>
             <div className="h-px w-8 bg-gold/30" />
           </div>
@@ -370,7 +372,7 @@ export default function AuthPage() {
 
         <div className="text-center mt-12 opacity-30">
           <p className="text-[9px] uppercase tracking-[0.4em] text-white font-medium">
-            &copy; 2026 INZAN ATHLETICS • CREATED BY MICHAEL MITRY
+            &copy; {new Date().getFullYear()} {config.name} • CREATED BY MICHAEL MITRY
           </p>
         </div>
       </motion.div>

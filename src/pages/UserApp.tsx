@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "motion/react";
 import NavItem from "../components/user/NavItem";
 import { useData } from "../context/DataContext";
 import { useLanguage } from "../utils/i18n";
+import { useBranding } from "../context/BrandingContext";
 
 // Lazy load tabs for better bundle sizing and performance
 const HomeTab = lazy(() => import("../components/user/HomeTab"));
@@ -32,6 +33,7 @@ const LoadingFallback = () => (
 export default function UserApp() {
   const [activeTab, setActiveTab] = useState("home");
   const { currentUser, legalAgreements, signWaiver } = useData();
+  const { config } = useBranding();
   const { t } = useLanguage();
   const [signature, setSignature] = useState("");
   const [isSigning, setIsSigning] = useState(false);
@@ -69,27 +71,27 @@ export default function UserApp() {
               className="bg-[#0a0a0a] border border-red-500/20 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl overflow-hidden relative"
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
-              
+
               <div className="flex flex-col items-center text-center mb-8">
                 <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4 border border-red-500/20">
                   <User size={32} className="text-red-500" />
                 </div>
                 <h2 className="text-2xl font-heading uppercase italic text-white mb-2">Liability Waiver</h2>
                 <p className="text-[11px] text-white/40 uppercase tracking-widest leading-relaxed">
-                  Action required before accessing the INZAN Athletics platform.
+                  Action required before accessing the {config.name} platform.
                 </p>
               </div>
 
               <div className="bg-black/50 border border-white/5 rounded-2xl p-6 mb-8 h-48 overflow-y-auto custom-scrollbar text-[11px] text-white/50 leading-loose">
                 <p className="mb-4 text-white/70 font-bold uppercase tracking-widest text-[#FFB800] text-[10px]">Assumption of Risk</p>
                 <p className="mb-4">
-                  I acknowledge that participating in physical activities involves inherent risks of injury. I hereby assume all risks associated with my participation at INZAN Athletics.
+                  I acknowledge that participating in physical activities involves inherent risks of injury. I hereby assume all risks associated with my participation at {config.name}.
                 </p>
                 <p className="mb-4">
                   I agree to follow all safety instructions provided by the coaching staff. I certify that I am in good physical health and able to undertake these activities.
                 </p>
                 <p>
-                  By typing my name below, I legally bind myself to this liability waiver and release INZAN Athletics from any claims.
+                  By typing my name below, I legally bind myself to this liability waiver and release {config.name} from any claims.
                 </p>
               </div>
 
@@ -103,7 +105,7 @@ export default function UserApp() {
                     className="w-full bg-black border border-white/10 rounded-xl py-4 px-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#FFB800]/50 transition-all font-mono uppercase tracking-widest text-center"
                   />
                 </div>
-                
+
                 <button
                   onClick={handleSignWaiver}
                   disabled={!signature.trim() || isSigning}
@@ -132,37 +134,38 @@ export default function UserApp() {
                 <HomeTab />
               </motion.div>
             )}
-            {activeTab === "classes" && (
+            {(activeTab === "classes" || activeTab === "pt" || activeTab === "sessions") && (
               <motion.div
-                key="classes"
+                key="training"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
+                className="flex flex-col gap-6"
               >
-                <ClassesTab />
-              </motion.div>
-            )}
-            {activeTab === "pt" && (
-              <motion.div
-                key="pt"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <PTBookingTab />
-              </motion.div>
-            )}
-            {activeTab === "sessions" && (
-              <motion.div
-                key="sessions"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <MySessionsTab />
+                <div className="flex gap-2 p-1 bg-white/5 rounded-2xl border border-white/10 mx-4">
+                  <button
+                    onClick={() => setActiveTab("classes")}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all ${activeTab === 'classes' ? 'bg-[#FFB800] text-black' : 'text-white/40'}`}
+                  >
+                    {t('modules')}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("pt")}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all ${activeTab === 'pt' ? 'bg-[#FFB800] text-black' : 'text-white/40'}`}
+                  >
+                    {t('booking')}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("sessions")}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all ${activeTab === 'sessions' ? 'bg-[#FFB800] text-black' : 'text-white/40'}`}
+                  >
+                    {t('active')}
+                  </button>
+                </div>
+                {activeTab === "classes" && <ClassesTab />}
+                {activeTab === "pt" && <PTBookingTab />}
+                {activeTab === "sessions" && <MySessionsTab />}
               </motion.div>
             )}
             {activeTab === "kitchen" && (
@@ -176,15 +179,16 @@ export default function UserApp() {
                 <KitchenTab />
               </motion.div>
             )}
-            {activeTab === "profile" && (
+            {(activeTab === "profile" || activeTab === "more") && (
               <motion.div
-                key="profile"
+                key="profile-hub"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
               >
                 <ProfileTab />
+                {activeTab === "more" && <div className="mt-8 border-t border-white/5 pt-8 px-6"><MoreTab /></div>}
               </motion.div>
             )}
             {activeTab === "community" && (
@@ -196,17 +200,6 @@ export default function UserApp() {
                 transition={{ duration: 0.3, ease: "easeOut" }}
               >
                 <CommunityTab />
-              </motion.div>
-            )}
-            {activeTab === "more" && (
-              <motion.div
-                key="more"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <MoreTab />
               </motion.div>
             )}
           </AnimatePresence>
@@ -224,22 +217,10 @@ export default function UserApp() {
               onClick={() => setActiveTab("home")}
             />
             <NavItem
-              icon={<Users size={20} />}
-              label={t('classes')}
-              isActive={activeTab === "classes"}
-              onClick={() => setActiveTab("classes")}
-            />
-            <NavItem
               icon={<Dumbbell size={20} />}
-              label={t('coaches')}
-              isActive={activeTab === "pt"}
-              onClick={() => setActiveTab("pt")}
-            />
-            <NavItem
-              icon={<CalendarCheck size={20} />}
-              label={t('my_sessions')}
-              isActive={activeTab === "sessions"}
-              onClick={() => setActiveTab("sessions")}
+              label={t('training')}
+              isActive={activeTab === "classes" || activeTab === "pt" || activeTab === "sessions"}
+              onClick={() => setActiveTab("classes")}
             />
             <NavItem
               icon={<Coffee size={20} />}
@@ -248,22 +229,16 @@ export default function UserApp() {
               onClick={() => setActiveTab("kitchen")}
             />
             <NavItem
-              icon={<User size={20} />}
-              label={t('profile')}
-              isActive={activeTab === "profile"}
-              onClick={() => setActiveTab("profile")}
-            />
-            <NavItem
               icon={<Users size={20} />}
               label={t('community')}
               isActive={activeTab === "community"}
               onClick={() => setActiveTab("community")}
             />
             <NavItem
-              icon={<MoreHorizontal size={20} />}
-              label={t('More')}
-              isActive={activeTab === "more"}
-              onClick={() => setActiveTab("more")}
+              icon={<User size={20} />}
+              label={t('profile')}
+              isActive={activeTab === "profile" || activeTab === "more"}
+              onClick={() => setActiveTab("profile")}
             />
           </ul>
         </nav>

@@ -21,7 +21,7 @@ export const translations = {
     delete: 'Delete',
     loading: 'Processing...',
     welcome: 'Welcome back, Operator',
-    
+
     // Admin specific
     financials: 'Financial Ledger',
     inventory: 'Arsenal Inventory',
@@ -32,16 +32,31 @@ export const translations = {
     pt_sessions: 'PT Sessions',
     pt_reports: 'PT Reports',
     session_policies: 'Session Policies',
-    
+
     // User specific
     daily_schedule: 'Temporal Matrix',
     my_sessions: 'Active Deployments',
     qr_scanner: 'Identity Portal',
     attendance: 'Session Logs',
     community: 'Community',
-    
+
     events_upcoming: 'Upcoming Operations',
     events_past: 'Archived Logs',
+
+    welcome_back: 'Welcome Back',
+    recovery_coach: 'Recovery Coach',
+    recovery_low: 'High strain detected. Focus on active recovery.',
+    recovery_mid: 'Moderate strain detected. Good day for mobility.',
+    recovery_high: 'Fully recovered. Push your limits today!',
+    recovery_ready: 'Ready to start?',
+    recommended_action: 'Recommended Action',
+    back_freeze: 'Back Freeze Request',
+    click_here: 'Click Here',
+    view_active_sessions: 'View Active Sessions',
+    training: 'Training Hub',
+    modules: 'Modules',
+    booking: 'Booking',
+    active: 'Active',
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -63,7 +78,7 @@ export const translations = {
     delete: 'حذف',
     loading: 'جاري المعالجة...',
     welcome: 'مرحباً بعودتك، أيها العامل',
-    
+
     // Admin specific
     financials: 'السجل المالي',
     inventory: 'جرد المعدات',
@@ -74,16 +89,31 @@ export const translations = {
     pt_sessions: 'جلسات التدريب الشخصي',
     pt_reports: 'تقارير التدريب الشخصي',
     session_policies: 'سياسات الجلسات',
-    
+
     // User specific
     daily_schedule: 'الجدول اليومي',
     my_sessions: 'عملياتي النشطة',
     qr_scanner: 'بوابة الهوية',
     attendance: 'سجلات الحضور',
     community: 'المجتمع',
-    
+
     events_upcoming: 'العمليات القادمة',
     events_past: 'السجلات السابقة',
+
+    welcome_back: 'مرحباً بعودتك',
+    recovery_coach: 'مدرب الاستشفاء',
+    recovery_low: 'تم كشف إجهاد عالٍ. ركز على الاستشفاء النشط.',
+    recovery_mid: 'تم كشف إجهاد متوسط. يوم جيد للحركة.',
+    recovery_high: 'مستعد تماماً. ادفع حدودك اليوم!',
+    recovery_ready: 'هل أنت مستعد للبدء؟',
+    recommended_action: 'الإجراء الموصى به',
+    back_freeze: 'طلب تجميد العضوية',
+    click_here: 'انقر هنا',
+    view_active_sessions: 'عرض الجلسات النشطة',
+    training: 'مركز التدريب',
+    modules: 'الوحدات',
+    booking: 'الحجز',
+    active: 'نشط',
   }
 };
 

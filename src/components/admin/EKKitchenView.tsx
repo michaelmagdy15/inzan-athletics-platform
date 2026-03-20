@@ -13,8 +13,10 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useBranding } from "../../context/BrandingContext";
 
 export default function EKKitchenView() {
+  const { config } = useBranding();
   const {
     kitchenItems,
     orders,
@@ -94,7 +96,7 @@ export default function EKKitchenView() {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
         <div>
           <h1 className="text-2xl lg:text-3xl font-heading tracking-tight text-white mb-1 uppercase">
-            EK Kitchen
+            {config.shortName} Kitchen
           </h1>
           <p className="text-[10px] tracking-[0.3em] text-white/30 uppercase font-medium">
             Kitchen Inventory

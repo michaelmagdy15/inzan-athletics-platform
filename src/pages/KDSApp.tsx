@@ -1,8 +1,9 @@
 import React from "react";
 import { useData } from "../context/DataContext";
 import { Clock, CheckCircle2, AlertTriangle, LogOut } from "lucide-react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/firebase";
 import { useNavigate } from "react-router-dom";
+import { useBranding } from "../context/BrandingContext";
 
 /**
  * @feature {
@@ -18,6 +19,7 @@ import { useNavigate } from "react-router-dom";
  */
 export default function KDSApp() {
     const { orders, updateOrderStatus } = useData();
+    const { config } = useBranding();
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -34,7 +36,7 @@ export default function KDSApp() {
             <header className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4">
                 <div>
                     <h1 className="text-xl font-heading tracking-widest uppercase text-white">
-                        EK Kitchen
+                        {config.shortName} Kitchen
                     </h1>
                     <p className="text-[10px] text-gold tracking-[0.3em] font-bold uppercase">
                         Display System

@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabase } from "./firebase";
 
 export type NotificationType =
   | "booking"

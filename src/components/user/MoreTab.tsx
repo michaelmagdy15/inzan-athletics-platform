@@ -10,9 +10,11 @@ import {
   Ticket,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useBranding } from "../../context/BrandingContext";
 
 export default function MoreTab() {
   const navigate = useNavigate();
+  const { config } = useBranding();
   return (
     <div className="p-6 pt-12 flex flex-col gap-8">
       <header className="flex justify-between items-center mb-4">
@@ -56,7 +58,7 @@ export default function MoreTab() {
         <div className="h-px bg-white/10 my-2 mx-4" />
         <MoreItem
           icon={<Shield size={20} />}
-          label="About INZAN"
+          label={`About ${config.shortName}`}
           onClick={() => navigate("/p/about")}
         />
         <MoreItem

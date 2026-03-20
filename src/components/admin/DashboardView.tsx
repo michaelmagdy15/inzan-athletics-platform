@@ -12,6 +12,7 @@ export default function DashboardView() {
     operatingGoals,
     broadcastAlert,
     attendanceLogs,
+    refreshData,
   } = useData();
 
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
@@ -48,7 +49,7 @@ export default function DashboardView() {
   const membershipSales = filteredTransactions
     .filter((t) => t.transaction_type === "membership")
     .reduce((acc, t) => acc + Number(t.amount), 0);
-  
+
   const otherTransactions = filteredTransactions
     .filter(
       (t) =>
@@ -141,7 +142,7 @@ export default function DashboardView() {
     document.body.removeChild(link);
   };
 
-  const handleAction = (label: string) => {
+  const handleAction = async (label: string) => {
     switch (label) {
       case "Send Member Announcement":
         broadcastAlert("Announcement sent to all active members.", "info");
@@ -155,10 +156,15 @@ export default function DashboardView() {
         broadcastAlert("Exporting revenue records...", "success");
         break;
       case "Sync System Time":
-        broadcastAlert(
-          "System time synchronized with local server.",
-          "success",
-        );
+        try {
+          await refreshData();
+          broadcastAlert(
+            "System time synchronized and data refreshed.",
+            "success",
+          );
+        } catch (err) {
+          broadcastAlert("Sync protocol failed. Check connectivity.", "error");
+        }
         break;
       case "Run Security Check":
         broadcastAlert(
@@ -183,7 +189,7 @@ export default function DashboardView() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <select 
+          <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value as any)}
             className="bg-black/40 border border-white/10 text-white/80 text-[10px] font-bold uppercase tracking-widest rounded-xl px-4 py-2.5 outline-none focus:border-gold/50 cursor-pointer appearance-none text-center"

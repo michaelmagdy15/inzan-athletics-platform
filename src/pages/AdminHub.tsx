@@ -25,16 +25,17 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData, Member } from "../context/DataContext";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/firebase";
 import NotificationBell from "../components/shared/NotificationBell";
 import { useLanguage } from "../utils/i18n";
+import { useBranding } from "../context/BrandingContext";
 
 // Lazy load views for optimization
 const DashboardView = lazy(() => import("../components/admin/DashboardView"));
 const MembersView = lazy(() => import("../components/admin/MembersView"));
 const ClassesView = lazy(() => import("../components/admin/ClassesView"));
 const CoachesView = lazy(() => import("../components/admin/CoachesView"));
-const EKKitchenView = lazy(() => import("../components/admin/EKKitchenView"));
+const KitchenView = lazy(() => import("../components/admin/EKKitchenView"));
 const FinancialsView = lazy(() => import("../components/admin/FinancialsView"));
 const InventoryView = lazy(() => import("../components/admin/InventoryView"));
 const SettingsView = lazy(() => import("../components/admin/SettingsView"));
@@ -64,7 +65,7 @@ type CreationMode = "member" | "coach" | "class" | null;
  * @feature {
  *   "role": "admin",
  *   "title": "Admin Dashboard",
- *   "description": "The command center for Inzan Athletics. Monitor real-time KPIs and system status.",
+ *   "description": "The command center for our gym. Monitor real-time KPIs and system status.",
  *   "steps": [
  *     "1. Log in with admin credentials.",
  *     "2. View active memberships and pending approvals.",
@@ -94,6 +95,7 @@ export default function AdminHub() {
   const [searchQuery, setSearchQuery] = useState("");
   const [creationMode, setCreationMode] = useState<CreationMode>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { config } = useBranding();
   const { t } = useLanguage();
 
   const handleSignOut = async () => {
@@ -187,15 +189,15 @@ export default function AdminHub() {
                 <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-gold/50 transition-all duration-500 shadow-2xl relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span className="text-xl xl:text-2xl font-heading text-gold relative z-10">
-                    I
+                    {config.shortName[0]}
                   </span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-lg xl:text-2xl font-heading tracking-widest text-white">
-                    INZAN
+                    {config.shortName}
                   </span>
                   <span className="text-[7px] xl:text-[9px] tracking-[0.4em] uppercase text-gold/60 font-bold -mt-1">
-                    Systems
+                    {config.name.includes("Athletics") ? "Systems" : "Management"}
                   </span>
                 </div>
               </div>
@@ -315,9 +317,9 @@ export default function AdminHub() {
               <NavItem
                 icon={<Coffee size={18} />}
                 label={t('kitchen')}
-                isActive={activeTab === "ek_kitchen"}
+                isActive={activeTab === "kitchen"}
                 onClick={() => {
-                  setActiveTab("ek_kitchen");
+                  setActiveTab("kitchen");
                   closeMobileMenu();
                 }}
               />
@@ -460,7 +462,7 @@ export default function AdminHub() {
                   )}
                   {activeTab === "classes" && <ClassesView />}
                   {activeTab === "coaches" && <CoachesView />}
-                  {activeTab === "ek_kitchen" && <EKKitchenView />}
+                  {activeTab === "kitchen" && <KitchenView />}
                   {activeTab === "financials" && <FinancialsView />}
                   {activeTab === "inventory" && <InventoryView />}
                   {activeTab === "settings" && <SettingsView />}
@@ -522,6 +524,7 @@ export default function AdminHub() {
                         <div className="relative group inline-block">
                           <select
                             value={selectedMember.role}
+                            disabled={selectedMember.email === "michaelmitry13@gmail.com"}
                             onChange={async (e) => {
                               try {
                                 await updateMemberRole(
@@ -540,7 +543,7 @@ export default function AdminHub() {
                                 });
                               }
                             }}
-                            className="appearance-none bg-gold/10 border border-gold/20 text-[9px] text-gold font-bold uppercase tracking-widest rounded-full px-4 py-1.5 pr-8 focus:outline-none focus:border-gold/50 cursor-pointer transition-all hover:bg-gold/20"
+                            className={`appearance-none bg-gold/10 border border-gold/20 text-[9px] text-gold font-bold uppercase tracking-widest rounded-full px-4 py-1.5 pr-8 focus:outline-none focus:border-gold/50 cursor-pointer transition-all hover:bg-gold/20 ${selectedMember.email === "michaelmitry13@gmail.com" ? "opacity-50 cursor-not-allowed" : ""}`}
                           >
                             <option value="member" className="bg-[#050505]">
                               MEMBER
@@ -696,28 +699,30 @@ export default function AdminHub() {
                           ? "Suspend"
                           : "Activate"}
                       </button>
-                      <button
-                        onClick={async () => {
-                          if (
-                            confirm(
-                              "Are you sure you want to purge this entity?",
-                            )
-                          ) {
-                            try {
-                              await deleteMember(selectedMember.id);
-                              setSelectedMember(null);
-                            } catch (err: any) {
-                              setSystemAlert({
-                                message: err.message,
-                                type: "error",
-                              });
+                      {selectedMember.email !== "michaelmitry13@gmail.com" && (
+                        <button
+                          onClick={async () => {
+                            if (
+                              confirm(
+                                "Are you sure you want to purge this entity?",
+                              )
+                            ) {
+                              try {
+                                await deleteMember(selectedMember.id);
+                                setSelectedMember(null);
+                              } catch (err: any) {
+                                setSystemAlert({
+                                  message: err.message,
+                                  type: "error",
+                                });
+                              }
                             }
-                          }
-                        }}
-                        className="py-3 lg:py-3.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500 text-red-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all font-bold"
-                      >
-                        Purge Entity
-                      </button>
+                          }}
+                          className="py-3 lg:py-3.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500 text-red-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all font-bold"
+                        >
+                          Purge Entity
+                        </button>
+                      )}
                     </div>
                   </div>
                 </motion.div>

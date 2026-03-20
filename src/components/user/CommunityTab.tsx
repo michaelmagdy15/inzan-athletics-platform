@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Trophy, Heart, MessageSquare, Share2, 
-  Activity, Zap, Moon, Watch, PlusCircle, CheckCircle2 
+import {
+  Trophy, Heart, MessageSquare, Share2,
+  Activity, Zap, Moon, Watch, PlusCircle, CheckCircle2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useData } from "../../context/DataContext";
 import { WearableIntegrationManager, WearableData } from "../../utils/WearableIntegrationManager";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../lib/firebase";
 
 interface Post {
   id: string;
@@ -114,31 +114,28 @@ export default function CommunityTab() {
       <div className="flex bg-[#121212] p-1.5 rounded-2xl border border-white/5 shadow-inner">
         <button
           onClick={() => setActiveSegment("feed")}
-          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
-            activeSegment === "feed"
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeSegment === "feed"
               ? "bg-white/10 text-white shadow-lg"
               : "text-white/40 hover:text-white"
-          }`}
+            }`}
         >
           Social Feed
         </button>
         <button
           onClick={() => setActiveSegment("leaderboard")}
-          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
-            activeSegment === "leaderboard"
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeSegment === "leaderboard"
               ? "bg-[#FFB800] text-black shadow-[0_0_15px_rgba(255,184,0,0.3)]"
               : "text-white/40 hover:text-white"
-          }`}
+            }`}
         >
           Rankings
         </button>
         <button
           onClick={() => setActiveSegment("wearables")}
-          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${
-            activeSegment === "wearables"
+          className={`flex-1 py-3 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] rounded-xl transition-all ${activeSegment === "wearables"
               ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
               : "text-white/40 hover:text-white"
-          }`}
+            }`}
         >
           Wearables
         </button>
@@ -149,9 +146,9 @@ export default function CommunityTab() {
           {/* Post Action */}
           <div className="bg-[#121212] border border-white/5 rounded-3xl p-5 flex items-center gap-4">
             <img src={currentUser?.avatar} className="w-12 h-12 rounded-full border border-white/10" alt="Me" />
-            <input 
-              type="text" 
-              placeholder="Share your latest victory..." 
+            <input
+              type="text"
+              placeholder="Share your latest victory..."
               className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 focus:outline-none"
             />
             <button className="w-10 h-10 bg-[#FFB800] rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform shrink-0">
@@ -203,7 +200,7 @@ export default function CommunityTab() {
                     #{user.rank}
                   </span>
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-white text-xs">
-                    {user.name.substring(0,2).toUpperCase()}
+                    {user.name.substring(0, 2).toUpperCase()}
                   </div>
                   <span className="font-bold text-white text-sm">{user.name}</span>
                 </div>
@@ -224,8 +221,8 @@ export default function CommunityTab() {
             <p className="text-xs text-white/50 max-w-sm leading-relaxed mb-6">
               Connect your Apple Health, WHOOP, or Garmin to automatically calculate your daily Recovery and Strain.
             </p>
-            
-            <button 
+
+            <button
               onClick={handleSyncWearable}
               disabled={isSyncing}
               className="px-6 py-3 bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-xl flex items-center gap-2 hover:scale-105 transition-all disabled:opacity-50"

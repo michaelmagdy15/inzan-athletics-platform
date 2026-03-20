@@ -1,7 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Montserrat:wght@100;300;400;500;700;900&family=Inter:wght@400;500;600&display=swap");
 @import "tailwindcss";
 @import "./themes.css";
-
-@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Montserrat:wght@100;300;400;500;700;900&family=Inter:wght@400;500;600&display=swap");
 
 @theme {
   --font-heading: "Syne", sans-serif;

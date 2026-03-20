@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, QrCode, ShieldX, CheckCircle2, Info, UserPlus, Ticket, Clock, Calendar as CalIcon, Dumbbell, Plus, X, Save, TrendingUp, MessageSquare, Send } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useData } from "../context/DataContext";
+import { useBranding } from "../context/BrandingContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
@@ -12,7 +13,8 @@ const EventsOffersView = React.lazy(() => import('../components/user/EventsOffer
 export default function UserSubPage() {
   const { pageId } = useParams();
   const navigate = useNavigate();
-  const { currentUser, registerAttendance, membershipTiers, checkoutPay, invitations, createInvitation, packageOfferings, attendanceLogs, submitFreezeRequest, freezeRequests, workouts, logWorkout, nutritionAssessments, messages, sendMessage, markAsRead, members } = useData();
+  const { config } = useBranding();
+  const { currentUser, classes, registerAttendance, membershipTiers, checkoutPay, invitations, createInvitation, packageOfferings, attendanceLogs, submitFreezeRequest, freezeRequests, workouts, logWorkout, nutritionAssessments, messages, sendMessage, markAsRead, members } = useData();
   const [promoCodeInput, setPromoCodeInput] = useState("");
   const [scanStatus, setScanStatus] = useState<"idle" | "success" | "error">(
     "idle",
@@ -57,7 +59,7 @@ export default function UserSubPage() {
                     <div className="absolute -inset-8 bg-[#FFB800]/10 rounded-full blur-3xl group-hover:bg-[#FFB800]/20 transition-all duration-700" />
                     <div className="w-64 h-64 bg-white p-6 rounded-[2.5rem] shadow-2xl relative z-10 border border-white/20 transition-transform group-hover:scale-[1.02] duration-500">
                       <QRCodeSVG
-                        value={currentUser?.code || "INZAN"}
+                        value={currentUser?.code || config.shortName}
                         size={256}
                         level="H"
                         includeMargin={false}
@@ -205,11 +207,10 @@ export default function UserSubPage() {
                           <span className="text-white text-[11px] font-black uppercase tracking-widest">
                             {new Date(fr.start_date).toLocaleDateString()} — {new Date(fr.end_date).toLocaleDateString()}
                           </span>
-                          <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${
-                            fr.status === 'approved' ? 'bg-emerald-500/20 text-emerald-500' :
+                          <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${fr.status === 'approved' ? 'bg-emerald-500/20 text-emerald-500' :
                             fr.status === 'rejected' ? 'bg-red-500/20 text-red-500' :
-                            'bg-[#FFB800]/10 text-[#FFB800]'
-                          }`}>
+                              'bg-[#FFB800]/10 text-[#FFB800]'
+                            }`}>
                             {fr.status}
                           </span>
                         </div>
@@ -228,6 +229,9 @@ export default function UserSubPage() {
         );
 
       case "daily-schedule":
+        const todayStr = new Date().toLocaleDateString();
+        const todayClasses = classes.filter(c => c.date === todayStr);
+
         return (
           <div className="space-y-4">
             <div className="flex justify-between items-center px-1 mb-2">
@@ -235,36 +239,35 @@ export default function UserSubPage() {
                 Active Sessions (Today)
               </h3>
               <span className="text-[9px] text-[#FFB800] font-black uppercase tracking-widest">
-                3 Classes
+                {todayClasses.length} {todayClasses.length === 1 ? 'Class' : 'Classes'}
               </span>
             </div>
-            <div className="p-5 bg-white/5 rounded-3xl border border-white/10 group cursor-pointer hover:border-[#FFB800]/30 transition-all relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
-                <span className="text-[8px] text-[#FFB800] font-black uppercase tracking-[0.3em]">
-                  Open
-                </span>
+            {todayClasses.length > 0 ? (
+              todayClasses.map(c => (
+                <div key={c.id} className="p-5 bg-white/5 rounded-3xl border border-white/10 group cursor-pointer hover:border-[#FFB800]/30 transition-all relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[8px] text-[#FFB800] font-black uppercase tracking-[0.3em]">
+                      {c.spots_left > 0 ? 'Open' : 'Full'}
+                    </span>
+                  </div>
+                  <p className="text-[#FFB800] text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+                    {c.time}
+                  </p>
+                  <h4 className="font-heading text-xl mb-1 text-white uppercase tracking-tight">
+                    {c.title}
+                  </h4>
+                  <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">
+                    {c.trainer} • {c.total_spots - c.spots_left}/{c.total_spots} Booked
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="p-12 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
+                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest italic leading-relaxed">
+                  The training floor is clear. <br />No sessions currently registered for this cycle.
+                </p>
               </div>
-              <p className="text-[#FFB800] text-[10px] font-black uppercase tracking-[0.2em] mb-2">
-                08:00 AM
-              </p>
-              <h4 className="font-heading text-xl mb-1 text-white uppercase tracking-tight">
-                Morning HIIT
-              </h4>
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">
-                Coach Alex • 12/20 Booked
-              </p>
-            </div>
-            <div className="p-5 bg-white/5 rounded-3xl border border-white/10 group cursor-pointer hover:border-[#FFB800]/30 transition-all relative overflow-hidden">
-              <p className="text-[#FFB800] text-[10px] font-black uppercase tracking-[0.2em] mb-2">
-                10:00 AM
-              </p>
-              <h4 className="font-heading text-xl mb-1 text-white uppercase tracking-tight">
-                Powerlifting
-              </h4>
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">
-                Coach Sarah • 8/12 Booked
-              </p>
-            </div>
+            )}
           </div>
         );
 
@@ -412,21 +415,21 @@ export default function UserSubPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={assessments}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                      <XAxis 
-                        dataKey="formattedDate" 
-                        stroke="rgba(255,255,255,0.2)" 
-                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 'bold' }} 
+                      <XAxis
+                        dataKey="formattedDate"
+                        stroke="rgba(255,255,255,0.2)"
+                        tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 'bold' }}
                         tickLine={false}
                         axisLine={false}
                       />
-                      <YAxis 
-                        stroke="rgba(255,255,255,0.2)" 
+                      <YAxis
+                        stroke="rgba(255,255,255,0.2)"
                         tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 'bold' }}
                         tickLine={false}
                         axisLine={false}
                         width={30}
                       />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ backgroundColor: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold' }}
                         itemStyle={{ color: '#fff' }}
                       />
@@ -437,7 +440,7 @@ export default function UserSubPage() {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
                     <span className="text-xl font-heading text-[#FFB800]">{latestAssessment?.weight_kg || '-'}</span>
@@ -454,10 +457,10 @@ export default function UserSubPage() {
                 </div>
               </div>
             ) : (
-                <div className="p-10 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-3xl opacity-50">
-                  <Info size={40} className="text-white/20 mb-4" />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-center">No assessments found.<br/>Book a session with a nutritionist.</p>
-                </div>
+              <div className="p-10 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-3xl opacity-50">
+                <Info size={40} className="text-white/20 mb-4" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-center">No assessments found.<br />Book a session with a nutritionist.</p>
+              </div>
             )}
           </div>
         );
@@ -588,7 +591,7 @@ export default function UserSubPage() {
         const myLogs = attendanceLogs.filter(log => log.member_id === currentUser?.id);
         const today = new Date().toDateString();
         const todayCount = myLogs.filter(log => new Date(log.checked_in_at).toDateString() === today).length;
-        
+
         // Calculate streak
         let streak = 0;
         const uniqueDays = [...new Set<string>(myLogs.map(log => new Date(log.checked_in_at).toDateString()))];
@@ -670,21 +673,18 @@ export default function UserSubPage() {
         return <MessagesPanel currentUser={currentUser} messages={messages} sendMessage={sendMessage} markAsRead={markAsRead} staff={members.filter(m => m.role === 'admin' || m.role === 'coach' || m.role === 'nutritionist')} />;
 
       case "workouts":
-        return <WorkoutsPanel workouts={workouts.filter(w => w.member_id === currentUser?.id)} logWorkout={logWorkout} />;
-
-      case "workouts":
         return <WorkoutsPanel workouts={workouts.filter((w: any) => w.member_id === currentUser?.id)} logWorkout={logWorkout} />;
 
       case "library":
         return (
-          <React.Suspense fallback={<div className="p-10 text-center"><div className="animate-spin w-8 h-8 border-2 border-[#FFB800] border-t-transparent mx-auto rounded-full"/></div>}>
+          <React.Suspense fallback={<div className="p-10 text-center"><div className="animate-spin w-8 h-8 border-2 border-[#FFB800] border-t-transparent mx-auto rounded-full" /></div>}>
             <ContentLibraryView />
           </React.Suspense>
         );
 
       case "events-offers":
         return (
-          <React.Suspense fallback={<div className="p-10 text-center"><div className="animate-spin w-8 h-8 border-2 border-[#FFB800] border-t-transparent mx-auto rounded-full"/></div>}>
+          <React.Suspense fallback={<div className="p-10 text-center"><div className="animate-spin w-8 h-8 border-2 border-[#FFB800] border-t-transparent mx-auto rounded-full" /></div>}>
             <EventsOffersView />
           </React.Suspense>
         );
@@ -808,13 +808,13 @@ function WorkoutsPanel({ workouts, logWorkout }: { workouts: any[], logWorkout: 
             <X size={16} />
           </button>
         </div>
-        
+
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">Date</label>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none focus:border-[#FFB800]/50 transition-all font-bold uppercase color-scheme-dark" />
           </div>
-          
+
           <div className="space-y-4">
             <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1 flex justify-between items-center">
               <span>Exercises</span>
@@ -822,7 +822,7 @@ function WorkoutsPanel({ workouts, logWorkout }: { workouts: any[], logWorkout: 
                 <Plus size={12} /> Add
               </button>
             </label>
-            
+
             {exercises.map((ex, idx) => (
               <div key={ex.id} className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3 relative group">
                 <button type="button" onClick={() => handleRemoveExercise(ex.id)} className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
@@ -945,7 +945,7 @@ function MessagesPanel({ currentUser, messages, sendMessage, markAsRead, staff }
     }
   }, [staff, selectedStaffId]);
 
-  const conversation = messages.filter((m: any) => 
+  const conversation = messages.filter((m: any) =>
     (m.sender_id === currentUser?.id && m.receiver_id === selectedStaffId) ||
     (m.receiver_id === currentUser?.id && m.sender_id === selectedStaffId)
   ).sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
@@ -970,8 +970,8 @@ function MessagesPanel({ currentUser, messages, sendMessage, markAsRead, staff }
     <div className="flex flex-col h-[600px] border border-white/10 rounded-3xl overflow-hidden bg-black/40">
       <div className="p-4 border-b border-white/10 bg-white/5">
         <label className="text-[10px] text-gray-500 uppercase font-black tracking-widest pl-1">Select Staff Member</label>
-        <select 
-          value={selectedStaffId} 
+        <select
+          value={selectedStaffId}
           onChange={(e) => setSelectedStaffId(e.target.value)}
           className="w-full mt-2 bg-black border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#FFB800]/50 transition-colors uppercase tracking-widest text-xs font-bold"
         >
@@ -985,7 +985,7 @@ function MessagesPanel({ currentUser, messages, sendMessage, markAsRead, staff }
         {conversation.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center opacity-40">
             <MessageSquare size={48} className="mb-4" />
-            <p className="text-[10px] uppercase font-black tracking-widest text-center">No messages yet.<br/>Start the transmission.</p>
+            <p className="text-[10px] uppercase font-black tracking-widest text-center">No messages yet.<br />Start the transmission.</p>
           </div>
         ) : (
           conversation.map((msg: any) => {
@@ -1006,11 +1006,11 @@ function MessagesPanel({ currentUser, messages, sendMessage, markAsRead, staff }
       </div>
 
       <form onSubmit={handleSend} className="p-4 border-t border-white/10 bg-white/5 flex gap-2">
-        <input 
-          type="text" 
+        <input
+          type="text"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Enter message..." 
+          placeholder="Enter message..."
           className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#FFB800]/50 transition-colors"
         />
         <button type="submit" disabled={!content.trim()} className="w-12 h-12 bg-[#FFB800] text-black rounded-xl flex items-center justify-center disabled:opacity-50 transition-all hover:bg-white active:scale-95">

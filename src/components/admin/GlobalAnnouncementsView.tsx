@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Send, Eye, Clock, Hash, Tag, Plus, CheckCircle2 } from "lucide-react";
 import { useData } from "../../context/DataContext";
 import { motion } from "framer-motion";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../lib/firebase";
 
 export default function GlobalAnnouncementsView() {
     const { setSystemAlert, currentUser, notifications } = useData();

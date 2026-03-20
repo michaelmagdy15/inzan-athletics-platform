@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,10 +12,12 @@ import {
   KeyRound,
   CheckCircle2,
 } from "lucide-react";
+import { useBranding } from "../context/BrandingContext";
 
 type ResetStep = "request" | "verify" | "newPassword" | "success";
 
 export default function ResetPasswordPage() {
+  const { config } = useBranding();
   const navigate = useNavigate();
   const [step, setStep] = useState<ResetStep>("request");
   const [email, setEmail] = useState("");
@@ -176,10 +178,10 @@ export default function ResetPasswordPage() {
             <Crown className="w-8 h-8 text-[#FFB800]" />
           </div>
           <h1 className="text-4xl font-light tracking-tight uppercase text-white mb-2">
-            Inzan <span className="font-bold text-[#FFB800]">Athletics</span>
+            {config.shortName} <span className="font-bold text-[#FFB800]">Athletics</span>
           </h1>
           <p className="text-[10px] tracking-[0.3em] font-bold uppercase text-white/40">
-            High Performance Protocol
+            {config.tagline}
           </p>
         </div>
 
@@ -191,25 +193,23 @@ export default function ResetPasswordPage() {
             ).map((s, i) => (
               <React.Fragment key={s}>
                 <div
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                    step === s
-                      ? "bg-[#FFB800] scale-125 shadow-[0_0_8px_rgba(255,184,0,0.4)]"
-                      : ["request", "verify", "newPassword", "success"].indexOf(
-                            step,
-                          ) > i
-                        ? "bg-[#FFB800]/50"
-                        : "bg-white/10"
-                  }`}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${step === s
+                    ? "bg-[#FFB800] scale-125 shadow-[0_0_8px_rgba(255,184,0,0.4)]"
+                    : ["request", "verify", "newPassword", "success"].indexOf(
+                      step,
+                    ) > i
+                      ? "bg-[#FFB800]/50"
+                      : "bg-white/10"
+                    }`}
                 />
                 {i < 3 && (
                   <div
-                    className={`w-8 h-0.5 transition-all duration-300 ${
-                      ["request", "verify", "newPassword", "success"].indexOf(
-                        step,
-                      ) > i
-                        ? "bg-[#FFB800]/30"
-                        : "bg-white/5"
-                    }`}
+                    className={`w-8 h-0.5 transition-all duration-300 ${["request", "verify", "newPassword", "success"].indexOf(
+                      step,
+                    ) > i
+                      ? "bg-[#FFB800]/30"
+                      : "bg-white/5"
+                      }`}
                   />
                 )}
               </React.Fragment>
@@ -375,39 +375,35 @@ export default function ResetPasswordPage() {
                   {/* Password strength hints */}
                   <div className="grid grid-cols-2 gap-2">
                     <div
-                      className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${
-                        newPassword.length >= 6
-                          ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
-                          : "text-white/20 border-white/5 bg-white/[0.02]"
-                      }`}
+                      className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${newPassword.length >= 6
+                        ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
+                        : "text-white/20 border-white/5 bg-white/[0.02]"
+                        }`}
                     >
                       6+ Characters
                     </div>
                     <div
-                      className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${
-                        /\d/.test(newPassword)
-                          ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
-                          : "text-white/20 border-white/5 bg-white/[0.02]"
-                      }`}
+                      className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${/\d/.test(newPassword)
+                        ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
+                        : "text-white/20 border-white/5 bg-white/[0.02]"
+                        }`}
                     >
                       Number
                     </div>
                     <div
-                      className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${
-                        /[A-Z]/.test(newPassword)
-                          ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
-                          : "text-white/20 border-white/5 bg-white/[0.02]"
-                      }`}
+                      className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${/[A-Z]/.test(newPassword)
+                        ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
+                        : "text-white/20 border-white/5 bg-white/[0.02]"
+                        }`}
                     >
                       Uppercase
                     </div>
                     <div
-                      className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${
-                        newPassword === confirmPassword &&
+                      className={`text-[8px] uppercase tracking-wider font-bold p-2 rounded-lg border text-center ${newPassword === confirmPassword &&
                         confirmPassword.length > 0
-                          ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
-                          : "text-white/20 border-white/5 bg-white/[0.02]"
-                      }`}
+                        ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
+                        : "text-white/20 border-white/5 bg-white/[0.02]"
+                        }`}
                     >
                       Match
                     </div>
@@ -462,7 +458,7 @@ export default function ResetPasswordPage() {
 
         <div className="text-center mt-8">
           <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/5 whitespace-nowrap">
-            Inzan Athletics | Premium Excellence
+            {config.name} | {config.tagline}
           </p>
         </div>
       </motion.div>

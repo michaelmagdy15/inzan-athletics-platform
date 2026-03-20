@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { Calendar as CalendarIcon, MapPin, Users, Ticket, CheckCircle2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useBranding } from '../../context/BrandingContext';
 import { downloadIcsFile } from '../../utils/CalendarSyncApi';
 
 export default function EventsOffersView() {
   const { events, eventRegistrations, registerForEvent, cancelEventRegistration, currentUser } = useData();
+  const { config } = useBranding();
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   const activeEvents = events.filter(e => e.status === 'upcoming' || e.status === 'ongoing');
-  
+
   const getRegistration = (eventId: string) => {
     return eventRegistrations.find(r => r.event_id === eventId && r.member_id === currentUser?.id);
   };
@@ -131,10 +133,10 @@ export default function EventsOffersView() {
                             id: event.id,
                             title: event.title,
                             description: event.description || '',
-                            location: event.location || 'Inzan Athletics',
+                            location: event.location || config.name,
                             startTime: new Date(event.start_time),
                             endTime: new Date(event.end_time)
-                          }, `event-${event.id}`);
+                          }, `event-${event.id}`, config.name, config.contact.email.split('@')[1]);
                         }}
                         className="p-2 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
                         title="Add to Calendar"
@@ -153,7 +155,7 @@ export default function EventsOffersView() {
                       onClick={() => handleRegister(event.id)}
                       disabled={isFull}
                       className={`px-6 py-2 rounded-xl font-black text-[10px] tracking-widest uppercase transition-colors flex items-center gap-2
-                        ${isFull 
+                        ${isFull
                           ? 'bg-white/10 text-white/40 cursor-not-allowed'
                           : 'bg-gold text-black hover:bg-white'
                         }
