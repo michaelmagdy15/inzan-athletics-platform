@@ -27,7 +27,7 @@ export default function NutritionistApp() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white font-sans flex flex-col max-w-md mx-auto relative overflow-hidden">
+        <div className="min-h-screen bg-[#050505] text-white font-sans flex flex-col mx-auto relative overflow-hidden" style={{ maxWidth: 'clamp(100%, 100vw, 48rem)' }}>
             {/* Ambient Background Glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[#FFB800]/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -72,7 +72,7 @@ export default function NutritionistApp() {
             </main>
 
             {/* Bottom Navigation */}
-            <nav className="fixed bottom-0 w-full max-w-md bg-[#0a0a0a]/90 backdrop-blur-2xl border-t border-white/5 px-2 py-4 z-50 rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+            <nav className="fixed bottom-0 w-full bg-[#0a0a0a]/90 backdrop-blur-2xl border-t border-white/5 px-2 py-4 z-50 rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] mx-auto left-1/2 -translate-x-1/2" style={{ maxWidth: 'clamp(100%, 100vw, 48rem)' }}>
                 <ul className="flex justify-around items-center">
                     <NavItem
                         icon={<LayoutDashboard size={20} />}

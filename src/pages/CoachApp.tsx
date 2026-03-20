@@ -84,8 +84,8 @@ export default function CoachApp() {
       </header>
 
       {/* Main Content Area */}
-      <main className="content-fit px-4 lg:px-10 pb-32 lg:pb-40 relative z-10 pt-6 lg:pt-10">
-        <div className="max-w-[100vw] sm:max-w-2xl lg:max-w-5xl mx-auto">
+      <main className="content-fit px-4 lg:px-10 pb-32 lg:pb-40 relative z-10 pt-6 lg:pt-10 flex flex-col items-center">
+        <div className="w-full" style={{ maxWidth: 'clamp(100%, 100vw, 64rem)' }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -103,8 +103,8 @@ export default function CoachApp() {
       </main>
 
       {/* Fixed Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 lg:p-8 z-50 pointer-events-none">
-        <nav className="max-w-lg lg:max-w-2xl mx-auto bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/10 p-1.5 lg:p-2 rounded-3xl lg:rounded-[2.5rem] flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto relative overflow-hidden group">
+      <div className="fixed bottom-0 left-0 right-0 p-4 lg:p-8 z-50 pointer-events-none flex justify-center">
+        <nav className="w-full mx-auto bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/10 p-1.5 lg:p-2 rounded-3xl lg:rounded-[2.5rem] flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto relative overflow-hidden group" style={{ maxWidth: 'clamp(100%, 100vw, 48rem)' }}>
           {/* Active indicator background element could go here if needed */}
           <NavItem
             icon={<CalendarDays size={20} />}

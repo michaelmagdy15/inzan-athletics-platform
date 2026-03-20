@@ -15,13 +15,35 @@
   --color-primary: var(--bg-dark);
   /* Keeping existing primary, as it's not explicitly removed/replaced by new dark/dark-soft */
   --color-secondary: var(--bg-dark-soft);
-  --color-accent: var(--gold);
-
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
 
   --animate-float: float 3s ease-in-out infinite;
   --animate-shimmer: shimmer 2s linear infinite;
+
+  /* Fluid Typography 
+     Assuming min viewport 320px(20rem), max viewport 1200px(75rem)
+  */
+  --text-xs: clamp(0.75rem, calc(0.71rem + 0.18vw), 0.875rem);
+  --text-sm: clamp(0.875rem, calc(0.84rem + 0.18vw), 1rem);
+  --text-base: clamp(1rem, calc(0.96rem + 0.18vw), 1.125rem);
+  --text-lg: clamp(1.125rem, calc(1.09rem + 0.18vw), 1.25rem);
+  --text-xl: clamp(1.25rem, calc(1.18rem + 0.36vw), 1.5rem);
+  --text-2xl: clamp(1.5rem, calc(1.36rem + 0.73vw), 2rem);
+  --text-3xl: clamp(1.875rem, calc(1.66rem + 1.09vw), 2.625rem);
+  --text-4xl: clamp(2.25rem, calc(1.92rem + 1.64vw), 3.375rem);
+  --text-5xl: clamp(3rem, calc(2.45rem + 2.73vw), 4.875rem);
+
+  /* Fluid Spacing */
+  --space-3xs: clamp(0.25rem, calc(0.23rem + 0.09vw), 0.3125rem);
+  --space-2xs: clamp(0.5rem, calc(0.46rem + 0.18vw), 0.625rem);
+  --space-xs: clamp(0.75rem, calc(0.71rem + 0.18vw), 0.875rem);
+  --space-sm: clamp(1rem, calc(0.93rem + 0.36vw), 1.25rem);
+  --space-md: clamp(1.5rem, calc(1.36rem + 0.73vw), 2rem);
+  --space-lg: clamp(2rem, calc(1.78rem + 1.09vw), 2.75rem);
+  --space-xl: clamp(3rem, calc(2.64rem + 1.82vw), 4.25rem);
+  --space-2xl: clamp(4rem, calc(3.56rem + 2.18vw), 5.5rem);
+  --space-3xl: clamp(6rem, calc(5.42rem + 2.91vw), 8rem);
 }
 
 @keyframes float {
@@ -46,11 +68,29 @@
   }
 }
 
+html {
+  font-size: 100%;
+  /* Define CSS variables on root for custom classes outside @theme */
+  --space-sm: clamp(1rem, calc(0.93rem + 0.36vw), 1.25rem);
+  --space-md: clamp(1.5rem, calc(1.36rem + 0.73vw), 2rem);
+}
+
 body {
   background-color: #050505;
   color: #ffffff;
   font-family: var(--font-sans);
   overflow-x: hidden;
+  font-size: var(--text-base);
+}
+
+/* Flexible Media Resets */
+img,
+video,
+iframe,
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 h1,
@@ -77,19 +117,37 @@ h6 {
 }
 
 .premium-button {
-  @apply relative overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer;
+  position: relative;
+  overflow: hidden;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+  cursor: pointer;
   background: linear-gradient(135deg,
       var(--color-gold) 0%,
       var(--color-gold-dark) 100%);
 }
 
+.premium-button:active {
+  transform: scale(0.95);
+}
+
 .premium-button::after {
   content: "";
-  @apply absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }
 
 .premium-button:hover::after {
-  @apply opacity-100;
+  opacity: 1;
 }
 
 /* Custom Scrollbar */
@@ -120,8 +178,8 @@ h6 {
 
 @layer utilities {
   .fit-screen {
-    height: 100dvh;
-    overflow: hidden;
+    /* Fluid height handling, ensuring it takes at least viewport height */
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
   }
@@ -137,6 +195,35 @@ h6 {
   }
 
   .form-input {
-    @apply w-full bg-black/40 border border-white/5 rounded-2xl p-4 lg:p-5 text-sm outline-none text-white focus:border-gold/30 transition-all font-bold placeholder:text-white/10;
+    /* Replaced static padding/text-size with fluid variables/relative units */
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-2xl);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    color: #ffffff;
+    font-weight: 700;
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+    padding: var(--space-sm);
+    font-size: var(--text-sm);
+  }
+
+  .form-input:focus {
+    border-color: rgba(202, 138, 4, 0.3);
+  }
+
+  .form-input::placeholder {
+    color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Macro-Layout Grid Utility */
+  .auto-grid {
+    display: grid;
+    /* Uses CSS Grid with auto-fit for automatic wrapping without media queries */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--min-col-width, 300px)), 1fr));
+    gap: var(--grid-gap, var(--space-md));
   }
 }

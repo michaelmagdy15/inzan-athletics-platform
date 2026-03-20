@@ -53,7 +53,7 @@ export default function UserApp() {
   };
 
   return (
-    <div className="h-[100dvh] bg-[#050505] text-white font-sans flex flex-col w-full sm:max-w-2xl lg:max-w-3xl mx-auto relative overflow-hidden border-x border-white/5 lg:shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+    <div className="h-[100dvh] bg-[#050505] text-white font-sans flex flex-col w-full mx-auto relative overflow-hidden lg:shadow-[0_0_100px_rgba(0,0,0,0.5)]" style={{ maxWidth: 'clamp(100%, 100vw, 48rem)' }}>
       {/* Ambient Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[150%] bg-[#FFB800]/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -207,8 +207,8 @@ export default function UserApp() {
       </main>
 
       {/* Bottom Navigation Container to handle fixed centering */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full sm:max-w-2xl lg:max-w-3xl z-50">
-        <nav className="bg-[#0a0a0a]/95 backdrop-blur-2xl border-t border-white/5 px-2 py-4 rounded-t-[2rem] shadow-[0_-20px_50px_rgba(0,0,0,0.8)] border-x border-white/5">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-50" style={{ maxWidth: 'clamp(100%, 100vw, 48rem)' }}>
+        <nav className="bg-[#0a0a0a]/95 backdrop-blur-2xl border-t border-white/5 px-2 py-4 rounded-t-[2rem] shadow-[0_-20px_50px_rgba(0,0,0,0.8)] border-x border-white/5 mx-auto">
           <ul className="flex items-center justify-around gap-1">
             <NavItem
               icon={<Home size={20} />}

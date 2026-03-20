@@ -9,32 +9,36 @@ import {
   signOut, sendPasswordResetEmail, onAuthStateChanged
 } from 'firebase/auth';
 
-const getEnv = (key: string) => {
-  // Try Vite/Meta first
-  try {
-    const val = (import.meta as any).env[key];
-    if (val) return val;
-  } catch (e) { }
+const getEnvValue = (viteValue: string | undefined, nodeKey: string) => {
+  // Use Vite injected value if present and not empty
+  if (viteValue && viteValue !== "dummy") return viteValue;
 
-  // Fallback to process.env (for scripts/Node)
+  // Fallback to process.env (for scripts/Vitest)
   try {
-    if (typeof process !== 'undefined' && process.env[key]) {
-      return process.env[key];
+    if (typeof process !== 'undefined' && process.env && process.env[nodeKey]) {
+      return process.env[nodeKey];
     }
-  } catch (e) { }
+  } catch (e) {
+    // Ignore error
+  }
 
   return "dummy";
 };
 
+// Explicit references to import.meta.env are required for Vite's static replacement
 const firebaseConfig = {
-  apiKey: getEnv("VITE_FIREBASE_API_KEY"),
-  authDomain: getEnv("VITE_FIREBASE_AUTH_DOMAIN"),
-  projectId: getEnv("VITE_FIREBASE_PROJECT_ID"),
-  storageBucket: getEnv("VITE_FIREBASE_STORAGE_BUCKET"),
-  messagingSenderId: getEnv("VITE_FIREBASE_MESSAGING_SENDER_ID"),
-  appId: getEnv("VITE_FIREBASE_APP_ID"),
-  measurementId: getEnv("VITE_FIREBASE_MEASUREMENT_ID") === "dummy" ? undefined : getEnv("VITE_FIREBASE_MEASUREMENT_ID")
+  apiKey: getEnvValue(import.meta.env?.VITE_FIREBASE_API_KEY, "VITE_FIREBASE_API_KEY"),
+  authDomain: getEnvValue(import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN, "VITE_FIREBASE_AUTH_DOMAIN"),
+  projectId: getEnvValue(import.meta.env?.VITE_FIREBASE_PROJECT_ID, "VITE_FIREBASE_PROJECT_ID"),
+  storageBucket: getEnvValue(import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET, "VITE_FIREBASE_STORAGE_BUCKET"),
+  messagingSenderId: getEnvValue(import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID, "VITE_FIREBASE_MESSAGING_SENDER_ID"),
+  appId: getEnvValue(import.meta.env?.VITE_FIREBASE_APP_ID, "VITE_FIREBASE_APP_ID")
 };
+
+const measurementIdRaw = getEnvValue(import.meta.env?.VITE_FIREBASE_MEASUREMENT_ID, "VITE_FIREBASE_MEASUREMENT_ID");
+if (measurementIdRaw && measurementIdRaw !== "dummy") {
+  (firebaseConfig as any).measurementId = measurementIdRaw;
+}
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
