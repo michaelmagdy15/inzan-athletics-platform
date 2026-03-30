@@ -103,11 +103,11 @@ export default function AdminHub() {
   };
 
   const filteredMembers = useMemo(() => {
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery?.toLowerCase() || "";
     return members.filter(
       (m) =>
-        m.name.toLowerCase().includes(query) ||
-        m.role.toLowerCase().includes(query),
+        (m?.name || "").toLowerCase().includes(query) ||
+        (m?.role || "").toLowerCase().includes(query),
     );
   }, [members, searchQuery]);
 

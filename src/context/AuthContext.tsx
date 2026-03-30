@@ -16,71 +16,38 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [currentUser, setCurrentUser] = useState<Member | null>(null);
-    const [loading, setLoading] = useState(true);
+    const mockAdmin: Member = {
+        id: "mock-admin-id",
+        name: "Mock Admin Bypass",
+        email: "michaelmitry13@gmail.com",
+        role: "admin",
+        avatar: "https://i.pravatar.cc/150",
+        strain: 0,
+        recovery: 0,
+        badges: [],
+        riskStatus: "low",
+        code: "0000",
+        bookedClasses: [],
+        membershipExpiry: "2099-12-31",
+        membershipStatus: "active",
+        lastAttendance: null,
+        invitationsBalance: 0,
+    };
+
+    const [currentUser, setCurrentUser] = useState<Member | null>(mockAdmin);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const fetchProfile = async (userId: string) => {
-        try {
-            const { data, error: profileError } = await supabase
-                .from("profiles")
-                .select("*")
-                .eq("id", userId)
-                .single();
-
-            if (profileError) throw profileError;
-
-            if (data) {
-                // Mapped member structure to match legacy DataContext
-                const member: Member = {
-                    id: data.id,
-                    name: data.full_name,
-                    email: data.email,
-                    role: data.email === "michaelmitry13@gmail.com" ? "admin" : data.role,
-                    avatar: data.avatar_url || `https://i.pravatar.cc/150?u=${data.id}`,
-                    strain: data.current_strain || 0,
-                    recovery: data.current_recovery || 0,
-                    badges: data.athletic_passport_badges || [],
-                    riskStatus: data.risk_status || "low",
-                    code: data.member_code || "0000",
-                    bookedClasses: [], // Will be filled by FitnessContext or a cross-fetch
-                    membershipExpiry: data.membership_expiry,
-                    membershipStatus: data.membership_status || "pending",
-                    lastAttendance: data.last_attendance || null,
-                    invitationsBalance: data.invitations_balance || 0,
-                };
-                setCurrentUser(member);
-            }
-        } catch (err: any) {
-            console.error("Error fetching profile:", err);
-            setError(err.message);
-        }
+        // Disabled for bypass
     };
 
     const refreshUser = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-            await fetchProfile(session.user.id);
-        } else {
-            setCurrentUser(null);
-        }
+        // Disabled for bypass
     };
 
     useEffect(() => {
-        refreshUser().finally(() => setLoading(false));
-
-        const { data: { subscription: authListener } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session) {
-                await fetchProfile(session.user.id);
-            } else {
-                setCurrentUser(null);
-            }
-            setLoading(false);
-        });
-
-        return () => {
-            authListener.unsubscribe();
-        };
+        // Disabled Supabase Auth Listener for bypass
     }, []);
 
     const signIn = async (email: string, password: string) => {

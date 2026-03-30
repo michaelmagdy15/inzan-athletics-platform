@@ -412,7 +412,7 @@ export default function UserSubPage() {
                   <TrendingUp size={12} className="text-[#FFB800]" /> Body Composition History
                 </h3>
                 <div className="p-4 bg-white/5 rounded-[2rem] border border-white/10 h-64">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" minHeight={250}>
                     <LineChart data={assessments}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                       <XAxis
