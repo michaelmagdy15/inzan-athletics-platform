@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import {
   Search,
-  Bell,
   LayoutDashboard,
   Users,
   Calendar,
@@ -11,7 +10,6 @@ import {
   DollarSign,
   Package,
   Settings,
-  ChevronRight,
   X,
   AlertCircle,
   CheckCircle2,
@@ -29,6 +27,9 @@ import { supabase } from "../lib/firebase";
 import NotificationBell from "../components/shared/NotificationBell";
 import { useLanguage } from "../utils/i18n";
 import { useBranding } from "../context/BrandingContext";
+import MemberDetailPanel from "../components/admin/MemberDetailPanel";
+import CreationModal from "../components/admin/CreationModal";
+import { useDebounce } from "../hooks/useDebounce";
 
 // Lazy load views for optimization
 const DashboardView = lazy(() => import("../components/admin/DashboardView"));
@@ -78,21 +79,15 @@ export default function AdminHub() {
     members,
     currentUser,
     addMember,
-    deleteMember,
-    updateMemberStatus,
-    updateMemberRole,
-    renewMembership,
-    resetUserPassword,
     addCoach,
     addClass,
     systemAlert,
     setSystemAlert,
-    membershipTiers,
-    assignMembership,
   } = useData();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [creationMode, setCreationMode] = useState<CreationMode>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { config } = useBranding();
@@ -103,13 +98,13 @@ export default function AdminHub() {
   };
 
   const filteredMembers = useMemo(() => {
-    const query = searchQuery?.toLowerCase() || "";
+    const query = debouncedSearch?.toLowerCase() || "";
     return members.filter(
       (m) =>
         (m?.name || "").toLowerCase().includes(query) ||
         (m?.role || "").toLowerCase().includes(query),
     );
-  }, [members, searchQuery]);
+  }, [members, debouncedSearch]);
 
   const handleCreateEntity = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -480,387 +475,22 @@ export default function AdminHub() {
 
           <AnimatePresence>
             {activeTab === "members" && selectedMember && (
-              <>
-                {/* Mobile Backdrop for Selected Member */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-[#050505]/80 backdrop-blur-sm z-40 lg:hidden"
-                  onClick={() => setSelectedMember(null)}
-                />
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="fixed lg:static inset-x-4 top-24 bottom-4 z-50 lg:z-auto w-auto lg:w-80 glass-card rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-8 flex flex-col gap-6 lg:gap-8 shrink-0 h-[calc(100vh-8rem)] lg:h-fit lg:sticky lg:top-0 shadow-2xl overflow-y-auto scrollbar-hide bg-[#050505]/95 lg:bg-transparent border border-white/10"
-                >
-                  <div className="flex flex-col gap-6 shrink-0">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-[10px] text-gold tracking-[0.4em] uppercase font-bold">
-                        Entity Registry
-                      </h3>
-                      <button
-                        onClick={() => setSelectedMember(null)}
-                        className="text-white/20 hover:text-white transition-colors bg-white/5 lg:bg-transparent p-2 lg:p-0 rounded-full"
-                      >
-                        <X size={16} className="lg:w-[14px] lg:h-[14px]" />
-                      </button>
-                    </div>
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="relative group">
-                        <div className="absolute inset-0 bg-gold rounded-[2rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-                        <img
-                          src={selectedMember.avatar}
-                          className="w-20 h-20 lg:w-24 lg:h-24 rounded-[2rem] border-2 border-white/10 object-cover shadow-2xl relative z-10"
-                          alt=""
-                        />
-                      </div>
-                      <div className="text-center w-full">
-                        <h2 className="text-xl lg:text-2xl font-heading tracking-tight mb-2">
-                          {selectedMember.name}
-                        </h2>
-
-                        <div className="relative group inline-block">
-                          <select
-                            value={selectedMember.role}
-                            disabled={selectedMember.email === "michaelmitry13@gmail.com"}
-                            onChange={async (e) => {
-                              try {
-                                await updateMemberRole(
-                                  selectedMember.id,
-                                  e.target.value as Member["role"],
-                                );
-                                // Optionally update the local state to reflect the change immediately
-                                setSelectedMember({
-                                  ...selectedMember,
-                                  role: e.target.value as Member["role"],
-                                });
-                              } catch (err: any) {
-                                setSystemAlert({
-                                  message: err.message,
-                                  type: "error",
-                                });
-                              }
-                            }}
-                            className={`appearance-none bg-gold/10 border border-gold/20 text-[9px] text-gold font-bold uppercase tracking-widest rounded-full px-4 py-1.5 pr-8 focus:outline-none focus:border-gold/50 cursor-pointer transition-all hover:bg-gold/20 ${selectedMember.email === "michaelmitry13@gmail.com" ? "opacity-50 cursor-not-allowed" : ""}`}
-                          >
-                            <option value="member" className="bg-[#050505]">
-                              MEMBER
-                            </option>
-                            <option value="coach" className="bg-[#050505]">
-                              COACH
-                            </option>
-                            <option value="nutritionist" className="bg-[#050505]">
-                              NUTRITIONIST
-                            </option>
-                            <option value="admin" className="bg-[#050505]">
-                              ADMIN
-                            </option>
-                          </select>
-                          <ChevronRight className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gold/50 group-hover:text-gold rotate-90 transition-colors pointer-events-none" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-4 bg-black/20 p-5 lg:p-6 rounded-3xl border border-white/5">
-                    <div className="flex justify-between items-center group cursor-help">
-                      <span className="text-[9px] text-white/30 uppercase tracking-widest group-hover:text-white/50 transition-colors">
-                        Endpoint
-                      </span>
-                      <span className="text-[10px] lg:text-[11px] text-white font-medium truncate max-w-[120px]">
-                        {selectedMember.email}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[9px] text-white/30 uppercase tracking-widest">
-                        Performance
-                      </span>
-                      <span className="text-[10px] lg:text-[11px] text-gold font-bold">
-                        {selectedMember.strain}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[9px] text-white/30 uppercase tracking-widest">
-                        Readiness
-                      </span>
-                      <span className="text-[10px] lg:text-[11px] text-emerald-400 font-bold">
-                        {selectedMember.recovery}%
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <h4 className="text-[9px] text-white/30 tracking-[0.3em] uppercase font-bold">
-                      Assign Membership
-                    </h4>
-                    <select
-                      onChange={async (e) => {
-                        if (e.target.value) {
-                          try {
-                            await assignMembership(
-                              selectedMember.id,
-                              e.target.value,
-                            );
-                            e.target.value = "";
-                          } catch (err: any) {
-                            setSystemAlert({
-                              message: err.message,
-                              type: "error",
-                            });
-                          }
-                        }
-                      }}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-[10px] font-bold uppercase tracking-widest text-white outline-none cursor-pointer focus:border-gold/30 transition-all"
-                    >
-                      <option value="" className="bg-[#050505] text-white/50">
-                        SELECT TIER
-                      </option>
-                      {membershipTiers.map((t) => (
-                        <option
-                          key={t.id}
-                          value={t.id}
-                          className="bg-[#050505]"
-                        >
-                          {t.name} ({t.price} EGP)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="text-[9px] text-gold tracking-[0.3em] uppercase mb-4 font-bold opacity-60">
-                      Neural Insights
-                    </h4>
-                    <div className="p-4 lg:p-5 bg-gold/5 border border-gold/10 rounded-2xl relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 w-16 h-16 bg-gold/10 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2" />
-                      <p className="text-[10px] text-white/60 leading-relaxed italic relative z-10">
-                        Member demonstrating peak performance levels. Strategy
-                        maintenance advised.
-                      </p>
-                      <button
-                        onClick={async () => {
-                          try {
-                            await resetUserPassword(selectedMember.email);
-                          } catch (err: any) {
-                            setSystemAlert({
-                              message: err.message,
-                              type: "error",
-                            });
-                          }
-                        }}
-                        className="premium-button w-full py-3 rounded-xl mt-4 lg:mt-6 group/btn overflow-hidden relative"
-                      >
-                        <div className="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
-                        <span className="text-[10px] font-black tracking-widest uppercase text-black relative z-10">
-                          Reset Password
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 mt-auto">
-                    <button
-                      onClick={async () => {
-                        try {
-                          await renewMembership(selectedMember.id);
-                        } catch (err: any) {
-                          setSystemAlert({
-                            message: err.message,
-                            type: "error",
-                          });
-                        }
-                      }}
-                      className="w-full py-3.5 lg:py-4 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all font-bold"
-                    >
-                      Renew Membership
-                    </button>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={async () => {
-                          try {
-                            await updateMemberStatus(
-                              selectedMember.id,
-                              selectedMember.membershipStatus === "active"
-                                ? "suspended"
-                                : "active",
-                            );
-                          } catch (err: any) {
-                            setSystemAlert({
-                              message: err.message,
-                              type: "error",
-                            });
-                          }
-                        }}
-                        className={`py-3 lg:py-3.5 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all font-bold ${selectedMember.membershipStatus === "active" ? "bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500/20" : "bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20"}`}
-                      >
-                        {selectedMember.membershipStatus === "active"
-                          ? "Suspend"
-                          : "Activate"}
-                      </button>
-                      {selectedMember.email !== "michaelmitry13@gmail.com" && (
-                        <button
-                          onClick={async () => {
-                            if (
-                              confirm(
-                                "Are you sure you want to purge this entity?",
-                              )
-                            ) {
-                              try {
-                                await deleteMember(selectedMember.id);
-                                setSelectedMember(null);
-                              } catch (err: any) {
-                                setSystemAlert({
-                                  message: err.message,
-                                  type: "error",
-                                });
-                              }
-                            }
-                          }}
-                          className="py-3 lg:py-3.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500 text-red-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition-all font-bold"
-                        >
-                          Purge Entity
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              </>
+              <MemberDetailPanel
+                member={selectedMember}
+                onClose={() => setSelectedMember(null)}
+                onMemberUpdated={setSelectedMember}
+              />
             )}
           </AnimatePresence>
         </div>
 
         <AnimatePresence>
           {creationMode && (
-            <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-              <motion.form
-                onSubmit={handleCreateEntity}
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="glass-card rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-12 w-full max-w-lg flex flex-col gap-6 lg:gap-10 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-white/10 max-h-[90vh] overflow-y-auto scrollbar-hide"
-                style={{ background: "rgba(20, 20, 20, 0.8)" }}
-              >
-                <div className="text-center font-bold">
-                  <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-2">
-                    {creationMode === "member"
-                      ? "Initialize Entity"
-                      : creationMode === "coach"
-                        ? "Recruit Instructor"
-                        : "Deploy Class"}
-                  </h2>
-                  <p className="text-[10px] tracking-[0.4em] uppercase text-gold/60 font-bold">
-                    New Registry Entry
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-4 lg:gap-6">
-                  {creationMode === "member" && (
-                    <>
-                      <input
-                        name="name"
-                        required
-                        placeholder="FULL NAME"
-                        className="form-input"
-                      />
-                      <input
-                        name="email"
-                        type="email"
-                        required
-                        placeholder="EMAIL ADDRESS"
-                        className="form-input"
-                      />
-                      <Select
-                        name="tier"
-                        options={[
-                          "High Performance",
-                          "Fuel Plan",
-                          "Holistic Flow",
-                        ]}
-                      />
-                    </>
-                  )}
-                  {creationMode === "coach" && (
-                    <>
-                      <input
-                        name="name"
-                        required
-                        placeholder="COACH NAME"
-                        className="form-input"
-                      />
-                      <input
-                        name="email"
-                        type="email"
-                        required
-                        placeholder="COACH EMAIL"
-                        className="form-input"
-                      />
-                      <input
-                        name="specialty"
-                        required
-                        placeholder="SPECIALTY"
-                        className="form-input"
-                      />
-                      <textarea
-                        name="bio"
-                        placeholder="BIOGRAPHY"
-                        className="form-input h-24 pt-4 lg:pt-6 resize-none"
-                      />
-                    </>
-                  )}
-                  {creationMode === "class" && (
-                    <>
-                      <input
-                        name="title"
-                        required
-                        placeholder="CLASS NAME"
-                        className="form-input"
-                      />
-                      <input
-                        name="trainer"
-                        required
-                        placeholder="INSTRUCTOR NAME"
-                        className="form-input"
-                      />
-                      <input
-                        name="time"
-                        required
-                        placeholder="TIME (e.g. 12:00 PM)"
-                        className="form-input"
-                      />
-                      <input
-                        name="spots"
-                        type="number"
-                        required
-                        placeholder="CAPACITY"
-                        className="form-input"
-                      />
-                      <Select
-                        name="category"
-                        options={["Strength", "Cardio", "Yoga", "HIIT"]}
-                      />
-                    </>
-                  )}
-                </div>
-
-                <div className="flex gap-4 lg:gap-6 pt-2 lg:pt-4 font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setCreationMode(null)}
-                    className="flex-1 py-4 text-white/20 uppercase text-[10px] font-bold tracking-[0.3em] hover:text-white transition-colors"
-                  >
-                    Abort
-                  </button>
-                  <button
-                    type="submit"
-                    className="premium-button flex-1 h-14 rounded-2xl text-black font-black tracking-[0.3em] uppercase text-[10px] shadow-2xl shadow-gold/20"
-                  >
-                    Confirm Deployment
-                  </button>
-                </div>
-              </motion.form>
-            </div>
+            <CreationModal
+              mode={creationMode}
+              onClose={() => setCreationMode(null)}
+              onSubmit={handleCreateEntity}
+            />
           )}
         </AnimatePresence>
 
@@ -886,11 +516,11 @@ export default function AdminHub() {
                       } border shrink-0`}
                   >
                     {systemAlert.type === "success" ? (
-                      <CheckCircle2 size={20} lg:size={24} />
+                      <CheckCircle2 size={20} />
                     ) : systemAlert.type === "error" ? (
-                      <AlertCircle size={20} lg:size={24} />
+                      <AlertCircle size={20} />
                     ) : (
-                      <Info size={20} lg:size={24} />
+                      <Info size={20} />
                     )}
                   </div>
                   <div className="font-bold flex-1 min-w-0">
@@ -944,23 +574,5 @@ function NavItem({ icon, label, isActive, onClick }: any) {
       {/* Subtle Hover Glow */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-white/5 to-transparent pointer-events-none" />
     </button>
-  );
-}
-
-function Select({ name, options }: { name: string; options: string[] }) {
-  return (
-    <div className="relative group">
-      <select
-        name={name}
-        className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-sm outline-none text-white appearance-none uppercase tracking-widest cursor-pointer focus:border-gold/30 transition-all font-bold"
-      >
-        {options.map((opt) => (
-          <option key={opt} className="bg-black" value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-      <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-hover:text-gold rotate-90 transition-colors pointer-events-none" />
-    </div>
   );
 }

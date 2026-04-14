@@ -22,6 +22,7 @@ interface FitnessContextType {
     bookClass: (classId: string) => Promise<void>;
     cancelClass: (classId: string) => Promise<void>;
     bookPTSession: (data: any) => Promise<void>;
+    bookTrialSession: (data: { coach_id: string; member_id: string; scheduled_date: string; scheduled_time: string }) => Promise<void>;
     cancelPTSession: (sessionId: string) => Promise<void>;
     submitFreezeRequest: (startDate: string, endDate: string, reason: string) => Promise<void>;
     addMember: (data: { name: string; email: string }) => Promise<void>;
@@ -158,6 +159,16 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
         await refreshFitness();
     };
 
+    const bookTrialSession = async (data: { coach_id: string; member_id: string; scheduled_date: string; scheduled_time: string }) => {
+        const { error } = await supabase.from("pt_sessions").insert({
+            ...data,
+            session_type: "trial",
+            status: "scheduled",
+        });
+        if (error) throw error;
+        await refreshFitness();
+    };
+
     const cancelPTSession = async (sessionId: string) => {
         const { error } = await supabase.from("pt_sessions").update({ status: "canceled" }).eq("id", sessionId);
         if (error) throw error;
@@ -280,7 +291,7 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
             members, classes, ptPackages, ptSessions,
             coachAvailabilities, sessionPolicies, attendanceLogs,
             freezeRequests, classWaitlists, loading,
-            bookClass, cancelClass, bookPTSession, cancelPTSession,
+            bookClass, cancelClass, bookPTSession, bookTrialSession, cancelPTSession,
             submitFreezeRequest, addMember, deleteMember, updateMemberStatus,
             updateMemberRole, renewMembership, addCoach, addClass,
             assignMembership, registerAttendance, reviewFreezeRequest,

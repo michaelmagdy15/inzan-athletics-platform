@@ -11,51 +11,90 @@ interface AuthContextType {
     signOut: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
     refreshUser: () => Promise<void>;
+    updateMembership: (tier: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const mockAdmin: Member = {
-        id: "mock-admin-id",
-        name: "Mock Admin Bypass",
-        email: "michaelmitry13@gmail.com",
-        role: "admin",
-        avatar: "https://i.pravatar.cc/150",
-        strain: 0,
-        recovery: 0,
-        badges: [],
-        riskStatus: "low",
-        code: "0000",
+function mapProfileToMember(p: any): Member {
+    return {
+        id: p.id,
+        name: p.full_name || p.name || "Unknown User",
+        email: p.email,
+        role: p.role || "member",
+        avatar: p.avatar_url || `https://i.pravatar.cc/150?u=${p.id}`,
+        strain: p.current_strain || 0,
+        recovery: p.current_recovery || 0,
+        badges: p.athletic_passport_badges || [],
+        riskStatus: p.risk_status || "low",
+        code: p.member_code || "0000",
         bookedClasses: [],
-        membershipExpiry: "2099-12-31",
-        membershipStatus: "active",
-        lastAttendance: null,
-        invitationsBalance: 0,
+        membershipExpiry: p.membership_expiry || "2099-12-31",
+        membershipStatus: p.membership_status || "pending",
+        lastAttendance: p.last_attendance || null,
+        invitationsBalance: p.invitations_balance || 0,
+        membershipTier: p.membership_tier || "Standard",
+        full_name: p.full_name || p.name || "Unknown User",
     };
+}
 
-    const [currentUser, setCurrentUser] = useState<Member | null>(mockAdmin);
-    const [loading, setLoading] = useState(false);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+    const [currentUser, setCurrentUser] = useState<Member | null>(null);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchProfile = async (userId: string) => {
-        // Disabled for bypass
+    const fetchProfile = async (email: string): Promise<Member> => {
+        const { data: profile, error: fetchError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("email", email)
+            .single();
+
+        if (fetchError || !profile) {
+            throw new Error("Profile not found. Please contact support.");
+        }
+        return mapProfileToMember(profile);
     };
 
-    const refreshUser = async () => {
-        // Disabled for bypass
-    };
-
+    // Firebase Auth State Listener
     useEffect(() => {
-        // Disabled Supabase Auth Listener for bypass
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
+            if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+                try {
+                    const user = await fetchProfile(session.email);
+                    setCurrentUser(user);
+                } catch (err) {
+                    console.error("Auth listener profile fetch error:", err);
+                    setCurrentUser(null);
+                }
+            } else if (event === "SIGNED_OUT") {
+                setCurrentUser(null);
+            }
+            setLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
+    const refreshUser = async () => {
+        if (!currentUser) return;
+        try {
+            const user = await fetchProfile(currentUser.email);
+            setCurrentUser(user);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
     const signIn = async (email: string, password: string) => {
+        setError(null);
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
+        // Listener will handle setting current user
     };
 
     const signUp = async (email: string, password: string, data: any) => {
+        setError(null);
         const { error: signUpError } = await supabase.auth.signUp({
             email,
             password,
@@ -66,11 +105,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signOut = async () => {
         await supabase.auth.signOut();
+        setCurrentUser(null);
     };
 
     const resetPassword = async (email: string) => {
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
         if (resetError) throw resetError;
+    };
+
+    const updateMembership = async (tier: string) => {
+        if (!currentUser) return;
+        
+        try {
+            const { error: updateError } = await supabase
+                .from("profiles")
+                .update({ 
+                    membership_tier: tier,
+                    membership_status: "active",
+                    updated_at: new Date().toISOString()
+                })
+                .eq("id", currentUser.id);
+
+            if (updateError) throw updateError;
+            await refreshUser();
+        } catch (err: any) {
+            console.error("Membership update error:", err);
+            throw err;
+        }
     };
 
     return (
@@ -82,7 +143,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             signUp,
             signOut,
             resetPassword,
-            refreshUser
+            refreshUser,
+            updateMembership
         }}>
             {children}
         </AuthContext.Provider>

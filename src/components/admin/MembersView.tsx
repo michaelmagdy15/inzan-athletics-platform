@@ -408,7 +408,7 @@ export default function MembersView({
             >
               <div className="text-center font-bold">
                 <div className="w-16 h-16 lg:w-20 lg:h-20 bg-gold/10 rounded-3xl mx-auto mb-4 lg:mb-6 flex items-center justify-center border border-gold/20 shadow-[0_0_30px_rgba(202,138,4,0.1)]">
-                  <Fingerprint size={32} lg:size={40} className="text-gold" />
+                  <Fingerprint size={32} className="text-gold" />
                 </div>
                 <h2 className="text-2xl lg:text-3xl font-heading tracking-[0.2em] uppercase text-white mb-1 lg:mb-2">
                   Member Access Scan
@@ -422,7 +422,6 @@ export default function MembersView({
                 <QRCodeSVG
                   value={`${window.location.origin}/attendance`}
                   size={120}
-                  sm:size={140}
                 />
                 <p className="text-black font-bold uppercase tracking-[0.2em] text-[7px] mt-3">
                   Scan to check-in
@@ -474,7 +473,7 @@ function Scorecard({ title, value, trend, subtitle, highlight, icon }: any) {
       className={`p-5 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] border relative overflow-hidden transition-all duration-700 group cursor-pointer font-bold ${highlight ? "bg-gold/10 border-gold/20 shadow-[0_0_50px_rgba(202,138,4,0.1)]" : "bg-[#121212]/30 border-white/5 hover:border-gold/20"}`}
     >
       <div className="absolute top-0 right-0 p-4 lg:p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-        {icon || <Search size={12} lg:size={14} className="text-gold/30" />}
+        {icon || <Search size={12} className="text-gold/30" />}
       </div>
 
       <h3 className="text-[8px] lg:text-[9px] font-black tracking-[0.3em] text-white/20 uppercase mb-3 lg:mb-5 group-hover:text-gold/50 transition-colors uppercase font-bold">

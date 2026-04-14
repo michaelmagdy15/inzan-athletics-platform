@@ -7,11 +7,15 @@ import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import UserSubPage from "./pages/UserSubPage";
 import PaymentResult from "./pages/PaymentResult";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancel from "./pages/PaymentCancel";
+import MembershipPage from "./pages/MembershipPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import { useData } from "./context/DataContext";
 import { Loader2 } from "lucide-react";
 
 import ProtectedRoute from "./components/shared/ProtectedRoute";
+import ErrorBoundary from "./components/shared/ErrorBoundary";
 import HolidayDecorations from "./components/common/HolidayDecorations";
 
 import KDSApp from "./pages/KDSApp";
@@ -29,6 +33,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ErrorBoundary>
       <HolidayDecorations />
       <Routes>
         <Route
@@ -97,6 +102,32 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        
+        {/* Membership & Payments */}
+        <Route
+          path="/membership"
+          element={
+            <ProtectedRoute>
+              <MembershipPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payment-success"
+          element={
+            <ProtectedRoute>
+              <PaymentSuccess />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payment-cancel"
+          element={
+            <ProtectedRoute>
+              <PaymentCancel />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/preview-coach"
           element={
@@ -118,6 +149,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

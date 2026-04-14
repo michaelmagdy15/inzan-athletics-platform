@@ -16,6 +16,8 @@ export interface Member {
     membershipStatus: "active" | "suspended" | "expired" | "pending";
     lastAttendance: string | null;
     invitationsBalance: number;
+    membershipTier: string;
+    full_name: string;
 }
 
 export interface Invitation {
@@ -67,7 +69,7 @@ export interface KitchenOrder {
     member_id: string;
     items: any;
     total_price: number;
-    status: "pending" | "preparing" | "ready" | "picked_up";
+    status: "pending" | "preparing" | "ready" | "picked_up" | "completed";
     created_at: string;
 }
 
@@ -105,7 +107,7 @@ export interface Equipment {
     id: string;
     name: string;
     category: string;
-    status: "operational" | "needs_maintenance" | "out_of_orded";
+    status: "operational" | "needs_maintenance" | "out_of_order";
     purchase_date: string;
     expected_lifespan_years: number;
     created_at: string;

@@ -268,7 +268,6 @@ export default function CoachesView() {
                 tick={{
                   fill: "rgba(255,255,255,0.3)",
                   fontSize: 8,
-                  lg: 10,
                   fontWeight: 700,
                 }}
                 label={{
@@ -291,7 +290,6 @@ export default function CoachesView() {
                 tick={{
                   fill: "rgba(255,255,255,0.3)",
                   fontSize: 8,
-                  lg: 10,
                   fontWeight: 700,
                 }}
               />
@@ -332,7 +330,7 @@ export default function CoachesView() {
             clients={coach.clients}
             rating={coach.rating.toFixed(1)}
             avatar={coach.avatar}
-            code={coachData.find(cd => cd.id === coach.id)?.code || coach.code}
+            code={coaches.find(c => c.id === coach.id)?.code || ""}
             onClick={() => setSelectedCoach(coach)}
           />
         ))}
@@ -572,7 +570,7 @@ function CoachCard({ name, tier, clients, rating, avatar, code, onClick }: any) 
           alt=""
         />
         <div className="absolute -bottom-2 lg:-bottom-3 -right-2 lg:-right-3 bg-gold text-black w-8 h-8 lg:w-10 lg:h-10 rounded-xl lg:rounded-2xl flex items-center justify-center border-4 border-[#050505] shadow-lg relative z-20">
-          <UserCheck size={14} lg:size={18} />
+          <UserCheck size={14} />
         </div>
       </div>
 

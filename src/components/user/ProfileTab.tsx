@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import {
   Bell,
   Shield,
@@ -15,6 +16,8 @@ import {
   ScanLine,
   Ticket,
   MessageSquare,
+  Crown,
+  ChevronRight,
 } from "lucide-react";
 import { useData, SESSION_TYPE_LABELS } from "../../context/DataContext";
 import { QRCodeSVG } from "qrcode.react";
@@ -69,13 +72,13 @@ export default function ProfileTab() {
               onClick={() => navigate("/p/notifications")}
               className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors shadow-lg"
             >
-              <Bell size={18} lg:size={20} />
+              <Bell size={18} />
             </button>
             <button
               onClick={handleSignOut}
               className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-colors shadow-lg"
             >
-              <LogOut size={18} lg:size={20} />
+              <LogOut size={18} />
             </button>
           </div>
         </header>
@@ -93,7 +96,7 @@ export default function ProfileTab() {
                   alt="Profile"
                 />
                 <div className="absolute -bottom-2 -right-2 w-7 h-7 lg:w-9 lg:h-9 bg-[#FFB800] rounded-full border-4 border-[#050505] flex items-center justify-center shadow-xl">
-                  <Shield size={12} lg:size={16} className="text-black" />
+                  <Shield className="w-3 h-3 lg:w-4 lg:h-4 text-black" />
                 </div>
               </div>
               <div className="flex flex-col justify-center gap-1">
@@ -124,6 +127,38 @@ export default function ProfileTab() {
         </div>
 
         <div className="flex flex-col gap-4">
+          {/* --- UPGRADE CTA START --- */}
+          {currentUser?.membershipTier !== "Elite" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative overflow-hidden rounded-[2.5rem] p-8 bg-gradient-to-br from-[#FFB800] to-[#b38100] group cursor-pointer shadow-[0_20px_40px_rgba(255,184,0,0.2)] hover:shadow-[0_25px_50px_rgba(255,184,0,0.3)] transition-all active:scale-[0.98] mb-4"
+              onClick={() => navigate("/membership")}
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                <div className="flex gap-4 items-center">
+                  <div className="w-14 h-14 rounded-2xl bg-black/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                    <Crown className="text-black" size={28} />
+                  </div>
+                  <div>
+                    <h3 className="text-black font-heading text-xl lg:text-2xl tracking-tight uppercase italic leading-none mb-1">
+                      Elevate to Elite
+                    </h3>
+                    <p className="text-black/60 text-[9px] lg:text-[10px] uppercase tracking-[0.2em] font-black">
+                      Unlock Unlimited Arena Access
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-black/10 px-6 py-3 rounded-xl border border-white/10 group-hover:bg-black/20 transition-colors shadow-2xl">
+                  <span className="text-black text-[10px] font-black uppercase tracking-widest">Upgrade Now</span>
+                  <ChevronRight size={16} className="text-black" />
+                </div>
+              </div>
+            </motion.div>
+          )}
+          {/* --- UPGRADE CTA END --- */}
+
           <div className="flex items-center justify-between px-1">
             <h3 className="font-heading text-base lg:text-lg tracking-widest text-white/50 uppercase italic font-black">Biometric Diagnostics</h3>
             <span className="flex items-center gap-1.5 text-[9px] text-emerald-500 uppercase tracking-widest font-black italic">
@@ -134,7 +169,7 @@ export default function ProfileTab() {
 
           <div className="grid grid-cols-2 gap-4 lg:gap-6">
             <div className="bg-white/5 backdrop-blur-xl rounded-[2rem] p-6 lg:p-8 border border-white/10 relative overflow-hidden group hover:border-red-500/20 transition-all">
-              <Flame size={20} lg:size={24} className="text-red-500 mb-4 group-hover:scale-110 transition-transform" />
+              <Flame className="w-5 h-5 lg:w-6 lg:h-6 text-red-500 mb-4 group-hover:scale-110 transition-transform" />
               <p className="text-[9px] lg:text-[10px] text-white/30 uppercase tracking-[0.3em] font-black mb-1">
                 Day Strain
               </p>
@@ -146,7 +181,7 @@ export default function ProfileTab() {
               </div>
             </div>
             <div className="bg-white/5 backdrop-blur-xl rounded-[2rem] p-6 lg:p-8 border border-white/10 relative overflow-hidden group hover:border-emerald-500/20 transition-all">
-              <Droplets size={20} lg:size={24} className="text-emerald-500 mb-4 group-hover:scale-110 transition-transform" />
+              <Droplets className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-500 mb-4 group-hover:scale-110 transition-transform" />
               <p className="text-[9px] lg:text-[10px] text-white/30 uppercase tracking-[0.3em] font-black mb-1">
                 Recovery
               </p>
@@ -194,7 +229,7 @@ export default function ProfileTab() {
                 >
                   <div className="flex gap-4 items-center">
                     <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-[#FFB800]/10 flex items-center justify-center border border-[#FFB800]/20 text-[#FFB800] group-hover:scale-110 transition-transform">
-                      <Package size={20} lg:size={24} />
+                      <Package className="w-5 h-5 lg:w-6 lg:h-6" />
                     </div>
                     <div>
                       <p className="text-white font-black text-[11px] lg:text-sm uppercase tracking-widest italic">

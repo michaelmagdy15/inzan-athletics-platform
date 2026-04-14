@@ -126,7 +126,7 @@ export default function ClassesView() {
             <div className="absolute top-0 left-0 w-1 h-full bg-gold opacity-50 shadow-[0_0_15px_rgba(202,138,4,0.3)]" />
             <div className="flex flex-col sm:flex-row items-start lg:items-center gap-6 lg:gap-8 relative z-10 w-full lg:w-auto">
               <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gold/10 flex items-center justify-center border border-gold/20 shadow-[0_0_30px_rgba(202,138,4,0.1)] group-hover:scale-110 transition-transform duration-700 shrink-0">
-                <Zap className="text-gold" size={24} lg:size={28} />
+                <Zap className="text-gold" size={24} />
               </div>
               <div className="max-w-xl">
                 <h3 className="text-[10px] font-black text-gold tracking-[0.4em] uppercase mb-2 lg:mb-4">

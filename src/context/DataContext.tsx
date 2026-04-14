@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "../lib/firebase";
 import { useAuth } from "./AuthContext";
 import { useKitchen } from "./KitchenContext";
 import { useFitness } from "./FitnessContext";
@@ -76,6 +77,30 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const admin = useAdmin();
 
   const [systemAlert, setSystemAlert] = useState<{ message: string; type: "info" | "warning" | "error" | "success" } | null>(null);
+  const [legalAgreements, setLegalAgreements] = useState<any[]>([]);
+
+  // Load legal agreements when the current user changes
+  useEffect(() => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) { setLegalAgreements([]); return; }
+    supabase.from("legal_agreements").select("*").eq("member_id", currentUser.id)
+      .then(({ data }) => setLegalAgreements(data || []));
+  }, [auth.currentUser?.id]);
+
+  const signWaiver = async (documentType: string, signature: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("Authentication required.");
+    const { error } = await supabase.from("legal_agreements").insert({
+      member_id: currentUser.id,
+      document_type: documentType,
+      signature,
+      signed_at: new Date().toISOString(),
+    });
+    if (error) throw error;
+    // Refresh agreements after signing
+    const { data } = await supabase.from("legal_agreements").select("*").eq("member_id", currentUser.id);
+    setLegalAgreements(data || []);
+  };
 
   const broadcastAlert = (message: string, type: "info" | "warning" | "error" | "success") => {
     setSystemAlert({ message, type });
@@ -121,6 +146,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     bookClass: fitness.bookClass,
     cancelClass: fitness.cancelClass,
     bookPTSession: fitness.bookPTSession,
+    bookTrialSession: fitness.bookTrialSession,
     cancelPTSession: fitness.cancelPTSession,
     submitFreezeRequest: fitness.submitFreezeRequest,
 
@@ -163,7 +189,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     mealPlans: [],
     workouts: [],
     messages: [],
-    legalAgreements: [],
+    legalAgreements,
+    signWaiver,
     promoCodes: [],
     staffShifts: [],
     staffAttendance: [],
