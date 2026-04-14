@@ -42,31 +42,44 @@ export default function PaymentSuccess() {
         className="w-full max-w-md bg-white/[0.03] backdrop-blur-3xl rounded-[3rem] border border-white/10 p-12 text-center shadow-2xl relative z-10"
       >
         <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-          <CheckCircle2 className="text-emerald-500" size={40} />
+          {loading ? (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              className="relative"
+            >
+              <Loader2 className="text-gold" size={40} />
+            </motion.div>
+          ) : (
+            <CheckCircle2 className="text-emerald-500" size={40} />
+          )}
         </div>
 
         <h1 className="text-4xl font-heading tracking-tight mb-4 uppercase">
-          Elite <span className="text-[#FFB800]">Confirmed</span>
+          {loading ? "Syncing" : "Status"} <span className="text-[#FFB800]">{loading ? "Neural Link" : "Confirmed"}</span>
         </h1>
         
         <div className="flex items-center justify-center gap-2 mb-8 text-[10px] tracking-[0.3em] font-black uppercase text-white/30">
            <ShieldCheck size={14} className="text-[#FFB800]" />
-           Identity Protocol Updated
+           {loading ? "Authenticating Transmission" : "Identity Protocol Updated"}
         </div>
 
-        <p className="text-white/60 leading-relaxed text-[11px] uppercase tracking-widest mb-10 font-medium">
-          Your transmission was successful. Your profile has been elevated to Elite Status within the collective.
+        <p className="text-white/60 leading-relaxed text-[11px] uppercase tracking-widest mb-10 font-medium h-12">
+          {loading 
+            ? "Verifying encrypted transfer and synchronizing your athletic passport..."
+            : "Your transmission was successful. Your profile has been elevated to Elite Status within the collective."
+          }
         </p>
 
         <div className="bg-black/20 rounded-2xl p-6 mb-10 border border-white/5 space-y-4">
            <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest">
-              <span className="text-white/20">New Tier</span>
-              <span className="text-[#FFB800]">Elite Status</span>
+              <span className="text-white/20">Protocol</span>
+              <span className="text-[#FFB800]">Tier Elevation</span>
            </div>
            <div className="h-px bg-white/5" />
            <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest">
-              <span className="text-white/20">Activation</span>
-              <span className="text-emerald-400">Instant</span>
+              <span className="text-white/20">Integrity</span>
+              <span className="text-emerald-400">Verified</span>
            </div>
         </div>
 
@@ -78,7 +91,7 @@ export default function PaymentSuccess() {
           {loading ? (
              <>
                <Loader2 className="animate-spin" size={14} />
-               Synchronizing...
+               Synchronizing Profile...
              </>
           ) : (
             <>

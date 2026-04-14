@@ -413,8 +413,8 @@ export default function AdminHub() {
                 <span className="text-[10px] xl:text-xs font-bold text-white tracking-widest uppercase truncate max-w-[120px]">
                   {currentUser?.name || "Admin"}
                 </span>
-                <span className="text-[7px] xl:text-[8px] text-gold tracking-[0.3em] uppercase font-black">
-                  Operator
+                <span className={`text-[7px] xl:text-[8px] tracking-[0.3em] uppercase font-black ${currentUser?.role === 'super_admin' ? 'text-gold drop-shadow-[0_0_8px_rgba(202,138,4,0.8)]' : 'text-gold/60'}`}>
+                  {currentUser?.role === 'super_admin' ? "System Owner" : "Operator"}
                 </span>
               </div>
               <motion.div

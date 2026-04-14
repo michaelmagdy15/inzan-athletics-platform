@@ -4,7 +4,7 @@ export interface Member {
     id: string;
     name: string;
     email: string;
-    role: "member" | "admin" | "coach" | "nutritionist";
+    role: "member" | "admin" | "coach" | "nutritionist" | "super_admin";
     avatar: string;
     strain: number;
     recovery: number;

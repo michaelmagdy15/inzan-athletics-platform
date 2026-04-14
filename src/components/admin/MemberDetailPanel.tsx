@@ -66,7 +66,7 @@ export default function MemberDetailPanel({ member, onClose, onMemberUpdated }: 
               <div className="relative group inline-block">
                 <select
                   value={member.role}
-                  disabled={member.email === "michaelmitry13@gmail.com"}
+                  disabled={member.role === "super_admin" || member.email === "michaelmitry13@gmail.com"}
                   onChange={async (e) => {
                     try {
                       await updateMemberRole(member.id, e.target.value as Member["role"]);
@@ -75,12 +75,15 @@ export default function MemberDetailPanel({ member, onClose, onMemberUpdated }: 
                       setSystemAlert({ message: err.message, type: "error" });
                     }
                   }}
-                  className={`appearance-none bg-gold/10 border border-gold/20 text-[9px] text-gold font-bold uppercase tracking-widest rounded-full px-4 py-1.5 pr-8 focus:outline-none focus:border-gold/50 cursor-pointer transition-all hover:bg-gold/20 ${member.email === "michaelmitry13@gmail.com" ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`appearance-none bg-gold/10 border border-gold/20 text-[9px] text-gold font-bold uppercase tracking-widest rounded-full px-4 py-1.5 pr-8 focus:outline-none focus:border-gold/50 cursor-pointer transition-all hover:bg-gold/20 ${member.role === "super_admin" || member.email === "michaelmitry13@gmail.com" ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <option value="member" className="bg-[#050505]">MEMBER</option>
                   <option value="coach" className="bg-[#050505]">COACH</option>
                   <option value="nutritionist" className="bg-[#050505]">NUTRITIONIST</option>
                   <option value="admin" className="bg-[#050505]">ADMIN</option>
+                  {member.role === "super_admin" && (
+                     <option value="super_admin" className="bg-[#050505]">SYSTEM OWNER</option>
+                  )}
                 </select>
                 <ChevronRight className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gold/50 group-hover:text-gold rotate-90 transition-colors pointer-events-none" />
               </div>
@@ -189,7 +192,7 @@ export default function MemberDetailPanel({ member, onClose, onMemberUpdated }: 
             >
               {member.membershipStatus === "active" ? "Suspend" : "Activate"}
             </button>
-            {member.email !== "michaelmitry13@gmail.com" && (
+            {member.email !== "michaelmitry13@gmail.com" && member.role !== "super_admin" && (
               <button
                 onClick={async () => {
                   if (confirm("Are you sure you want to purge this entity?")) {

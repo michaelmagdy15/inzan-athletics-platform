@@ -21,7 +21,10 @@ import {
   signOut, 
   onAuthStateChanged, 
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  sendEmailVerification,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "firebase/auth";
 
 // Firebase configuration from environment variables
@@ -202,29 +205,20 @@ export const firebase = {
   auth: {
     signInWithPassword: async ({ email, password }: any) => {
       try {
-        // Attempt real Firebase Auth first
         const res = await signInWithEmailAndPassword(auth, email, password);
         return { data: { user: res.user }, error: null };
       } catch (error: any) {
-        // FALLBACK: If Auth service is not enabled, try to bypass if email exists in database
-        const isConfigError = error.message?.includes("CONFIGURATION_NOT_FOUND") || error.code === "auth/configuration-not-found";
-        const forceMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
-
-        if (isConfigError || forceMock) {
-          console.warn("Firebase Auth Configuration Error detected. Attempting bypass via Firestore lookup...");
-          const { data: profile } = await firebase.from("profiles").select("*").eq("email", email).single();
-          if (profile) {
-              console.log("Bypass successful: User found in profiles database.");
-              return { data: { user: { email, uid: profile.id, ...profile } }, error: null };
-          }
-          return { data: { user: null }, error: new Error("Auth service unavailable and user not found in database.") };
-        }
+        console.error("Firebase Auth Error [signIn]:", error.message);
         return { data: { user: null }, error };
       }
     },
     signUp: async ({ email, password, options }: any) => {
       try {
         const res = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Trigger verification email immediately
+        await sendEmailVerification(res.user);
+
         // Create profile if metadata provided
         if (options?.data) {
            await setDoc(doc(db, "profiles", res.user.uid), {
@@ -260,13 +254,38 @@ export const firebase = {
         await sendPasswordResetEmail(auth, email);
         return { data: {}, error: null };
       } catch (error: any) {
-        const isConfigError = error.message?.includes("CONFIGURATION_NOT_FOUND") || error.code === "auth/configuration-not-found";
-        const forceMock = import.meta.env.VITE_USE_MOCK_AUTH === "true";
-
-        if (isConfigError || forceMock) {
-            console.warn("Firebase Auth Configuration Error detected. Mocking password reset response.");
-            return { data: {}, error: null };
+        console.error("Firebase Auth Error [resetPassword]:", error.message);
+        return { data: null, error };
+      }
+    },
+    signInWithOAuth: async ({ provider }: { provider: string }) => {
+      try {
+        if (provider !== "google") {
+          throw new Error(`Provider ${provider} not supported by this shim.`);
         }
+        
+        const googleProvider = new GoogleAuthProvider();
+        const res = await signInWithPopup(auth, googleProvider);
+        
+        // Auto-profile creation if it doesn't exist
+        const profileRef = doc(db, "profiles", res.user.uid);
+        const profileSnap = await getDoc(profileRef);
+        
+        if (!profileSnap.exists()) {
+          await setDoc(profileRef, {
+            email: res.user.email,
+            full_name: res.user.displayName || "Google User",
+            avatar_url: res.user.photoURL,
+            role: "member",
+            membership_tier: "Standard",
+            membership_status: "pending",
+            created_at: new Date().toISOString()
+          });
+        }
+        
+        return { data: { user: res.user }, error: null };
+      } catch (error: any) {
+        console.error("Firebase Auth Error [OAuth]:", error.message);
         return { data: null, error };
       }
     },
@@ -278,8 +297,16 @@ export const firebase = {
         return { data: {}, error: null };
     },
     resend: async (_opts: any) => {
-        // Placeholder for resend logic
-        return { data: {}, error: null };
+      try {
+        if (auth.currentUser) {
+            await sendEmailVerification(auth.currentUser);
+            return { data: {}, error: null };
+        }
+        throw new Error("Activation identity not found. Please sign in again.");
+      } catch (error: any) {
+        console.error("Firebase Auth Error [resend]:", error.message);
+        return { data: null, error };
+      }
     },
     updateUser: async (data: any) => {
        try {

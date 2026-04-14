@@ -43,17 +43,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchProfile = async (email: string): Promise<Member> => {
-        const { data: profile, error: fetchError } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("email", email)
-            .single();
+    const fetchProfileWithRetry = async (email: string, retries = 3, delay = 1500): Promise<Member> => {
+        try {
+            const { data: profile, error: fetchError } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("email", email)
+                .single();
 
-        if (fetchError || !profile) {
-            throw new Error("Profile not found. Please contact support.");
+            if (fetchError || !profile) {
+                if (retries > 0) {
+                    console.warn(`Profile Not Found. Retrying in ${delay}ms... (${retries} retries left)`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchProfileWithRetry(email, retries - 1, delay);
+                }
+                throw new Error("Profile synchronization failed. Please contact support.");
+            }
+            
+            const member = mapProfileToMember(profile);
+            
+            // Force super_admin for owner email
+            if (member.email === "michaelmitry13@gmail.com") {
+                member.role = "super_admin";
+            }
+            
+            return member;
+        } catch (err) {
+            if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return fetchProfileWithRetry(email, retries - 1, delay);
+            }
+            throw err;
         }
-        return mapProfileToMember(profile);
     };
 
     // Firebase Auth State Listener
@@ -61,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
             if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
                 try {
-                    const user = await fetchProfile(session.email);
+                    const user = await fetchProfileWithRetry(session.email);
                     setCurrentUser(user);
                 } catch (err) {
                     console.error("Auth listener profile fetch error:", err);
@@ -79,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const refreshUser = async () => {
         if (!currentUser) return;
         try {
-            const user = await fetchProfile(currentUser.email);
+            const user = await fetchProfileWithRetry(currentUser.email);
             setCurrentUser(user);
         } catch (err: any) {
             setError(err.message);
