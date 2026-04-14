@@ -6,7 +6,8 @@
       "Bash(ls node_modules/react/*.d.ts)",
       "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\(p.get\\('types','none'\\)\\); print\\(p.get\\('typings','none'\\)\\); print\\(list\\(p.get\\('exports',{}\\).keys\\(\\)\\)[:10]\\)\")",
       "Bash(npm install:*)",
-      "Bash(python3 -)"
+      "Bash(python3 -)",
+      "Bash(grep -E \"^vitest$|^@stripe$|^@testing-library$\")"
     ]
   }
 }
