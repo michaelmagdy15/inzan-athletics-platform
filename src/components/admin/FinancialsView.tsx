@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useData } from "../../context/DataContext";
+import { useAdmin } from "../../context/AdminContext";
 import { supabase } from "../../lib/firebase";
 import { ExportManager } from "../../utils/ExportManager";
 import {
@@ -38,41 +39,13 @@ import {
 
 export default function FinancialsView() {
   const { members, transactions, broadcastAlert, addTransaction } = useData();
+  const { expenses, refunds, refreshAdmin } = useAdmin();
   const [selectedMethod, setSelectedMethod] = useState("ALL");
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [activeTab, setActiveTab] = useState<"revenue" | "expenses" | "refunds">("revenue");
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [refunds, setRefunds] = useState<any[]>([]);
-
-  // Mock data for new advanced financials
-  const MOCK_EXPENSES = [
-    { id: '1', category: 'Equipment', amount: 45000, description: 'New Concept2 Rowers', date: '2024-03-01' },
-    { id: '2', category: 'Maintenance', amount: 3200, description: 'AC Repair', date: '2024-03-05' },
-    { id: '3', category: 'Marketing', amount: 15000, description: 'Social Media Ads', date: '2024-03-10' },
-  ];
-
-  const MOCK_REFUNDS = [
-    { id: '1', member: 'Sarah K.', amount: 1500, reason: 'Duplicate charge', status: 'approved', date: '2024-03-08' },
-    { id: '2', member: 'Alex R.', amount: 5000, reason: 'Medical cancellation', status: 'pending', date: '2024-03-11' },
-  ];
 
   useEffect(() => {
-    const fetchFinancials = async () => {
-      let { data: expData } = await supabase.from('financial_expenses').select('*');
-      if (!expData || expData.length === 0) {
-        for (const e of MOCK_EXPENSES) await supabase.from('financial_expenses').insert(e);
-        expData = MOCK_EXPENSES;
-      }
-      setExpenses(expData || []);
-
-      let { data: refData } = await supabase.from('financial_refunds').select('*');
-      if (!refData || refData.length === 0) {
-        for (const r of MOCK_REFUNDS) await supabase.from('financial_refunds').insert(r);
-        refData = MOCK_REFUNDS;
-      }
-      setRefunds(refData || []);
-    };
-    fetchFinancials();
+    refreshAdmin();
   }, []);
 
   // Format transactions for display

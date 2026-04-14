@@ -15,12 +15,14 @@ export const getStripe = () => {
 
 /**
  * Prices for membership tiers
- * Managed via environment variables for security and flexibility
+ * Managed via environment variables for security and flexibility.
+ * NOTE: Replace these with your actual Stripe Price IDs (starts with price_...)
+ * found in the Stripe Dashboard > Products > [Your Product].
  */
 export const MEMBERSHIP_PRICES = {
-  STANDARD: import.meta.env.VITE_STRIPE_PRICE_STANDARD || 'price_placeholder_standard',
-  PRO: import.meta.env.VITE_STRIPE_PRICE_PRO || 'price_placeholder_pro',
-  ELITE: import.meta.env.VITE_STRIPE_PRICE_ELITE || 'price_placeholder_elite',
+  STANDARD: import.meta.env.VITE_STRIPE_PRICE_STANDARD || 'price_1P3Z...placeholder',
+  PRO: import.meta.env.VITE_STRIPE_PRICE_PRO || 'price_1P3Z...placeholder',
+  ELITE: import.meta.env.VITE_STRIPE_PRICE_ELITE || 'price_1P3Z...placeholder',
 };
 
 /**

@@ -12,6 +12,8 @@ interface AdminContextType {
     equipment: Equipment[];
     facilityZones: FacilityZone[];
     maintenanceLogs: MaintenanceLog[];
+    expenses: any[];
+    refunds: any[];
     settings: SystemSettings;
     loading: boolean;
     updateSettings: (updates: Partial<SystemSettings>) => Promise<void>;
@@ -28,6 +30,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     const [equipment, setEquipment] = useState<Equipment[]>([]);
     const [facilityZones, setFacilityZones] = useState<FacilityZone[]>([]);
     const [maintenanceLogs, setMaintenanceLogs] = useState<MaintenanceLog[]>([]);
+    const [expenses, setExpenses] = useState<any[]>([]);
+    const [refunds, setRefunds] = useState<any[]>([]);
     const [settings, setSettings] = useState<SystemSettings>({
         brandName: branding.name,
         timezone: "UTC+2",
@@ -55,6 +59,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             if (equipRes.data) setEquipment(equipRes.data);
             if (zonesRes.data) setFacilityZones(zonesRes.data);
             if (maintRes.data) setMaintenanceLogs(maintRes.data);
+
+            const [expRes, refRes] = await Promise.all([
+                supabase.from("financial_expenses").select("*"),
+                supabase.from("financial_refunds").select("*")
+            ]);
+            if (expRes.data) setExpenses(expRes.data);
+            if (refRes.data) setRefunds(refRes.data);
+
             if (settingsRes.data) {
                 setSettings({
                     brandName: settingsRes.data.brand_name,
@@ -104,7 +116,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     return (
         <AdminContext.Provider value={{
             operatingGoals, transactions, equipment,
-            facilityZones, maintenanceLogs, settings, loading,
+            facilityZones, maintenanceLogs, expenses, refunds, settings, loading,
             updateSettings, addMaintenanceLog, addTransaction, refreshAdmin
         }}>
             {children}
